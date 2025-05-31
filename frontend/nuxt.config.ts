@@ -20,12 +20,14 @@ export default defineNuxtConfig({
     customCollections: [
       {
         prefix: 'bean',
-        dir: './assets/icons'
-      }
-    ]
+        dir: './assets/icons',
+      },
+    ],
   },
-  app: {
-    baseURL: '/login',
+  routeRules: {
+    '/': {
+      redirect: '/login',
+    },
   },
   components: [
     {
@@ -34,4 +36,4 @@ export default defineNuxtConfig({
     },
   ],
   modules: ['@vueuse/nuxt', '@nuxt/fonts', '@nuxt/icon'],
-})
+});

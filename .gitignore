@@ -138,3 +138,5 @@ dist
 /.idea/*.mjs
 /.idea/*.xml
 /.idea/*.iml
+
+*/package-lock.json

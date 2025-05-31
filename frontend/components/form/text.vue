@@ -11,7 +11,7 @@ const props = defineProps<{
     :name="name"
     :placeholder="placeholder"
     :required="isRequired"
-    class="h-6 w-full"
+    class="h-6 w-full rounded-md border border-solid border-black/50 p-1"
     type="text"
   />
 </template>
