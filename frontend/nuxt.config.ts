@@ -19,11 +19,13 @@ export default defineNuxtConfig({
   icon: {
     customCollections: [
       {
-        // ToDo: enter your project name here
-        prefix: 'project-name',
+        prefix: 'bean',
         dir: './assets/icons'
       }
     ]
+  },
+  app: {
+    baseURL: '/login',
   },
   components: [
     {
