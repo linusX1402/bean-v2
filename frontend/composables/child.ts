@@ -3,7 +3,7 @@ import type { Payout } from '~/composables/payout';
 type workState = 'working' | 'onBreak' | 'idle';
 export default class Child {
   public name: string;
-  public numberOfBeansHeld: number = 0;
+  public numberOfBeansEarned: number = 0;
   public numberOfBeansToPayout: number = 0;
   public state: workState = 'idle';
   public isWorking: boolean = false;
@@ -17,7 +17,7 @@ export default class Child {
   }
 
   public addBeans(amount: number): void {
-    this.numberOfBeansHeld += amount;
+    this.numberOfBeansEarned += amount;
     this.numberOfBeansToPayout += amount;
   }
 }
