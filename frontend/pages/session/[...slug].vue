@@ -32,9 +32,11 @@ stations.value = testStations.value;
 </script>
 
 <template>
-  <main class="flex min-h-screen w-full flex-col place-content-between">
+  <main
+    class="relative flex min-h-screen w-full flex-col place-content-between pb-24"
+  >
     <div
-      class="flex h-full w-full flex-col place-content-start place-items-center gap-8"
+      class="flex h-fit w-full flex-col place-content-start place-items-center gap-8 sm:pl-[72px] md:pl-0"
     >
       <header
         class="grid w-full grid-cols-3 place-content-center place-items-center border-b border-b-black/20 p-2 py-4 text-center"
@@ -42,7 +44,7 @@ stations.value = testStations.value;
         <h2 class="col-start-2 text-nowrap">Bean-Counter 🫘</h2>
       </header>
       <section
-        class="flex flex-wrap place-content-center gap-8 px-12 sm:place-content-start"
+        class="md::place-content-start flex flex-wrap place-content-center gap-8 md:px-12"
       >
         <station-card
           v-for="station in stations"
@@ -52,8 +54,12 @@ stations.value = testStations.value;
       </section>
     </div>
     <footer
-      class="sticky bottom-0 left-0 flex h-20 w-screen place-content-around place-items-center bg-gray-500"
-    ></footer>
+      class="sm:p fixed bottom-0 left-0 flex h-[72px] w-screen place-content-around place-items-center border-t border-t-black/20 bg-white px-10 sm:h-screen sm:w-[72px] sm:flex-col sm:border-r sm:border-r-black/20 sm:px-0 sm:py-10 md:hidden"
+    >
+      <LazyIcon class="size-8" name="bean:home"></LazyIcon>
+      <LazyIcon class="size-8" name="bean:share"></LazyIcon>
+      <LazyIcon class="size-8" name="bean:settings"></LazyIcon>
+    </footer>
   </main>
 </template>
 
