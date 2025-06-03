@@ -2,6 +2,17 @@
 const props = defineProps<{
   station: Station;
 }>();
+
+function getWorkingChildrenCount(station: Station): number {
+  return station.children.filter((child) => child.isWorking).length;
+}
+
+function getTotalBeansEarned(station: Station): number {
+  return station.children.reduce(
+    (total, child) => total + child.numberOfBeansEarned,
+    0,
+  );
+}
 </script>
 
 <template>
@@ -12,6 +23,8 @@ const props = defineProps<{
     <h6 class="w-full text-center">{{ station.name }}</h6>
     <ul>
       <li>children: {{ station.children.length }}</li>
+      <li>working: {{ getWorkingChildrenCount(station) }}</li>
+      <li>total Beans Earned: {{ station.children.length }}</li>
     </ul>
   </div>
 </template>
