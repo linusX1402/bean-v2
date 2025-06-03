@@ -2,6 +2,9 @@
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   devtools: { enabled: true },
+  ssr: false,
+
+  modules: ['@vueuse/nuxt', '@nuxt/fonts', '@nuxt/icon'],
 
   postcss: {
     plugins: {
@@ -35,5 +38,15 @@ export default defineNuxtConfig({
       pathPrefix: true,
     },
   ],
-  modules: ['@vueuse/nuxt', '@nuxt/fonts', '@nuxt/icon'],
+  imports: {
+    dirs: ['types'],
+  },
+  runtimeConfig: {
+    public: {
+      baseURL:
+        process.env.BUILD_MODE === 'prod'
+          ? process.env.API_BASE_URL
+          : 'http://localhost:3000',
+    },
+  },
 });
