@@ -4,7 +4,7 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   ssr: false,
 
-  modules: ['@vueuse/nuxt', '@nuxt/fonts', '@nuxt/icon'],
+  modules: ['@vueuse/nuxt', '@nuxt/icon'],
 
   postcss: {
     plugins: {
@@ -39,7 +39,7 @@ export default defineNuxtConfig({
     },
   ],
   imports: {
-    dirs: ['types'],
+    dirs: ['types/types', 'composables/api'],
   },
   runtimeConfig: {
     public: {

@@ -17,7 +17,6 @@ export default class SessionController {
         sessionIdUser,
       ),
     );
-    console.log(this.openSessions);
     return this.openSessions[this.openSessions.length - 1];
   }
 
@@ -26,8 +25,27 @@ export default class SessionController {
   }
 
   getSessionById(sessionId: string) {
-    return this._openSessions.find((i) => {
-      i.containsSessionId(sessionId);
-    });
+    const session = this._openSessions.find((i) =>
+      i.containsSessionId(sessionId),
+    );
+    try {
+      if (session) {
+        return new BeanSession(
+          session.name || '',
+          session.icon || '',
+          sessionId === session?.sessionIdAdmin ? sessionId : '',
+          sessionId === session?.sessionIdEditor ||
+          sessionId ||
+          sessionId === session?.sessionIdAdmin
+            ? session.sessionIdUser
+            : '',
+          session!.sessionIdUser,
+        );
+      }
+    } catch (error) {
+      throw new Error(
+        `Session with id ${sessionId} not found or invalid session data.`,
+      );
+    }
   }
 }

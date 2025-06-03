@@ -5,12 +5,18 @@ export default class BeanSession {
     sessionIdAdmin: string,
     sessionIdEditor: string,
     sessionIdUser: string,
+    secondsPerTick: number = 60,
+    beanPerTick: number = 5,
+    startingFunds: number = 5,
   ) {
     this._name = name;
     this._icon = icon;
     this.sessionIdAdmin = sessionIdAdmin;
     this.sessionIdEditor = sessionIdEditor;
     this.sessionIdUser = sessionIdUser;
+    this.secondsPerTick = secondsPerTick;
+    this.beanPerTick = beanPerTick;
+    this.startingFunds = startingFunds;
   }
 
   public readonly sessionIdAdmin: string;
@@ -18,6 +24,9 @@ export default class BeanSession {
   public readonly sessionIdUser: string;
   private _name: string;
   private _icon: string;
+  public secondsPerTick;
+  public beanPerTick;
+  public startingFunds;
 
   get name(): string {
     return this._name;

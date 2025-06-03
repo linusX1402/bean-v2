@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { iconList } from '../../types/types';
-import sessionController from '~/server/session-controller-instance';
 import { getCookie, setCookie } from 'typescript-cookie';
 import type BeanSession from '../../models/session';
 
@@ -17,7 +16,6 @@ const currentView = ref<loginViews>(loginViews.copy);
 
 const permissions = ref<string[]>(['Admin', 'Edit', 'View']);
 const selectedPermission = ref<string>('Admin');
-
 const currentSession = ref<BeanSession | undefined>();
 
 const sessionId = ref<number>(0);
@@ -25,24 +23,40 @@ const sessionId = ref<number>(0);
 const sessionName = ref<string>('');
 const icon = ref<string>('🫘');
 const options = ref<string[]>();
+const copied = ref<boolean>(false);
 
-onMounted(() => {
+onMounted(async () => {
   const cookieSessionId = getCookie('BeanSession') || '';
-  currentSession.value = sessionController.getSessionById(cookieSessionId);
-  console.log(sessionController.openSessions);
-  console.log('cookie: ' + cookieSessionId);
+  currentSession.value = await getSessionById(cookieSessionId);
+  console.log(currentSession.value ? 'found session' : 'No session found');
 });
 
 function submitLogin() {
   console.log(sessionId.value);
 }
 
-function submitCreate() {
+async function submitCreate() {
   try {
-    currentSession.value = sessionController.openNewSession(
-      sessionName.value,
-      icon.value,
-    );
+    const session = await $fetch(`${baseURL}/api/session/open`, {
+      method: 'POST',
+      body: {
+        sessionName: sessionName.value,
+        icon: icon.value,
+      },
+    });
+    if (session) {
+      currentSession.value = session as BeanSession;
+      console.log('Session created successfully:', currentSession.value);
+    } else {
+      console.error('Failed to create session');
+      return;
+    }
+
+    // currentSession.value = sessionController.openNewSession(
+    //   sessionName.value,
+    //   icon.value,
+    // );
+
     setCookie('BeanSession', currentSession.value.sessionIdAdmin);
     currentView.value = loginViews.copy;
   } catch (e: any) {
@@ -55,10 +69,31 @@ function changeView(updatedView: loginViews) {
 }
 
 function getCurrentLink(permission?: string) {
-  const currentToken = currentSession.value?.getSessionIdByRole(
-    permission ? permission : selectedPermission.value,
-  );
-  return baseURL + '/session/' + currentToken;
+  const perm = permission ? permission : selectedPermission.value;
+  let sessionIdByPerm: string | undefined = '';
+  if (perm === 'Admin') {
+    sessionIdByPerm = currentSession.value?.sessionIdAdmin;
+  } else if (perm === 'Edit') {
+    sessionIdByPerm = currentSession.value?.sessionIdEditor;
+  } else if (perm === 'View') {
+    sessionIdByPerm = currentSession.value?.sessionIdUser;
+  }
+
+  return baseURL + '/session/' + sessionIdByPerm;
+}
+
+function copyToClipboard() {
+  const link = getCurrentLink();
+  navigator.clipboard
+    .writeText(link)
+    .then(() => {
+      copied.value = true;
+      setTimeout(() => (copied.value = false), 2000);
+      console.log('Link copied to clipboard:', link);
+    })
+    .catch((err) => {
+      console.error('Failed to copy link:', err);
+    });
 }
 </script>
 
@@ -69,7 +104,7 @@ function getCurrentLink(permission?: string) {
     >
       <h1>Bean-Counter 🫘</h1>
       <div
-        class="min-h-[50%] w-full rounded-md border border-solid border-black/20 px-12 py-16 sm:min-h-[33%] sm:w-fit"
+        class="min-h-[50%] w-full rounded-md border border-solid border-black/20 px-12 py-16 sm:min-h-[33%] sm:w-2/3 lg:w-1/2 xl:w-1/3 2xl:w-fit"
       >
         <form
           v-if="currentView === loginViews.login"
@@ -91,7 +126,7 @@ function getCurrentLink(permission?: string) {
             </div>
           </div>
           <div
-            class="flex w-full place-content-center place-items-center gap-4"
+            class="grid w-full grid-cols-2 place-content-center place-items-center gap-4"
           >
             <ui-button
               @click="changeView(loginViews.create)"
@@ -136,7 +171,7 @@ function getCurrentLink(permission?: string) {
             </div>
           </div>
           <div
-            class="flex w-full place-content-center place-items-center gap-4"
+            class="grid w-full grid-cols-2 place-content-center place-items-center gap-4"
           >
             <ui-button
               @click="changeView(loginViews.login)"
@@ -151,25 +186,32 @@ function getCurrentLink(permission?: string) {
           v-if="currentView === loginViews.copy"
           class="flex h-full flex-col place-content-between place-items-center gap-8"
         >
-          <div
-            class="flex flex-col place-content-center place-items-center gap-8"
-          >
-            <h4>Copy to share</h4>
+          <h4>Copy to share</h4>
+          <div>
+            <label>permissions:</label>
             <div>
-              <label>permissions:</label>
-              <div>
-                <select
-                  v-model="selectedPermission"
-                  class="h-fit w-full rounded-md border border-solid border-black/50 p-1"
-                >
-                  <option v-for="i in permissions" :value="i">{{ i }}</option>
-                </select>
-              </div>
+              <select
+                v-model="selectedPermission"
+                class="h-fit w-full rounded-md border border-solid border-black/50 p-1"
+              >
+                <option v-for="i in permissions" :value="i">{{ i }}</option>
+              </select>
             </div>
-            <div>{{ getCurrentLink() }}</div>
+          </div>
+          <div class="flex w-full flex-row-reverse gap-8">
+            <button type="button">
+              <LazyIcon
+                :name="copied ? 'bean:check' : 'bean:copy'"
+                @click="copyToClipboard"
+                class="size-6"
+              />
+            </button>
+            <p class="w-full overflow-x-auto text-nowrap">
+              {{ getCurrentLink() }}
+            </p>
           </div>
           <div
-            class="flex w-full place-content-center place-items-center gap-4"
+            class="grid w-full grid-cols-2 place-content-center place-items-center gap-4"
           >
             <ui-button
               @click="changeView(loginViews.create)"
@@ -177,11 +219,8 @@ function getCurrentLink(permission?: string) {
               :type="'button'"
               >back</ui-button
             >
-            <a class="w-full">
-              <ui-button
-                :style="'primary'"
-                :type="'button'"
-                @click="console.log(sessionController.openSessions)"
+            <a class="w-full" :href="getCurrentLink('Admin')">
+              <ui-button :style="'primary'" :type="'button'"
                 >continue</ui-button
               >
             </a>

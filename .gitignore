@@ -102,10 +102,10 @@ dist
 
 # vuepress v2.x temp and cache directory
 .temp
-.cache
 
 # vitepress build output
 **/.vitepress/dist
+
 
 # vitepress cache directory
 **/.vitepress/cache
@@ -139,4 +139,4 @@ dist
 /.idea/*.xml
 /.idea/*.iml
 
-*/package-lock.json
+**/package-lock.json
