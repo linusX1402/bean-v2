@@ -32,23 +32,28 @@ stations.value = testStations.value;
 </script>
 
 <template>
-  <main
-    class="flex h-full w-full flex-col place-content-center place-items-center gap-8"
-  >
-    <header
-      class="grid w-full grid-cols-3 place-content-center place-items-center border-b border-b-black/20 text-center"
+  <main class="flex min-h-screen w-full flex-col place-content-between">
+    <div
+      class="flex h-full w-full flex-col place-content-start place-items-center gap-8"
     >
-      <h2 class="col-start-2 text-nowrap">Bean-Counter 🫘</h2>
-    </header>
-    <section
-      class="flex flex-wrap place-content-center gap-8 px-12 sm:place-content-start"
-    >
-      <station-card
-        v-for="station in stations"
-        :station="station"
-        :key="station.id"
-      />
-    </section>
+      <header
+        class="grid w-full grid-cols-3 place-content-center place-items-center border-b border-b-black/20 p-2 py-4 text-center"
+      >
+        <h2 class="col-start-2 text-nowrap">Bean-Counter 🫘</h2>
+      </header>
+      <section
+        class="flex flex-wrap place-content-center gap-8 px-12 sm:place-content-start"
+      >
+        <station-card
+          v-for="station in stations"
+          :station="station"
+          :key="station.id"
+        />
+      </section>
+    </div>
+    <footer
+      class="sticky bottom-0 left-0 flex h-20 w-screen place-content-around place-items-center bg-gray-500"
+    ></footer>
   </main>
 </template>
 
