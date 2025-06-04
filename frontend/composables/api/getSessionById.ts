@@ -1,6 +1,8 @@
 import type BeanSession from '../../../models/session';
 
-export async function getSessionById(sessionId: string) {
+export async function getSessionById(
+  sessionId: string,
+): Promise<BeanSession | undefined> {
   try {
     const session = await $fetch(
       `${useRuntimeConfig().public.baseURL}/api/session/get-by-uuid`,
