@@ -1,9 +1,12 @@
 #! /usr/bin/env bash
 
-DOCKERFILE="./compose/github.Dockerfile"
+DOCKERFILE="./compose/Dockerfile"
 
 npm install
 npm run build
 
 echo "Building image"
-docker build -t bean-v2 -f $DOCKERFILE .
+docker build \
+--build-arg BUILD_MODE=$BUILD_MODE \
+--build-arg API_BASE_URL=$API_BASE_URL \
+-t bean-v2 -f $DOCKERFILE .

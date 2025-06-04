@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  cts-frontend:
-    image: ghcr.io/linusx1402/cts-frontend:latest
+  bean-counter-app:
+    image: ghcr.io/linusx1402/bean-counter:latest
     ports:
       - "3000:3000"
