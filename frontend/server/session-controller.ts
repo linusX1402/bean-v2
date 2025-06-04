@@ -28,24 +28,39 @@ export default class SessionController {
     const session = this._openSessions.find((i) =>
       i.containsSessionId(sessionId),
     );
-    try {
-      if (session) {
-        return new BeanSession(
-          session.name || '',
-          session.icon || '',
-          sessionId === session?.sessionIdAdmin ? sessionId : '',
-          sessionId === session?.sessionIdEditor ||
-          sessionId ||
-          sessionId === session?.sessionIdAdmin
-            ? session.sessionIdUser
-            : '',
-          session!.sessionIdUser,
-        );
-      }
-    } catch (error) {
-      throw new Error(
-        `Session with id ${sessionId} not found or invalid session data.`,
+    if (session) {
+      return new BeanSession(
+        session.name || '',
+        session.icon || '',
+        sessionId === session?.sessionIdAdmin ? sessionId : '',
+        sessionId === session?.sessionIdEditor ||
+        sessionId ||
+        sessionId === session?.sessionIdAdmin
+          ? session.sessionIdUser
+          : '',
+        session!.sessionIdUser,
       );
     }
+  }
+
+  getSessionByName(name: string) {
+    const session = this._openSessions.find(
+      (s) => s.name.toLowerCase() === name.toLowerCase(),
+    );
+    if (session) {
+      return new BeanSession(
+        session.name,
+        session.icon,
+        '',
+        '',
+        session.sessionIdUser,
+      );
+    }
+  }
+
+  public closeSession(idToRemoveSessionAdmin: string) {
+    const toRemoveSession = this._openSessions.find(
+      (i) => i.sessionIdAdmin === idToRemoveSessionAdmin,
+    );
   }
 }

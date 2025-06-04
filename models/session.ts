@@ -59,10 +59,23 @@ export default class BeanSession {
   }
 
   public containsSessionId(sessionId: string): boolean {
+    let substr = Math.max(sessionId.length, 10);
     return (
-      this.sessionIdAdmin === sessionId ||
-      this.sessionIdEditor === sessionId ||
-      this.sessionIdUser === sessionId
+      this.sessionIdAdmin.substring(0, substr) ===
+        sessionId.substring(0, substr) ||
+      this.sessionIdEditor.substring(0, substr) ===
+        sessionId.substring(0, substr) ||
+      this.sessionIdUser.substring(0, substr) === sessionId.substring(0, substr)
     );
+  }
+
+  public getHighestPermissionSessionId(): string {
+    if (this.sessionIdAdmin) {
+      return this.sessionIdAdmin;
+    } else if (this.sessionIdEditor) {
+      return this.sessionIdEditor;
+    } else {
+      return this.sessionIdUser;
+    }
   }
 }

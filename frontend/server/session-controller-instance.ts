@@ -7,17 +7,19 @@ export function openNewSession(name: string, iconId: string) {
   return sessionController.openNewSession(name, iconId);
 }
 export function getSessionById(sessionId: string) {
-  console.log(`getSession by id (${sessionController.openSessions.length}):`);
-  try {
-    console.log(
-      sessionController.getSessionById(
-        sessionController.openSessions[0].sessionIdAdmin,
-      ),
-    );
-  } catch (error) {}
+  console.log(`session count: (${sessionController.openSessions.length}):`);
   return sessionController.getSessionById(sessionId);
 }
-//ToDo: remove after testing
-export function getOpenSessions() {
-  return sessionController.openSessions;
+
+export function getSessionByName(name: string) {
+  return sessionController.getSessionByName(name);
 }
+
+export function validateName(name: string) {
+  return (
+    name.length <= 50 &&
+    !sessionController.openSessions.some((s) => s.name === name)
+  );
+}
+
+export function closeSession(adminId: string) {}

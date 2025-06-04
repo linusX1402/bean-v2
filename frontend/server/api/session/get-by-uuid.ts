@@ -1,4 +1,8 @@
-import { getSessionById } from '../../session-controller-instance';
+import {
+  getSessionById,
+  getSessionByName,
+} from '../../session-controller-instance';
+import BeanSession from '../../../../models/session';
 
 export default defineEventHandler(async (event) => {
   const method = getMethod(event);
@@ -12,7 +16,16 @@ export default defineEventHandler(async (event) => {
         statusMessage: 'Missing required fields',
       });
     }
-
-    return getSessionById(uuid as string);
+    let session = getSessionById(uuid as string);
+    if (uuid && !session) {
+      session = getSessionByName(uuid as string);
+    }
+    if (!session) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: 'Session not found',
+      });
+    }
+    return session as BeanSession;
   }
 });

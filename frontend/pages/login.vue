@@ -4,36 +4,73 @@ import { getCookie, setCookie } from 'typescript-cookie';
 import type BeanSession from '../../models/session';
 
 enum loginViews {
-  login = 0,
+  join = 0,
   create = 1,
   copy = 2,
 }
 
 let baseURL = useRuntimeConfig().public.baseURL;
 
-// ToDo: change to login
-const currentView = ref<loginViews>(loginViews.copy);
+const currentView = ref<loginViews>(loginViews.join);
 
 const permissions = ref<string[]>(['Admin', 'Edit', 'View']);
 const selectedPermission = ref<string>('Admin');
 const currentSession = ref<BeanSession | undefined>();
 
-const sessionId = ref<number>(0);
+const sessionInput = ref<string>('');
+const sessionInputError = ref<boolean>(false);
 
 const sessionName = ref<string>('');
+const sessionNameError = ref<boolean>(false);
 const icon = ref<string>('🫘');
 const options = ref<string[]>();
 const copied = ref<boolean>(false);
 
 onMounted(async () => {
   const cookieSessionId = getCookie('BeanSession') || '';
-  currentSession.value = await getSessionById(cookieSessionId);
+  if (cookieSessionId) {
+    currentSession.value = await getSessionById(cookieSessionId);
+  }
   console.log(currentSession.value ? 'found session' : 'No session found');
+  if (currentSession.value) {
+    forwardUser(cookieSessionId);
+  }
 });
 
-function submitLogin() {
-  console.log(sessionId.value);
+const router = useRouter();
+
+function forwardUser(uuid: string) {
+  const redirectPath = baseURL + '/session/' + uuid;
+  console.log('Redirecting to:', redirectPath);
+  window.location.href = redirectPath;
 }
+
+async function submitLogin() {
+  currentSession.value = (await getSessionById(
+    sessionInput.value,
+  )) as BeanSession;
+  if (currentSession.value) {
+    sessionInputError.value = false;
+    console.log('sessionId: ');
+    console.log(currentSession.value);
+    forwardUser(currentSession.value.getHighestPermissionSessionId());
+  } else {
+    sessionInputError.value = true;
+    console.error('No session with this id was found');
+    return;
+  }
+}
+
+// function getHighestPermissionSessionId(session: BeanSession): string {
+//   if (selectedPermission.value === 'Admin') {
+//     return currentSession.value?.sessionIdAdmin || '';
+//   } else if (selectedPermission.value === 'Edit') {
+//     return currentSession.value?.sessionIdEditor || '';
+//   } else if (selectedPermission.value === 'View') {
+//     return currentSession.value?.sessionIdUser || '';
+//   }
+//   return '';
+// }
 
 async function submitCreate() {
   try {
@@ -51,13 +88,6 @@ async function submitCreate() {
       console.error('Failed to create session');
       return;
     }
-
-    // currentSession.value = sessionController.openNewSession(
-    //   sessionName.value,
-    //   icon.value,
-    // );
-
-    setCookie('BeanSession', currentSession.value.sessionIdAdmin);
     currentView.value = loginViews.copy;
   } catch (e: any) {
     console.log('failed to open new Session');
@@ -65,6 +95,8 @@ async function submitCreate() {
 }
 
 function changeView(updatedView: loginViews) {
+  sessionInputError.value = false;
+  sessionNameError.value = false;
   currentView.value = updatedView;
 }
 
@@ -95,6 +127,14 @@ function copyToClipboard() {
       console.error('Failed to copy link:', err);
     });
 }
+
+function forwardAndSaveCookie() {
+  if (currentSession.value) {
+    setCookie('BeanSession', currentSession.value.sessionIdAdmin);
+    forwardUser(currentSession.value.sessionIdAdmin);
+  } else {
+  }
+}
 </script>
 
 <template>
@@ -107,23 +147,29 @@ function copyToClipboard() {
         class="min-h-[50%] w-full rounded-md border border-solid border-black/20 px-12 py-16 sm:min-h-[33%] sm:w-2/3 lg:w-1/2 xl:w-1/3 2xl:w-fit"
       >
         <form
-          v-if="currentView === loginViews.login"
+          v-if="currentView === loginViews.join"
           class="flex h-full flex-col place-content-between place-items-center gap-8"
           @submit.prevent="submitLogin"
         >
           <div
-            class="flex flex-col place-content-center place-items-center gap-8"
+            class="flex flex-col place-content-center place-items-center gap-8 md:w-2/3"
           >
             <h4>Join a Session</h4>
-            <div>
-              <label>Session ID:</label>
+            <div class="w-full">
+              <label class="w-full">Session ID / Session Name: </label>
+              <label v-if="sessionNameError" class="pl-4 text-red-500"
+                >Invalid Session name!</label
+              >
               <form-text
-                v-model="sessionId"
+                v-model="sessionInput"
                 :is-required="true"
                 name="sessionId"
-                placeholder="Session ID"
+                placeholder="Tim's game"
               />
             </div>
+            <label class="text-red-500" v-if="sessionInputError"
+              >No session with this id was found</label
+            >
           </div>
           <div
             class="grid w-full grid-cols-2 place-content-center place-items-center gap-4"
@@ -151,6 +197,7 @@ function copyToClipboard() {
               <div>
                 <label>Session Name:</label>
                 <form-text
+                  :max-length="50"
                   v-model="sessionName"
                   :is-required="true"
                   name="sessionId"
@@ -174,7 +221,7 @@ function copyToClipboard() {
             class="grid w-full grid-cols-2 place-content-center place-items-center gap-4"
           >
             <ui-button
-              @click="changeView(loginViews.login)"
+              @click="changeView(loginViews.join)"
               :style="'secondary'"
               :type="'button'"
               >join</ui-button
@@ -219,7 +266,7 @@ function copyToClipboard() {
               :type="'button'"
               >back</ui-button
             >
-            <a class="w-full" :href="getCurrentLink('Admin')">
+            <a class="w-full" @click="forwardAndSaveCookie">
               <ui-button :style="'primary'" :type="'button'"
                 >continue</ui-button
               >
