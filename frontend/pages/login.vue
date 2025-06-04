@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { iconList } from '../../types/types';
-import { getCookie, setCookie } from 'typescript-cookie';
+import { removeCookie, getCookie, setCookie } from 'typescript-cookie';
 import type BeanSession from '../../models/session';
 
 enum loginViews {
@@ -35,6 +35,9 @@ onMounted(async () => {
   if (currentSession.value) {
     forwardUser(cookieSessionId);
   }
+  if (cookieSessionId && !currentSession.value) {
+    removeCookie('BeanSession');
+  }
 });
 
 const router = useRouter();
@@ -53,7 +56,8 @@ async function submitLogin() {
     sessionInputError.value = false;
     console.log('sessionId: ');
     console.log(currentSession.value);
-    forwardUser(currentSession.value.getHighestPermissionSessionId());
+    setCookie('BeanSession', getHighestPermissionSessionId());
+    forwardUser(getHighestPermissionSessionId() || '');
   } else {
     sessionInputError.value = true;
     console.error('No session with this id was found');
@@ -61,16 +65,15 @@ async function submitLogin() {
   }
 }
 
-// function getHighestPermissionSessionId(session: BeanSession): string {
-//   if (selectedPermission.value === 'Admin') {
-//     return currentSession.value?.sessionIdAdmin || '';
-//   } else if (selectedPermission.value === 'Edit') {
-//     return currentSession.value?.sessionIdEditor || '';
-//   } else if (selectedPermission.value === 'View') {
-//     return currentSession.value?.sessionIdUser || '';
-//   }
-//   return '';
-// }
+function getHighestPermissionSessionId() {
+  if (currentSession.value?.sessionIdAdmin) {
+    return currentSession.value.sessionIdAdmin;
+  } else if (currentSession.value?.sessionIdEditor) {
+    return currentSession.value.sessionIdEditor;
+  } else if (currentSession.value?.sessionIdUser) {
+    return currentSession.value.sessionIdUser;
+  }
+}
 
 async function submitCreate() {
   try {
@@ -82,7 +85,8 @@ async function submitCreate() {
       },
     });
     if (session) {
-      currentSession.value = session as BeanSession;
+      currentSession.value = session as unknown as BeanSession;
+      setCookie('BeanSession', currentSession.value.sessionIdAdmin);
       console.log('Session created successfully:', currentSession.value);
     } else {
       console.error('Failed to create session');
@@ -94,10 +98,18 @@ async function submitCreate() {
   }
 }
 
-function changeView(updatedView: loginViews) {
+function changeView(updatedView: loginViews, resetSession = false) {
   sessionInputError.value = false;
   sessionNameError.value = false;
   currentView.value = updatedView;
+  if (resetSession) {
+    $fetch(baseURL + '/api/session/close', {
+      method: 'DELETE',
+      header: {
+        adminSessionId: currentSession.value?.sessionIdAdmin,
+      },
+    });
+  }
 }
 
 function getCurrentLink(permission?: string) {
@@ -126,14 +138,6 @@ function copyToClipboard() {
     .catch((err) => {
       console.error('Failed to copy link:', err);
     });
-}
-
-function forwardAndSaveCookie() {
-  if (currentSession.value) {
-    setCookie('BeanSession', currentSession.value.sessionIdAdmin);
-    forwardUser(currentSession.value.sessionIdAdmin);
-  } else {
-  }
 }
 </script>
 
@@ -261,12 +265,15 @@ function forwardAndSaveCookie() {
             class="grid w-full grid-cols-2 place-content-center place-items-center gap-4"
           >
             <ui-button
-              @click="changeView(loginViews.create)"
+              @click="changeView(loginViews.create, true)"
               :style="'secondary'"
               :type="'button'"
               >back</ui-button
             >
-            <a class="w-full" @click="forwardAndSaveCookie">
+            <a
+              class="w-full"
+              @click="forwardUser(currentSession?.sessionIdAdmin || '')"
+            >
               <ui-button :style="'primary'" :type="'button'"
                 >continue</ui-button
               >

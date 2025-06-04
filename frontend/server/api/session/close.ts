@@ -1,30 +1,18 @@
-import {
-  openNewSession,
-  validateName,
-} from '../../session-controller-instance';
+import { closeSession } from '../../session-controller-instance';
 
 export default defineEventHandler(async (event) => {
   const method = getMethod(event);
 
-  if (method === 'POST') {
-    const body = await readBody(event);
-
-    const { sessionName, icon } = body;
-
-    if (!sessionName || !icon) {
+  if (method === 'DELETE') {
+    const adminSessionId = getHeader(event, 'adminSessionId');
+    if (!adminSessionId) {
       throw createError({
         statusCode: 400,
-        statusMessage: 'Missing required fields: ' + sessionName + ', ' + icon,
+        statusMessage: 'Missing required header: adminSessionId',
       });
     }
-    if (!validateName(sessionName)) {
-      throw createError({
-        statusCode: 422,
-        statusMessage:
-          'Invalid session name or icon: ' + sessionName + ', ' + icon,
-      });
+    if (closeSession(adminSessionId)) {
+      return { success: true, message: 'Session closed successfully.' };
     }
-
-    return openNewSession(sessionName, icon);
   }
 });

@@ -2,13 +2,14 @@ import BeanSession from '../../models/session';
 import { v4 as uuid4 } from 'uuid';
 
 export default class SessionController {
-  private _openSessions: BeanSession[] = [];
+  private _openSessions = new Map<string, BeanSession>();
 
   public openNewSession(name: string, iconId: string): BeanSession {
     let sessionIdAdmin = uuid4();
     let sessionIdEditor = uuid4();
     let sessionIdUser = uuid4();
-    this._openSessions.push(
+    this._openSessions.set(
+      sessionIdAdmin,
       new BeanSession(
         name,
         iconId,
@@ -17,17 +18,17 @@ export default class SessionController {
         sessionIdUser,
       ),
     );
-    return this.openSessions[this.openSessions.length - 1];
+    return this.openSessions.get(sessionIdAdmin)!;
   }
 
-  get openSessions(): BeanSession[] {
+  get openSessions() {
     return this._openSessions;
   }
 
   getSessionById(sessionId: string) {
-    const session = this._openSessions.find((i) =>
-      i.containsSessionId(sessionId),
-    );
+    const session = [...this._openSessions.entries()].find(([, v]) =>
+      v.containsSessionId(sessionId),
+    )?.[1];
     if (session) {
       return new BeanSession(
         session.name || '',
@@ -44,9 +45,9 @@ export default class SessionController {
   }
 
   getSessionByName(name: string) {
-    const session = this._openSessions.find(
-      (s) => s.name.toLowerCase() === name.toLowerCase(),
-    );
+    const session = [...this._openSessions.entries()].find(
+      ([, v]) => v.name === name,
+    )?.[1];
     if (session) {
       return new BeanSession(
         session.name,
@@ -58,9 +59,7 @@ export default class SessionController {
     }
   }
 
-  public closeSession(idToRemoveSessionAdmin: string) {
-    const toRemoveSession = this._openSessions.find(
-      (i) => i.sessionIdAdmin === idToRemoveSessionAdmin,
-    );
+  public closeSession(adminSessionId: string) {
+    return this._openSessions.delete(adminSessionId);
   }
 }

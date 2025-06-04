@@ -19,6 +19,7 @@ export default class BeanSession {
     this.startingFunds = startingFunds;
   }
 
+  public readonly creationDate: Date = new Date();
   public readonly sessionIdAdmin: string;
   public readonly sessionIdEditor: string;
   public readonly sessionIdUser: string;

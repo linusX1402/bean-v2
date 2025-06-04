@@ -9,11 +9,12 @@ const currentSession = ref<BeanSession | undefined>(undefined);
 const stations = ref<Station[]>([]);
 
 enum page {
-  home = 0,
-  settings = 1,
-  share = 2,
+  loading = 0,
+  home = 1,
+  settings = 2,
+  share = 3,
 }
-const currentPage = page.home;
+const currentPage = ref<page>(page.loading);
 
 onMounted(async () => {
   const slug = route.params.slug as string;
@@ -23,8 +24,10 @@ onMounted(async () => {
     console.log(currentSession.value ? 'found session' : 'No session found');
     console.log(currentSession.value);
   } else {
-    console.error('No session ID found in the route parameters.');
+    window.location.href = '/';
   }
+  currentPage.value =
+    parseInt(sessionStorage.getItem('currentPage') || '') || page.home;
 });
 
 const testStations = ref<Station[]>([
@@ -36,6 +39,11 @@ const testStations = ref<Station[]>([
 
 const sampleChildren = ref<Child[]>([]);
 stations.value = testStations.value;
+
+function setPage(page: page) {
+  currentPage.value = page;
+  sessionStorage.setItem('currentPage', page.toString());
+}
 </script>
 
 <template>
@@ -64,33 +72,53 @@ stations.value = testStations.value;
     <footer
       class="sm:p fixed bottom-0 left-0 flex h-[72px] w-screen place-content-around place-items-center border-t border-t-black/20 bg-white px-10 sm:h-screen sm:w-[72px] sm:flex-col sm:border-r sm:border-r-black/20 sm:px-0 sm:py-10 md:place-content-start md:gap-20 md:pt-36"
     >
-      <LazyIcon
-        :class="[
-          currentPage === page.home,
-          'rounded-md bg-black fill-white text-white',
-        ]"
-        class="aspect-square size-8 cursor-pointer p-4"
-        name="bean:home"
-      ></LazyIcon>
-      <LazyIcon
-        :class="[
-          currentPage === page.home,
-          'rounded-md bg-black fill-white text-white',
-        ]"
-        class="aspect-square size-8 cursor-pointer p-4"
-        name="bean:share"
-      ></LazyIcon>
-      <LazyIcon
-        :class="[currentPage === page.home, 'rounded-md bg-black stroke-white']"
-        class="aspect-square size-8 cursor-pointer p-4"
-        name="bean:settings"
-      ></LazyIcon>
+      <div
+        class="flex place-content-center place-items-center rounded-xl p-2"
+        :class="[currentPage === page.home ? 'bg-blue-600' : 'bg-black/10']"
+      >
+        <LazyIcon
+          @click="setPage(page.home)"
+          :class="[currentPage === page.home, 'text-white']"
+          class="aspect-square size-8 cursor-pointer"
+          :name="
+            currentPage === page.home ? 'bean:home-light' : 'bean:home-dark'
+          "
+        />
+      </div>
+      <div
+        class="flex place-content-center place-items-center rounded-xl p-2"
+        :class="[currentPage === page.share ? 'bg-blue-600' : 'bg-black/10']"
+      >
+        <LazyIcon
+          @click="setPage(page.share)"
+          :class="[currentPage === page.share, 'text-white']"
+          class="aspect-square size-8 cursor-pointer"
+          :name="
+            currentPage === page.share ? 'bean:share-light' : 'bean:share-dark'
+          "
+        />
+      </div>
+      <div
+        class="flex place-content-center place-items-center rounded-xl p-2"
+        :class="[currentPage === page.settings ? 'bg-blue-600' : 'bg-black/10']"
+      >
+        <LazyIcon
+          @click="setPage(page.settings)"
+          :class="[currentPage === page.settings, 'stroke-white']"
+          class="aspect-square size-8 cursor-pointer"
+          :name="
+            currentPage === page.settings
+              ? 'bean:settings-light'
+              : 'bean:settings-dark'
+          "
+        />
+      </div>
     </footer>
   </main>
 </template>
 
 <style scoped>
-.stroke-white {
-  stroke: white;
+.stroke-white ::v-deep svg {
+  stroke: red !important;
 }
 </style>

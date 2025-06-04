@@ -11,7 +11,7 @@ export async function getSessionById(
         headers: { uuid: sessionId },
       },
     );
-    return session as BeanSession;
+    return session as unknown as BeanSession;
   } catch (error) {
     console.error('Error fetching session:', error);
   }
