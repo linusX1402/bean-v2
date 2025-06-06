@@ -11,6 +11,10 @@ export default {
   ],
   theme: {
     extend: {
+      colors: {
+        'bean-white-400': '#F8F6F9',
+        'bean-white-500': '#EFEDF2',
+      },
       fontSize: {
         h1: '2.986rem', // 47.776px
         h2: '2.488rem', // 39.808px
