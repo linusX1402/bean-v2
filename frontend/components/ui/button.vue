@@ -14,7 +14,7 @@ const optionalClasses = {
 <template>
   <button
     :type="type"
-    class="box-border w-full rounded-md px-4 py-1 text-center"
+    class="box-border w-full rounded-md px-2 py-1 text-center"
     :class="optionalClasses[style]"
   >
     <slot />
