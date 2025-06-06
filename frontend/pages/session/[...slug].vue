@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type BeanSession from '../../../models/session';
 import StationCard from '~/components/data/station-card.vue';
-import type Child from '~/composables/child';
+import Child from '~/composables/child';
 
 const route = useRoute();
 const sessionId = ref<string | undefined>(undefined);
@@ -21,23 +21,38 @@ onMounted(async () => {
   if (slug) {
     sessionId.value = slug;
     currentSession.value = await getSessionById(sessionId.value);
+    if (!currentSession.value) {
+      sessionStorage.clear();
+      window.location.href = '/';
+    }
     console.log(currentSession.value ? 'found session' : 'No session found');
     console.log(currentSession.value);
-  } else {
-    window.location.href = '/';
   }
+
   currentPage.value =
     parseInt(sessionStorage.getItem('currentPage') || '') || page.home;
 });
 
 const testStations = ref<Station[]>([
-  new Station(1, '#FF5733', 'Massage Station'),
-  new Station(2, '#33FF57', 'Coffee Station'),
-  new Station(3, '#3357FF', 'Snacks'),
+  new Station(1, '#cb472b', 'Massage Station'),
+  new Station(2, '#27b21c', 'Coffee Station'),
+  new Station(3, '#284aef', 'Snacks'),
   new Station(5, '#9B59B6', 'Casino'),
 ]);
 
 const sampleChildren = ref<Child[]>([]);
+sampleChildren.value.push(new Child('Tim'));
+sampleChildren.value.push(new Child('Maxi'));
+sampleChildren.value.push(new Child('Roif'));
+sampleChildren.value.push(new Child('July'));
+sampleChildren.value.push(new Child('Paula'));
+
+testStations.value.forEach((s) => {
+  sampleChildren.value.forEach((c) => {
+    s.addChild(c);
+  });
+});
+
 stations.value = testStations.value;
 
 function setPage(page: page) {
@@ -54,7 +69,7 @@ function setPage(page: page) {
       class="flex h-fit w-full flex-col place-content-start place-items-center gap-8 sm:pl-[72px]"
     >
       <header
-        class="grid w-full grid-cols-3 place-content-center place-items-center border-b border-b-black/20 p-2 py-4 text-center"
+        class="grid w-full grid-cols-3 place-content-center place-items-center border-b border-b-gray-400 bg-bean-white-400 p-2 py-4 text-center"
       >
         <h2 class="col-start-2 text-nowrap">Bean-Counter 🫘</h2>
       </header>
@@ -70,7 +85,7 @@ function setPage(page: page) {
       </section>
     </div>
     <footer
-      class="sm:p fixed bottom-0 left-0 flex h-[72px] w-screen place-content-around place-items-center border-t border-t-black/20 bg-white px-10 sm:h-screen sm:w-[72px] sm:flex-col sm:border-r sm:border-r-black/20 sm:px-0 sm:py-10 md:place-content-start md:gap-20 md:pt-36"
+      class="sm:p fixed bottom-0 left-0 flex h-[72px] w-screen place-content-around place-items-center border-t border-t-gray-400 bg-bean-white-400 px-10 sm:h-screen sm:w-[72px] sm:flex-col sm:border-r sm:border-r-gray-400 sm:px-0 sm:py-10 md:place-content-start md:gap-20 md:pt-36"
     >
       <div
         class="flex place-content-center place-items-center rounded-xl p-2"
@@ -78,7 +93,6 @@ function setPage(page: page) {
       >
         <LazyIcon
           @click="setPage(page.home)"
-          :class="[currentPage === page.home, 'text-white']"
           class="aspect-square size-8 cursor-pointer"
           :name="
             currentPage === page.home ? 'bean:home-light' : 'bean:home-dark'
@@ -91,7 +105,6 @@ function setPage(page: page) {
       >
         <LazyIcon
           @click="setPage(page.share)"
-          :class="[currentPage === page.share, 'text-white']"
           class="aspect-square size-8 cursor-pointer"
           :name="
             currentPage === page.share ? 'bean:share-light' : 'bean:share-dark'
@@ -104,7 +117,6 @@ function setPage(page: page) {
       >
         <LazyIcon
           @click="setPage(page.settings)"
-          :class="[currentPage === page.settings, 'stroke-white']"
           class="aspect-square size-8 cursor-pointer"
           :name="
             currentPage === page.settings
@@ -117,8 +129,4 @@ function setPage(page: page) {
   </main>
 </template>
 
-<style scoped>
-.stroke-white ::v-deep svg {
-  stroke: red !important;
-}
-</style>
+<style scoped></style>
