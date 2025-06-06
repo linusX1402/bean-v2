@@ -8,7 +8,8 @@ export default defineEventHandler(async (event) => {
     if (!adminSessionId) {
       throw createError({
         statusCode: 400,
-        statusMessage: 'Missing required header: adminSessionId',
+        statusMessage:
+          'Missing required header: adminSessionId: ' + adminSessionId,
       });
     }
     if (closeSession(adminSessionId)) {

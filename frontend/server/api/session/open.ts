@@ -14,14 +14,13 @@ export default defineEventHandler(async (event) => {
     if (!sessionName || !icon) {
       throw createError({
         statusCode: 400,
-        statusMessage: 'Missing required fields: ' + sessionName + ', ' + icon,
+        statusMessage: 'Missing required fields',
       });
     }
     if (!validateName(sessionName)) {
       throw createError({
         statusCode: 422,
-        statusMessage:
-          'Invalid session name or icon: ' + sessionName + ', ' + icon,
+        statusMessage: 'Invalid session name or icon',
       });
     }
 
