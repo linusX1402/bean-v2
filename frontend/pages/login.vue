@@ -85,6 +85,7 @@ async function submitCreate() {
       },
     });
     if (session) {
+      sessionNameError.value = false;
       currentSession.value = session as unknown as BeanSession;
       setCookie('BeanSession', currentSession.value.sessionIdAdmin);
       console.log('Session created successfully:', currentSession.value);
@@ -94,21 +95,26 @@ async function submitCreate() {
     }
     currentView.value = loginViews.copy;
   } catch (e: any) {
+    sessionNameError.value = true;
     console.log('failed to open new Session');
   }
 }
 
-function changeView(updatedView: loginViews, resetSession = false) {
+async function changeView(updatedView: loginViews, resetSession = false) {
   sessionInputError.value = false;
   sessionNameError.value = false;
   currentView.value = updatedView;
-  if (resetSession) {
-    $fetch(baseURL + '/api/session/close', {
+  if (resetSession && currentSession.value) {
+    removeCookie('BeanSession');
+    console.log('Session reset');
+    console.log(currentSession.value.sessionIdAdmin);
+    const res = await $fetch(baseURL + '/api/session/close', {
       method: 'DELETE',
-      header: {
-        adminSessionId: currentSession.value?.sessionIdAdmin,
+      headers: {
+        adminSessionId: currentSession.value.sessionIdAdmin,
       },
     });
+    console.log(res);
   }
 }
 
@@ -144,11 +150,11 @@ function copyToClipboard() {
 <template>
   <main>
     <div
-      class="flex h-screen w-screen flex-col place-content-start place-items-center gap-16 px-10 md:gap-32"
+      class="flex h-screen w-screen flex-col place-content-start place-items-center gap-16 px-10 lg:gap-32"
     >
-      <h1>Bean-Counter 🫘</h1>
+      <h1 class="py-10">Bean-Counter 🫘</h1>
       <div
-        class="min-h-[50%] w-full rounded-md border border-solid border-black/20 px-12 py-16 sm:min-h-[33%] sm:w-2/3 lg:w-1/2 xl:w-1/3 2xl:w-fit"
+        class="min-h-[50%] w-full rounded-2xl bg-white px-12 py-16 sm:min-h-[50%] sm:w-2/3 md:min-h-[33%] lg:w-[500px]"
       >
         <form
           v-if="currentView === loginViews.join"
@@ -156,13 +162,13 @@ function copyToClipboard() {
           @submit.prevent="submitLogin"
         >
           <div
-            class="flex flex-col place-content-center place-items-center gap-8 md:w-2/3"
+            class="flex w-full flex-col place-content-center place-items-center gap-8"
           >
             <h4>Join a Session</h4>
             <div class="w-full">
               <label class="w-full">Session ID / Session Name: </label>
-              <label v-if="sessionNameError" class="pl-4 text-red-500"
-                >Invalid Session name!</label
+              <label class="text-red-500" v-if="sessionInputError"
+                >No session with this id was found</label
               >
               <form-text
                 v-model="sessionInput"
@@ -171,9 +177,6 @@ function copyToClipboard() {
                 placeholder="Tim's game"
               />
             </div>
-            <label class="text-red-500" v-if="sessionInputError"
-              >No session with this id was found</label
-            >
           </div>
           <div
             class="grid w-full grid-cols-2 place-content-center place-items-center gap-4"
@@ -194,12 +197,15 @@ function copyToClipboard() {
           @submit.prevent="submitCreate"
         >
           <div
-            class="flex flex-col place-content-center place-items-center gap-8"
+            class="flex w-full flex-col place-content-center place-items-center gap-8"
           >
             <h4>Create a Session</h4>
-            <div class="flex flex-col gap-2">
-              <div>
-                <label>Session Name:</label>
+            <div class="flex w-full flex-col gap-2">
+              <div class="w-full">
+                <label class="w-full">Session Name:</label>
+                <label v-if="sessionNameError" class="text-red-500">
+                  Invalid Session name!
+                </label>
                 <form-text
                   :max-length="50"
                   v-model="sessionName"
@@ -243,7 +249,7 @@ function copyToClipboard() {
             <div>
               <select
                 v-model="selectedPermission"
-                class="h-fit w-full rounded-md border border-solid border-black/50 p-1"
+                class="h-fit w-full rounded-md border border-solid border-gray-400 p-1"
               >
                 <option v-for="i in permissions" :value="i">{{ i }}</option>
               </select>
