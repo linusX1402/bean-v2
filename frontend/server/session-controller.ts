@@ -1,5 +1,8 @@
-import BeanSession from '../../models/session';
+import BeanSession from '../../models/bean-session';
+import { BeanStation } from '../../models/bean-station';
+
 import { v4 as uuid4 } from 'uuid';
+import BeanSessionDTO from '../../models/bean-session-dto';
 
 export default class SessionController {
   private _openSessions = new Map<string, BeanSession>();
@@ -30,7 +33,7 @@ export default class SessionController {
       v.containsSessionId(sessionId),
     )?.[1];
     if (session) {
-      return new BeanSession(
+      return new BeanSessionDTO(
         session.name || '',
         session.icon || '',
         sessionId === session?.sessionIdAdmin ? sessionId : '',
@@ -40,6 +43,10 @@ export default class SessionController {
           ? session.sessionIdUser
           : '',
         session!.sessionIdUser,
+        session.secondsPerTick,
+        session.beanPerTick,
+        session.startingFunds,
+        Array.from(session.stations.values()),
       );
     }
   }
@@ -49,17 +56,39 @@ export default class SessionController {
       ([, v]) => v.name === name,
     )?.[1];
     if (session) {
-      return new BeanSession(
+      return new BeanSessionDTO(
         session.name,
         session.icon,
         '',
         '',
         session.sessionIdUser,
+        session.secondsPerTick,
+        session.beanPerTick,
+        session.startingFunds,
+        Array.from(session.stations.values()),
       );
     }
   }
 
   public closeSession(adminSessionId: string) {
     return this._openSessions.delete(adminSessionId);
+  }
+
+  public addChild(name: string, stationId: number, sessionId: string) {
+    const session = this._openSessions.get(sessionId);
+    if (!session) {
+      throw new Error(`Session with name ${name} does not exist.`);
+    }
+    return session.addChild(name, stationId);
+  }
+
+  addStation(stationName: string, hexColor: string, sessionId: string) {
+    const session =
+      this._openSessions.get(sessionId) ||
+      this._openSessions.forEach((s) => s.sessionIdEditor === sessionId);
+    if (!session) {
+      throw new Error(`Session not found.`);
+    }
+    return session.addStation(stationName, hexColor);
   }
 }

@@ -2,7 +2,7 @@ import {
   getSessionById,
   getSessionByName,
 } from '../../session-controller-instance';
-import BeanSession from '../../../../models/session';
+import BeanSessionDTO from '../../../../models/bean-session-dto';
 
 export default defineEventHandler(async (event) => {
   const method = getMethod(event);
@@ -26,6 +26,6 @@ export default defineEventHandler(async (event) => {
         statusMessage: 'Session not found',
       });
     }
-    return session as BeanSession;
+    return session as BeanSessionDTO;
   }
 });

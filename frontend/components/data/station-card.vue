@@ -1,32 +1,42 @@
 <script setup lang="ts">
 import StationDetail from '~/components/data/station-detail.vue';
+import type { BeanStation } from '../../../models/bean-station';
 
-const props = defineProps<{
-  station: Station;
-}>();
+const props = withDefaults(
+  defineProps<{
+    station: BeanStation;
+    isUnstable?: boolean;
+  }>(),
+  { isUnstable: false },
+);
 
 const isDetailOpen = ref<boolean>(false);
 
-function getWorkingChildrenCount(station: Station): number {
+function getWorkingChildrenCount(station: BeanStation): number {
   return station.children.filter((child) => child.workState === 'working')
     .length;
 }
 
-function getTotalBeansEarned(station: Station): number {
+function getTotalBeansEarned(station: BeanStation): number {
   return station.children.reduce(
     (total, child) => total + child.numberOfBeansEarned,
     0,
   );
 }
+
 function toggleDetail() {
   isDetailOpen.value = !isDetailOpen.value;
-  document.body.style.overflow = 'hidden';
+  if (isDetailOpen.value) {
+    document.body.style.overflow = 'hidden';
+  } else {
+    document.body.style.overflow = 'auto';
+  }
 }
 </script>
 
 <template>
   <div
-    class="flex aspect-square w-60 cursor-pointer flex-col gap-4 rounded-2xl border-t-[20px] bg-white/75 p-6"
+    class="flex aspect-square w-60 cursor-pointer flex-col gap-4 rounded-2xl border-t-[20px] bg-bean-white-400 p-6"
     :style="'border-top-color: ' + props.station.hexColor"
     @click="toggleDetail"
   >
@@ -50,9 +60,7 @@ function toggleDetail() {
 <style scoped>
 .detail-enter-active,
 .detail-leave-active {
-  transition:
-    transform 0.3s ease,
-    opacity 0.3s ease;
+  transition: transform 0.125s ease-in-out;
 }
 
 .detail-enter-from {

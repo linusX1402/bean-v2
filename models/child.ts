@@ -1,11 +1,11 @@
-import type { Payout } from '~/composables/payout';
+import { Payout } from "./payout";
 
-type WorkState = 'working' | 'onBreak' | 'idle';
+type WorkState = "working" | "onBreak" | "idle";
 export default class Child {
   public name: string;
   public numberOfBeansEarned: number = 0;
   public numberOfBeansToPayout: number = 0;
-  public workState: WorkState = 'idle';
+  public workState: WorkState = "idle";
   public lastCheckout: Date | null = null;
   public lastCheckin: Date | null = null;
   public payoutHistory: Payout[] = [];

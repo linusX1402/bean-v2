@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type Child from '~/composables/child';
+import type Child from '../../../models/child';
 const props = defineProps<{ child: Child }>();
 </script>
 

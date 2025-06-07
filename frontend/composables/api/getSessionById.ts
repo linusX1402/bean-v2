@@ -1,8 +1,8 @@
-import type BeanSession from '../../../models/session';
+import type BeanSessionDTO from '../../../models/bean-session-dto';
 
 export async function getSessionById(
   sessionId: string,
-): Promise<BeanSession | undefined> {
+): Promise<BeanSessionDTO | undefined> {
   try {
     const session = await $fetch(
       `${useRuntimeConfig().public.baseURL}/api/session/get-by-uuid`,
@@ -11,7 +11,7 @@ export async function getSessionById(
         headers: { uuid: sessionId },
       },
     );
-    return session as unknown as BeanSession;
+    return session as unknown as BeanSessionDTO;
   } catch (error) {
     console.error('Error fetching session:', error);
   }

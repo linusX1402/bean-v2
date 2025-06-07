@@ -1,4 +1,5 @@
 import SessionController from './session-controller';
+import { BeanStation } from '../../models/bean-station';
 
 const sessionController = new SessionController();
 export default sessionController;
@@ -7,7 +8,7 @@ export function openNewSession(name: string, iconId: string) {
   return sessionController.openNewSession(name, iconId);
 }
 export function getSessionById(sessionId: string) {
-  console.log(`session count: (${sessionController.openSessions.size}):`);
+  console.log(`open session: (${sessionController.openSessions.size}):`);
   return sessionController.getSessionById(sessionId);
 }
 
@@ -24,4 +25,16 @@ export function validateName(name: string) {
 
 export function closeSession(adminId: string) {
   return sessionController.closeSession(adminId);
+}
+
+export function addChild(name: string, stationId: number, sessionId: string) {
+  return sessionController.addChild(name, stationId, sessionId);
+}
+
+export function addStation(
+  stationName: string,
+  hexColor: string,
+  stationId: string,
+) {
+  return sessionController.addStation(stationName, hexColor, stationId);
 }

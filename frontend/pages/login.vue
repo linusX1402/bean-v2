@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 import { iconList } from '../../types/types';
 import { removeCookie, getCookie, setCookie } from 'typescript-cookie';
-import type BeanSession from '../../models/session';
+import type BeanSession from '../../models/bean-session';
+import type BeanSessionDTO from '../../models/bean-session-dto';
 
 enum loginViews {
   join = 0,
@@ -15,7 +16,7 @@ const currentView = ref<loginViews>(loginViews.join);
 
 const permissions = ref<string[]>(['Admin', 'Edit', 'View']);
 const selectedPermission = ref<string>('Admin');
-const currentSession = ref<BeanSession | undefined>();
+const currentSession = ref<BeanSessionDTO | undefined>();
 
 const sessionInput = ref<string>('');
 const sessionInputError = ref<boolean>(false);
@@ -44,18 +45,13 @@ const router = useRouter();
 
 function forwardUser(uuid: string) {
   const redirectPath = baseURL + '/session/' + uuid;
-  console.log('Redirecting to:', redirectPath);
   window.location.href = redirectPath;
 }
 
 async function submitLogin() {
-  currentSession.value = (await getSessionById(
-    sessionInput.value,
-  )) as BeanSession;
+  currentSession.value = await getSessionById(sessionInput.value);
   if (currentSession.value) {
     sessionInputError.value = false;
-    console.log('sessionId: ');
-    console.log(currentSession.value);
     setCookie('BeanSession', getHighestPermissionSessionId());
     forwardUser(getHighestPermissionSessionId() || '');
   } else {
@@ -86,7 +82,7 @@ async function submitCreate() {
     });
     if (session) {
       sessionNameError.value = false;
-      currentSession.value = session as unknown as BeanSession;
+      currentSession.value = session as unknown as BeanSessionDTO;
       setCookie('BeanSession', currentSession.value.sessionIdAdmin);
       console.log('Session created successfully:', currentSession.value);
     } else {
@@ -106,15 +102,12 @@ async function changeView(updatedView: loginViews, resetSession = false) {
   currentView.value = updatedView;
   if (resetSession && currentSession.value) {
     removeCookie('BeanSession');
-    console.log('Session reset');
-    console.log(currentSession.value.sessionIdAdmin);
     const res = await $fetch(baseURL + '/api/session/close', {
       method: 'DELETE',
       headers: {
         adminSessionId: currentSession.value.sessionIdAdmin,
       },
     });
-    console.log(res);
   }
 }
 
@@ -139,7 +132,6 @@ function copyToClipboard() {
     .then(() => {
       copied.value = true;
       setTimeout(() => (copied.value = false), 2000);
-      console.log('Link copied to clipboard:', link);
     })
     .catch((err) => {
       console.error('Failed to copy link:', err);
