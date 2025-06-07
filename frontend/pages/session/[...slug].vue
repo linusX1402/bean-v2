@@ -13,10 +13,13 @@ const currentSession = ref<BeanSessionDTO | undefined>(undefined);
 // station input
 const isEditing = ref<boolean>(false);
 const newStationName = ref<string>('');
+const hexColor = ref<string>('#0A60FF');
 const tmpStations = ref<BeanStation[]>([]);
 const stationRef = ref<HTMLInputElement | null>(null);
 
+// animations
 const isAddIconVisible = ref<boolean>(true);
+const addStationRef = ref<HTMLDivElement | null>(null);
 
 enum page {
   loading = 0,
@@ -79,9 +82,13 @@ function addStation() {
     return;
   }
   nextTick(() => stationRef.value?.focus());
-  const newStation = new BeanStation('#000000', newStationName.value.trim());
+  const newStation = new BeanStation(
+    hexColor.value,
+    newStationName.value.trim(),
+  );
   tmpStations.value.push(newStation);
   newStationName.value = '';
+  scrollToAddStationCard();
 }
 
 async function toggleEdit(value?: boolean) {
@@ -93,7 +100,10 @@ async function toggleEdit(value?: boolean) {
     isEditing.value = !isEditing.value;
   }
   if (isEditing.value) {
-    nextTick(() => stationRef.value?.focus());
+    nextTick(() => {
+      stationRef.value?.focus();
+      scrollToAddStationCard(150);
+    });
   } else {
     await submitStations();
     tmpStations.value = [];
@@ -119,6 +129,17 @@ async function submitStations() {
     console.error('Error submitting stations:', error);
   }
 }
+
+function scrollToAddStationCard(delay: number = 0) {
+  setTimeout(() => {
+    if (addStationRef.value) {
+      addStationRef.value.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      });
+    }
+  }, delay);
+}
 </script>
 
 <template>
@@ -137,9 +158,16 @@ async function submitStations() {
           <button
             class="flex cursor-pointer place-content-center place-items-center text-blue-500"
             @click="toggleEdit()"
+            v-if="!isEditing"
           >
-            <LazyIcon v-if="!isEditing" class="size-7" name="bean:add-blue" />
-            <p v-else class="text-p text-blue-500">submit</p>
+            <LazyIcon class="size-7" name="bean:add-blue" />
+          </button>
+          <button
+            class="flex cursor-pointer place-content-center place-items-center text-blue-500"
+            @click="addStation"
+            v-else
+          >
+            <p class="text-p text-blue-500">submit</p>
           </button>
         </div>
         <h2 class="col-span-3 text-nowrap">Bean-Counter 🫘</h2>
@@ -207,24 +235,52 @@ async function submitStations() {
                       </p>
                     </button>
                   </div>
-                  <label>Name:</label>
-                  <input
-                    ref="stationRef"
-                    name="newStationName"
-                    maxlength="100"
-                    v-model="newStationName"
-                    placeholder="e.g. Casino"
-                    class="w-full bg-bean-white-400 p-[2px] px-1 font-sans text-sm text-inherit focus:outline-0 md:text-p"
-                  />
+                  <div class="flex flex-col gap-2">
+                    <div class="flex flex-col">
+                      <label>Name:</label>
+                      <input
+                        ref="stationRef"
+                        name="newStationName"
+                        maxlength="100"
+                        v-model="newStationName"
+                        placeholder="e.g. Casino"
+                        class="w-full bg-bean-white-400 p-[2px] px-1 font-sans text-sm text-inherit focus:outline-0 md:text-p"
+                      />
+                    </div>
+                    <div class="flex flex-col">
+                      <label class="text-nowrap"> Station Color: </label>
+                      <div class="relative h-10 w-10">
+                        <input
+                          class="absolute inset-0 z-20 h-full w-full cursor-pointer opacity-0"
+                          type="color"
+                          name="stationHexColor"
+                          v-model="hexColor"
+                        />
+                        <div
+                          class="relative flex h-full w-full items-center justify-center overflow-hidden rounded-full shadow-md"
+                        >
+                          <div
+                            class="absolute z-10 h-4/5 w-4/5 rounded-full border-2 border-bean-white-400"
+                            :style="{ backgroundColor: hexColor }"
+                          ></div>
+
+                          <div
+                            class="color-circle absolute inset-0 rounded-full border-4 border-solid border-transparent"
+                          ></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </form>
               </div>
             </transition>
+            <div ref="addStationRef"></div>
           </div>
         </div>
       </section>
     </div>
     <footer
-      class="sm:p fixed bottom-0 left-0 flex h-[72px] w-screen place-content-around place-items-center border-t border-t-gray-400 bg-bean-white-400 px-10 sm:h-screen sm:w-[72px] sm:flex-col sm:border-r sm:border-r-gray-400 sm:px-0 sm:py-10 md:place-content-start md:gap-16 md:pt-16 lg:gap-20 lg:pt-36"
+      class="sm:p fixed bottom-0 left-0 z-30 flex h-[72px] w-screen place-content-around place-items-center border-t border-t-gray-400 bg-bean-white-400 px-10 sm:h-screen sm:w-[72px] sm:flex-col sm:border-r sm:border-r-gray-400 sm:px-0 sm:py-10 md:place-content-start md:gap-16 md:pt-16 lg:gap-20 lg:pt-36"
     >
       <div
         :class="[currentPage === page.home ? 'bg-blue-600' : 'bg-black/10']"
@@ -306,5 +362,26 @@ async function submitStations() {
 
 .add-icon-enter-to {
   opacity: 1;
+}
+
+.color-circle {
+  background: conic-gradient(
+      from 0deg,
+      #ff0000,
+      #ffa500,
+      #ffff00,
+      #008000,
+      #0000ff,
+      #4b0082,
+      #ee82ee,
+      #ff0000
+    )
+    border-box;
+  /* stylelint-disable */
+  -webkit-mask: linear-gradient(#ffffff 0 0) padding-box
+    linear-gradient(#ffffff 0 0);
+  /* stylelint-enable */
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
 }
 </style>
