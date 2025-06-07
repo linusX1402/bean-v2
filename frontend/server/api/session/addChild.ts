@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
     const body = await readBody(event);
     const { name, stationId, sessionId } = body;
 
-    if (!name || !stationId) {
+    if (!name || stationId === undefined || !sessionId) {
       throw createError({
         statusCode: 400,
         statusMessage: 'Missing required fields',

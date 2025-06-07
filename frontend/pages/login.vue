@@ -37,7 +37,7 @@ onMounted(async () => {
     forwardUser(cookieSessionId);
   }
   if (cookieSessionId && !currentSession.value) {
-    removeCookie('BeanSession');
+    removeCookie('bean_session');
   }
 });
 
@@ -52,7 +52,8 @@ async function submitLogin() {
   currentSession.value = await getSessionById(sessionInput.value);
   if (currentSession.value) {
     sessionInputError.value = false;
-    setCookie('BeanSession', getHighestPermissionSessionId());
+    setCookie('bean_session', getHighestPermissionSessionId());
+    setCookie('bean_icon', currentSession.value.icon);
     forwardUser(getHighestPermissionSessionId() || '');
   } else {
     sessionInputError.value = true;
@@ -83,7 +84,7 @@ async function submitCreate() {
     if (session) {
       sessionNameError.value = false;
       currentSession.value = session as unknown as BeanSessionDTO;
-      setCookie('BeanSession', currentSession.value.sessionIdAdmin);
+      setCookie('bean_session', currentSession.value.sessionIdAdmin);
       console.log('Session created successfully:', currentSession.value);
     } else {
       console.error('Failed to create session');
@@ -101,7 +102,7 @@ async function changeView(updatedView: loginViews, resetSession = false) {
   sessionNameError.value = false;
   currentView.value = updatedView;
   if (resetSession && currentSession.value) {
-    removeCookie('BeanSession');
+    removeCookie('bean_session');
     const res = await $fetch(baseURL + '/api/session/close', {
       method: 'DELETE',
       headers: {
@@ -247,7 +248,10 @@ function copyToClipboard() {
               </select>
             </div>
           </div>
-          <div class="flex w-full flex-row-reverse gap-8">
+          <div class="flex w-full gap-8">
+            <p class="w-full select-none overflow-x-auto text-nowrap">
+              {{ getCurrentLink() }}
+            </p>
             <button type="button">
               <LazyIcon
                 :name="copied ? 'bean:check' : 'bean:copy'"
@@ -255,9 +259,6 @@ function copyToClipboard() {
                 class="size-6"
               />
             </button>
-            <p class="w-full overflow-x-auto text-nowrap">
-              {{ getCurrentLink() }}
-            </p>
           </div>
           <div
             class="grid w-full grid-cols-2 place-content-center place-items-center gap-4"

@@ -14,6 +14,7 @@ export default {
       colors: {
         'bean-white-400': '#F8F6F9',
         'bean-white-500': '#EFEDF2',
+        'bean-gray-500': '#7B7B81',
       },
       fontSize: {
         h1: '2.986rem', // 47.776px

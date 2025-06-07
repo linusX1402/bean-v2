@@ -31,10 +31,9 @@ async function toggleEdit() {
 
 function addChild() {
   if (childInput.value.trim() === '') {
-    newChildNameError.value = true;
+    toggleEdit();
     return;
   }
-  newChildNameError.value = false;
   const newChild = new Child(childInput.value.trim());
   tempChildren.value.push(newChild);
   childInput.value = '';
@@ -42,6 +41,9 @@ function addChild() {
 
 async function submitChildren() {
   for (const child of tempChildren.value) {
+    console.log('Submitting child:', child.name);
+    console.log(sessionId.value);
+    console.log('Station ID:', props.station.id);
     let res = await $fetch('/api/session/addChild', {
       method: 'POST',
       body: {
@@ -56,7 +58,7 @@ async function submitChildren() {
 </script>
 
 <template>
-  <section class="flex h-full w-full flex-col gap-12 bg-bean-white-500">
+  <section class="flex h-full w-full flex-col gap-12 bg-bean-white-500 pb-6">
     <header
       class="text-blue grid grid-cols-3 place-content-center place-items-center gap-y-2 border-b border-b-black/20 bg-white/60 p-2 py-4 pt-4 text-center"
     >
@@ -93,7 +95,11 @@ async function submitChildren() {
             <p>Children</p>
           </li>
           <child-row v-for="child in station.children" :child="child" />
-          <child-row v-for="child in tempChildren" :child="child" />
+          <child-row
+            v-for="child in tempChildren"
+            :child="child"
+            :is-unstable="true"
+          />
           <transition name="edit">
             <li
               v-if="isEditing"
@@ -101,7 +107,6 @@ async function submitChildren() {
             >
               <form @submit.prevent="addChild">
                 <input
-                  required
                   :class="{
                     'rounded-md outline outline-red-500': newChildNameError,
                   }"

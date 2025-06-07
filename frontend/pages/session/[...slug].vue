@@ -1,7 +1,5 @@
 <script lang="ts" setup>
-import type BeanSession from '../../../models/bean-session';
 import StationCard from '~/components/data/station-card.vue';
-import Child from '../../../models/child';
 import { BeanStation } from '../../../models/bean-station';
 import { setCookie } from 'typescript-cookie';
 import type BeanSessionDTO from '../../../models/bean-session-dto';
@@ -39,36 +37,41 @@ onMounted(async () => {
       sessionStorage.clear();
       window.location.href = '/';
     } else {
-      setCookie('BeanSession', sessionId.value);
+      setCookie('bean_session', sessionId.value);
+      setCookie('bean_icon', currentSession.value.icon);
     }
+    currentPage.value = localStorage.getItem('currentPage')
+      ? (parseInt(localStorage.getItem('currentPage') || '') as page)
+      : page.home;
   }
-  console.log(currentSession.value);
-  currentPage.value =
-    parseInt(sessionStorage.getItem('currentPage') || '') || page.home;
-  const testStations = ref<BeanStation[]>([
-    new BeanStation('#cb472b', 'Massage Station'),
-    new BeanStation('#27b21c', 'Coffee Station'),
-    new BeanStation('#284aef', 'Snacks'),
-    new BeanStation('#9B59B6', 'Casino'),
-  ]);
+  // ToDo: remove production code
+  // console.log(currentSession.value);
+  // currentPage.value =
+  //   parseInt(sessionStorage.getItem('currentPage') || '') || page.home;
+  // const testStations = ref<BeanStation[]>([
+  //   new BeanStation('#cb472b', 'Massage Station'),
+  //   new BeanStation('#27b21c', 'Coffee Station'),
+  //   new BeanStation('#284aef', 'Snacks'),
+  //   new BeanStation('#9B59B6', 'Casino'),
+  // ]);
+  //
+  // const sampleChildren = ref<Child[]>([]);
+  // sampleChildren.value.push(new Child('Tim'));
+  // sampleChildren.value.push(new Child('Maxi'));
+  // sampleChildren.value.push(new Child('Roif'));
+  // sampleChildren.value.push(new Child('July'));
+  // sampleChildren.value.push(new Child('Paula'));
 
-  const sampleChildren = ref<Child[]>([]);
-  sampleChildren.value.push(new Child('Tim'));
-  sampleChildren.value.push(new Child('Maxi'));
-  sampleChildren.value.push(new Child('Roif'));
-  sampleChildren.value.push(new Child('July'));
-  sampleChildren.value.push(new Child('Paula'));
-
-  testStations.value.forEach((s) => {
-    sampleChildren.value.forEach((c) => {
-      s.addChild(c);
-    });
-  });
-  if (currentSession.value) {
-    testStations.value.forEach((station) => {
-      currentSession.value?.stations.push(station);
-    });
-  }
+  // testStations.value.forEach((s) => {
+  //   sampleChildren.value.forEach((c) => {
+  //     s.addChild(c);
+  //   });
+  // });
+  // if (currentSession.value) {
+  //   testStations.value.forEach((station) => {
+  //     currentSession.value?.stations.push(station);
+  //   });
+  // }
 });
 
 function setPage(page: page) {
@@ -147,7 +150,7 @@ function scrollToAddStationCard(delay: number = 0) {
     class="relative flex min-h-screen w-full flex-col place-content-between pb-24"
   >
     <div
-      class="flex h-fit w-full flex-col place-content-start place-items-center gap-8 sm:pl-[72px]"
+      class="flex h-fit w-full flex-col place-content-start gap-8 sm:pl-[72px] md:place-items-center"
     >
       <header
         class="grid w-full grid-cols-3 place-content-center place-items-center border-b border-b-gray-400 bg-bean-white-400 p-2 py-4 text-center"
@@ -174,7 +177,7 @@ function scrollToAddStationCard(delay: number = 0) {
       </header>
       <section
         v-if="currentPage === page.home"
-        class="flex w-full place-items-center md:px-8"
+        class="flex w-full place-content-center place-items-center md:place-content-start md:px-8"
       >
         <div
           class="flex w-fit flex-wrap place-content-center gap-8 md:place-content-start"
@@ -188,6 +191,7 @@ function scrollToAddStationCard(delay: number = 0) {
             v-for="station in tmpStations"
             :key="station.id"
             :station="station"
+            :is-unstable="true"
           />
           <div
             class="relative flex w-60 flex-col rounded-2xl bg-bean-white-400 transition-all duration-150 ease-in-out md:h-60"
@@ -280,7 +284,7 @@ function scrollToAddStationCard(delay: number = 0) {
       </section>
     </div>
     <footer
-      class="sm:p fixed bottom-0 left-0 z-30 flex h-[72px] w-screen place-content-around place-items-center border-t border-t-gray-400 bg-bean-white-400 px-10 sm:h-screen sm:w-[72px] sm:flex-col sm:border-r sm:border-r-gray-400 sm:px-0 sm:py-10 md:place-content-start md:gap-16 md:pt-16 lg:gap-20 lg:pt-36"
+      class="sm:p fixed bottom-0 left-0 z-20 flex h-[72px] w-screen place-content-around place-items-center border-t border-t-gray-400 bg-bean-white-400 px-10 sm:h-screen sm:w-[72px] sm:flex-col sm:border-r sm:border-r-gray-400 sm:px-0 sm:py-10 md:place-content-start md:gap-16 md:pt-16 lg:pt-36"
     >
       <div
         :class="[currentPage === page.home ? 'bg-blue-600' : 'bg-black/10']"
