@@ -162,10 +162,10 @@ async function submitStations() {
             :station="station"
           />
           <div
-            class="relative flex w-60 flex-col rounded-2xl bg-bean-white-400 md:h-60"
+            class="relative flex w-60 flex-col rounded-2xl bg-bean-white-400 transition-all duration-150 ease-in-out md:h-60"
             :class="[
               isEditing
-                ? 'aspect-square'
+                ? 'h-60 w-60'
                 : 'h-[90px] place-content-center place-items-center md:w-[90px]',
             ]"
           >
