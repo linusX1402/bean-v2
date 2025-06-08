@@ -4,7 +4,7 @@ echo "... starting containers"
 
 echo "... starting frontend"
 cd frontend/compose || exit
-docker-compose --env-file ../.github.env up --detach
+docker-compose up --detach
 
 echo "++++ Starting Finished ++++"
 
