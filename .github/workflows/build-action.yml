@@ -44,9 +44,9 @@ jobs:
       run: echo "${{ secrets.CTS_GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
     - name: Tag the Docker image
-      run: docker tag bean-v2 ghcr.io/linusx1402/cts-frontend:latest
+      run: docker tag bean-v2 ghcr.io/linusx1402/bean-v2:latest
       working-directory: ./frontend
 
     - name: Push the Docker image
-      run: docker push ghcr.io/linusx1402/cts-frontend:latest
+      run: docker push ghcr.io/linusx1402/bean-v2:latest
       working-directory: ./frontend
