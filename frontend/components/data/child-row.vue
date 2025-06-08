@@ -10,6 +10,8 @@ const props = withDefaults(
   { isUnstable: false },
 );
 
+type workingState = 'working' | 'idle' | 'resting';
+
 const sessionIcon = ref<string>('');
 
 onMounted(() => {
@@ -29,6 +31,7 @@ onMounted(() => {
           {{ child.name }}
         </p>
       </div>
+      <div class="flex w-full place-content-center place-items-center"></div>
       <div
         class="col-start-3 flex h-full w-full place-content-end place-items-center pr-1"
       >
