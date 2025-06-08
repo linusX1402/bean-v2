@@ -1,0 +1,43 @@
+name: CTS Build Action
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{github.repository_owner}}/${{github.repository}}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+    - name: add execute flag to build.sh
+      working-directory: ./
+      run: chmod +x build.sh
+
+    - name: Build the Docker image
+      working-directory: ./
+      run: ./build.sh
+      ## Pushing to gitHub docker registry
+    - name: Log in to GitHub Container Registry
+      run: echo "${{ secrets.CTS_GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+    - name: Tag the Docker image
+      run: docker tag bean-v2 ghcr.io/linusx1402/cts-frontend:latest
+      working-directory: ./frontend
+
+    - name: Push the Docker image
+      run: docker push ghcr.io/linusx1402/cts-frontend:latest
+      working-directory: ./frontend

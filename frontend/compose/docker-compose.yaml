@@ -2,6 +2,6 @@ version: '3.8'
 
 services:
   bean-counter-app:
-    image: ghcr.io/linusx1402/bean-counter:latest
+    image: ghcr.io/linusx1402/bean-v2:latest
     ports:
       - "3000:3000"

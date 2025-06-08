@@ -1,7 +1,6 @@
 #! /usr/bin/env bash
 
 START_FLAG="--start"
-CURRENT_MODE='prod'
 
 echo "... building images"
 
@@ -24,7 +23,7 @@ echo "++++ Building Finished ++++"
 # Start Container if started with --start
 if [[ "$1" == "$START_FLAG" || "$2" == "$START_FLAG" ]]; then
 
-  if [  "$1" == "--dev" || "$2" == "--dev" ]; then
+  if [  "$1" == "--dev" ] || [ "$2" == "--dev" ]; then
           docker run bean-v2 -p 3000:3000
   fi
 
