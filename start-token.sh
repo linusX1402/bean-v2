@@ -22,13 +22,15 @@ if docker ps -a --format '{{.Names}}' | grep -q '^bean-v2$'; then
 fi
 
 # Run the container
-docker run --name bean-v2 -d -p 3000:3000 ghcr.io/linusx1402/bean-v2:latest
+docker run --pull always --name bean-v2 -d -p 3000:3000 ghcr.io/linusx1402/bean-v2:latest
 if [ $? -ne 0 ]; then
   echo "Error: Failed to start container"
-  docker logout
+#  docker logout
   exit 1
 fi
 
 # Logout from Docker registry
-docker logout
+#docker logout
+#!/bin/bash
+echo -e "\033[33mWARNING: run docker logout to remove locally stored credentials\033[0m"
 echo "Container started successfully"

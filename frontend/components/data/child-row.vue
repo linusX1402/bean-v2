@@ -26,8 +26,10 @@ onMounted(() => {
     <div
       class="grid w-full grid-cols-3 place-content-center place-items-center"
     >
-      <div class="flex h-full w-full place-content-center place-items-center">
-        <p>
+      <div
+        class="flex h-full w-full place-content-start place-items-center pl-1"
+      >
+        <p class="">
           {{ child.name }}
         </p>
       </div>

@@ -28,7 +28,7 @@ const options = ref<string[]>();
 const copied = ref<boolean>(false);
 
 onMounted(async () => {
-  const cookieSessionId = getCookie('BeanSession') || '';
+  const cookieSessionId = getCookie('bean_session') || '';
   if (cookieSessionId) {
     currentSession.value = await getSessionById(cookieSessionId);
   }

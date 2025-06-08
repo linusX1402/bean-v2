@@ -75,9 +75,12 @@ export default class SessionController {
   }
 
   public addChild(name: string, stationId: number, sessionId: string) {
-    const session = this._openSessions.get(sessionId);
+    const session =
+      this._openSessions.get(sessionId) ||
+      this._openSessions.forEach((s) => s.sessionIdEditor === sessionId);
+    console.log(this._openSessions);
     if (!session) {
-      throw new Error(`Session with name ${name} does not exist.`);
+      throw new Error(`Session with ID ${sessionId} does not exist.`);
     }
     return session.addChild(name, stationId);
   }

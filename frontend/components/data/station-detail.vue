@@ -16,7 +16,7 @@ const tempChildren = ref<Child[]>([]);
 const sessionId = ref<string | undefined>(undefined);
 
 onMounted(() => {
-  sessionId.value = getCookie('BeanSession') || undefined;
+  sessionId.value = getCookie('bean_session') || undefined;
 });
 
 async function toggleEdit() {
