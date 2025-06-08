@@ -78,7 +78,6 @@ export default class SessionController {
     const session =
       this._openSessions.get(sessionId) ||
       this._openSessions.forEach((s) => s.sessionIdEditor === sessionId);
-    console.log(this._openSessions);
     if (!session) {
       throw new Error(`Session with ID ${sessionId} does not exist.`);
     }

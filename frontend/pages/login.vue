@@ -32,7 +32,6 @@ onMounted(async () => {
   if (cookieSessionId) {
     currentSession.value = await getSessionById(cookieSessionId);
   }
-  console.log(currentSession.value ? 'found session' : 'No session found');
   if (currentSession.value) {
     forwardUser(cookieSessionId);
   }
@@ -85,7 +84,6 @@ async function submitCreate() {
       sessionNameError.value = false;
       currentSession.value = session as unknown as BeanSessionDTO;
       setCookie('bean_session', currentSession.value.sessionIdAdmin);
-      console.log('Session created successfully:', currentSession.value);
     } else {
       console.error('Failed to create session');
       return;
@@ -93,7 +91,7 @@ async function submitCreate() {
     currentView.value = loginViews.copy;
   } catch (e: any) {
     sessionNameError.value = true;
-    console.log('failed to open new Session');
+    console.error('failed to open new Session');
   }
 }
 

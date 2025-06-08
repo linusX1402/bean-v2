@@ -125,7 +125,6 @@ async function submitStations() {
           sessionId: sessionId.value,
         },
       });
-      console.log(res);
       currentSession.value?.stations.push(res as unknown as BeanStation);
     }
   } catch (error) {

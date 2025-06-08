@@ -41,9 +41,6 @@ function addChild() {
 
 async function submitChildren() {
   for (const child of tempChildren.value) {
-    console.log('Submitting child:', child.name);
-    console.log(sessionId.value);
-    console.log('Station ID:', props.station.id);
     let res = await $fetch('/api/session/addChild', {
       method: 'POST',
       body: {
