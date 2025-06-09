@@ -146,7 +146,7 @@ function scrollToAddStationCard(delay: number = 0) {
 
 <template>
   <main
-    class="relative flex min-h-screen w-full flex-col place-content-between pb-24"
+    class="relative flex min-h-screen w-full flex-col place-content-between overflow-x-hidden pb-24"
   >
     <div
       class="flex h-fit w-full flex-col place-content-start gap-8 sm:pl-[72px] md:place-items-center"
