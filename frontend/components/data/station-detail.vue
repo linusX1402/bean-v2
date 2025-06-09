@@ -3,6 +3,7 @@ import ChildRow from '~/components/data/child-row.vue';
 import Child from '../../../models/child';
 import type { BeanStation } from '../../../models/bean-station';
 import { removeCookie, getCookie, setCookie } from 'typescript-cookie';
+import { structuredClone } from 'structured-clone-es';
 
 const props = defineProps<{ station: BeanStation }>();
 const emit = defineEmits<{
@@ -40,16 +41,19 @@ function addChild() {
 }
 
 async function submitChildren() {
-  for (const child of tempChildren.value) {
-    let res = await $fetch('/api/session/addChild', {
-      method: 'POST',
-      body: {
-        name: child.name,
-        stationId: props.station.id,
-        sessionId: sessionId.value,
-      },
-    });
-    props.station.children.push((res as unknown as Child) || undefined);
+  while (tempChildren.value.length > 0) {
+    const child = tempChildren.value.shift();
+    if (child) {
+      let res = await $fetch('/api/session/addChild', {
+        method: 'POST',
+        body: {
+          name: child.name,
+          stationId: props.station.id,
+          sessionId: sessionId.value,
+        },
+      });
+      props.station.children.push((res as unknown as Child) || undefined);
+    }
   }
 }
 </script>

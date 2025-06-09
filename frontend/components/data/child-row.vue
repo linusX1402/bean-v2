@@ -33,11 +33,16 @@ onMounted(() => {
           {{ child.name }}
         </p>
       </div>
-      <div class="flex w-full place-content-center place-items-center"></div>
+      <div class="flex w-full place-content-center place-items-center">
+        <icon name="bean:play"></icon>
+      </div>
       <div
         class="col-start-3 flex h-full w-full place-content-end place-items-center pr-1"
       >
-        <p>{{ child.numberOfBeansToPayout + ' ' + sessionIcon }}</p>
+        <p>
+          {{ isUnstable ? '-' : child.numberOfBeansToPayout }}
+          {{ ' ' + sessionIcon }}
+        </p>
       </div>
     </div>
 
