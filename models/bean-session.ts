@@ -48,7 +48,7 @@ export default class BeanSession {
   }
 
   public addChild(name: string, stationId: number) {
-    const child = new Child(name);
+    const child = new Child(name, this.startingFunds);
     this._stations.forEach((key, value) => {
       if (value === stationId) {
         key.addChild(child);
