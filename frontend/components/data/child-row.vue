@@ -29,7 +29,7 @@ onMounted(() => {
       <div
         class="flex h-full w-full place-content-start place-items-center pl-1"
       >
-        <p class="">
+        <p class="text-p lg:text-lg-p">
           {{ child.name }}
         </p>
       </div>

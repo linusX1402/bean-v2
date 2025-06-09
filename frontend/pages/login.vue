@@ -3,6 +3,7 @@ import { iconList } from '../../types/types';
 import { removeCookie, getCookie, setCookie } from 'typescript-cookie';
 import type BeanSession from '../../models/bean-session';
 import type BeanSessionDTO from '../../models/bean-session-dto';
+import { getDynamicBaseURL } from '~/composables/dynamic-base-url';
 
 enum loginViews {
   join = 0,
@@ -10,7 +11,8 @@ enum loginViews {
   copy = 2,
 }
 
-let baseURL = useRuntimeConfig().public.baseURL;
+// let baseURL = useRuntimeConfig().public.baseURL;
+let baseURL = getDynamicBaseURL();
 
 const currentView = ref<loginViews>(loginViews.join);
 
@@ -28,6 +30,7 @@ const options = ref<string[]>();
 const copied = ref<boolean>(false);
 
 onMounted(async () => {
+  console.log('baseURL: ' + baseURL);
   const cookieSessionId = getCookie('bean_session') || '';
   if (cookieSessionId) {
     currentSession.value = await getSessionById(cookieSessionId);

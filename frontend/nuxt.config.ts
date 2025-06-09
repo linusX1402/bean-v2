@@ -44,9 +44,23 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       baseURL:
-        process.env.BUILD_MODE === 'prod'
-          ? process.env.API_BASE_URL
-          : 'http://localhost:3000',
+        process.env.BUILD_MODE === 'prod' ? process.env.API_BASE_URL : '',
     },
+    // : `http://${process.env.HOST || 'localhost'}:3000`,
+  },
+  app: {
+    head: {
+      meta: [
+        {
+          name: 'viewport',
+          content:
+            'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no',
+        },
+      ],
+    },
+  },
+  devServer: {
+    host: '0.0.0.0',
+    port: 3000,
   },
 });

@@ -85,7 +85,7 @@ async function submitChildren() {
     </header>
     <main>
       <div class="w-full px-8">
-        <ul class="w-full rounded-2xl bg-bean-white-400 px-2 py-1">
+        <ul class="w-full rounded-2xl bg-bean-white-400 px-2 pt-1 md:py-1">
           <li
             class="flex w-fit place-content-center place-items-center gap-2 px-2 py-2 font-semibold text-gray-400"
           >
