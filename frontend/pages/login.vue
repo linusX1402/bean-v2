@@ -12,7 +12,7 @@ enum loginViews {
 }
 
 // let baseURL = useRuntimeConfig().public.baseURL;
-let baseURL = getDynamicBaseURL();
+let baseUrl = getDynamicBaseURL();
 
 const currentView = ref<loginViews>(loginViews.join);
 
@@ -30,7 +30,7 @@ const options = ref<string[]>();
 const copied = ref<boolean>(false);
 
 onMounted(async () => {
-  console.log('baseURL: ' + baseURL);
+  console.log('baseURL: ' + baseUrl);
   const cookieSessionId = getCookie('bean_session') || '';
   if (cookieSessionId) {
     currentSession.value = await getSessionById(cookieSessionId);
@@ -46,7 +46,7 @@ onMounted(async () => {
 const router = useRouter();
 
 function forwardUser(uuid: string) {
-  const redirectPath = baseURL + '/session/' + uuid;
+  const redirectPath = baseUrl + '/session/' + uuid;
   window.location.href = redirectPath;
 }
 
@@ -76,7 +76,7 @@ function getHighestPermissionSessionId() {
 
 async function submitCreate() {
   try {
-    const session = await $fetch(`${baseURL}/api/session/open`, {
+    const session = await $fetch(`${baseUrl}/api/session/open`, {
       method: 'POST',
       body: {
         sessionName: sessionName.value,
@@ -104,7 +104,7 @@ async function changeView(updatedView: loginViews, resetSession = false) {
   currentView.value = updatedView;
   if (resetSession && currentSession.value) {
     removeCookie('bean_session');
-    const res = await $fetch(baseURL + '/api/session/close', {
+    const res = await $fetch(baseUrl + '/api/session/close', {
       method: 'DELETE',
       headers: {
         adminSessionId: currentSession.value.sessionIdAdmin,
@@ -124,7 +124,7 @@ function getCurrentLink(permission?: string) {
     sessionIdByPerm = currentSession.value?.sessionIdUser;
   }
 
-  return baseURL + '/session/' + sessionIdByPerm;
+  return baseUrl + '/session/' + sessionIdByPerm;
 }
 
 function copyToClipboard() {

@@ -105,7 +105,7 @@ async function toggleEdit(value?: boolean) {
   if (isEditing.value) {
     nextTick(() => {
       stationRef.value?.focus();
-      scrollToAddStationCard(150);
+      scrollToAddStationCard(250);
     });
   } else {
     await submitStations();
@@ -193,7 +193,7 @@ function scrollToAddStationCard(delay: number = 0) {
             :is-unstable="true"
           />
           <div
-            class="relative flex w-60 flex-col rounded-2xl bg-bean-white-400 transition-all duration-150 ease-in-out md:h-60"
+            class="relative flex w-60 flex-col rounded-2xl bg-bean-white-400 transition-all duration-[250ms] ease-in-out md:h-60"
             :class="[
               isEditing
                 ? 'h-60 w-60'
@@ -331,8 +331,8 @@ function scrollToAddStationCard(delay: number = 0) {
 .edit-enter-active,
 .edit-leave-active {
   transition:
-    width 0.15s ease-in-out,
-    opacity 0.15s ease-in-out;
+    width 0.25s ease-in-out,
+    opacity 0.25s ease-in-out;
 }
 
 .edit-enter-from {
