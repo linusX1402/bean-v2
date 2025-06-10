@@ -16,10 +16,12 @@
     "typescript-cookie": "^1.0.6",
     "uuid": "^11.1.0",
     "vue": "latest",
-    "vue-router": "latest"
+    "vue-router": "latest",
+    "ws": "^8.18.2"
   },
   "devDependencies": {
     "@nuxt/icon": "^1.10.3",
+    "@types/ws": "^8.18.1",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.5.1",
     "prettier": "^3.4.2",
