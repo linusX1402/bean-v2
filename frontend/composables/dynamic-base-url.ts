@@ -1,9 +1,10 @@
-export const getDynamicBaseURL = () => {
+export const getDynamicBaseURL = (
+  protocol: string = window.location.protocol,
+) => {
   const config = useRuntimeConfig();
   let baseURL = config.public.baseURL;
 
   if (!baseURL) {
-    const protocol = window.location.protocol;
     const host = window.location.host;
     baseURL = `${protocol}//${host}`;
   }
