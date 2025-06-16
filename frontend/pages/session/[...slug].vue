@@ -25,8 +25,8 @@ const addStationRef = ref<HTMLDivElement | null>(null);
 enum page {
   loading = 0,
   home = 1,
-  settings = 2,
-  share = 3,
+  share = 2,
+  settings = 3,
 }
 
 const currentPage = ref<page>(page.loading);
@@ -81,6 +81,7 @@ onMounted(async () => {
 
 function setPage(page: page) {
   currentPage.value = page;
+  console.log('page set to: ' + page);
   sessionStorage.setItem('currentPage', page.toString());
 }
 
@@ -278,8 +279,8 @@ function logout() {
     </div>
     <home-footer
       :current-page="currentPage"
-      :set-page="setPage"
       @update:logout="logout"
+      @update:set-page="setPage"
     />
   </main>
 </template>

@@ -1,19 +1,22 @@
 <script setup lang="ts">
 const props = defineProps<{
   currentPage: page;
-  setPage: (page: page) => void;
 }>();
 
 enum page {
   loading = 0,
   home = 1,
-  settings = 2,
-  share = 3,
+  share = 2,
+  settings = 3,
 }
-const emit = defineEmits(['update:logout']);
+const emit = defineEmits(['update:logout', 'update:set-page']);
 
 function logout() {
   emit('update:logout', true);
+}
+
+function setPage(page: page) {
+  emit('update:set-page', page);
 }
 </script>
 
