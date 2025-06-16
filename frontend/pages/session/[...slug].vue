@@ -32,8 +32,6 @@ enum page {
 const currentPage = ref<page>(page.loading);
 
 onMounted(async () => {
-  console.log(JSON.parse(getCookie('bean_sessions') || '[]'));
-  console.log(getCookie('forward'));
   const slug = route.params.slug as string;
   if (slug) {
     sessionId.value = slug[0];
@@ -45,43 +43,14 @@ onMounted(async () => {
       cookieService().addSession(sessionId.value);
       setCookie('bean_icon', currentSession.value.icon);
     }
-    currentPage.value = localStorage.getItem('currentPage')
-      ? (parseInt(localStorage.getItem('currentPage') || '') as page)
+    currentPage.value = sessionStorage.getItem('currentPage')
+      ? (parseInt(sessionStorage.getItem('currentPage') || '') as page)
       : page.home;
   }
-  // ToDo: remove production code
-  // console.log(currentSession.value);
-  // currentPage.value =
-  //   parseInt(sessionStorage.getItem('currentPage') || '') || page.home;
-  // const testStations = ref<BeanStation[]>([
-  //   new BeanStation('#cb472b', 'Massage Station'),
-  //   new BeanStation('#27b21c', 'Coffee Station'),
-  //   new BeanStation('#284aef', 'Snacks'),
-  //   new BeanStation('#9B59B6', 'Casino'),
-  // ]);
-  //
-  // const sampleChildren = ref<Child[]>([]);
-  // sampleChildren.value.push(new Child('Tim'));
-  // sampleChildren.value.push(new Child('Maxi'));
-  // sampleChildren.value.push(new Child('Roif'));
-  // sampleChildren.value.push(new Child('July'));
-  // sampleChildren.value.push(new Child('Paula'));
-
-  // testStations.value.forEach((s) => {
-  //   sampleChildren.value.forEach((c) => {
-  //     s.addChild(c);
-  //   });
-  // });
-  // if (currentSession.value) {
-  //   testStations.value.forEach((station) => {
-  //     currentSession.value?.stations.push(station);
-  //   });
-  // }
 });
 
 function setPage(page: page) {
   currentPage.value = page;
-  console.log('page set to: ' + page);
   sessionStorage.setItem('currentPage', page.toString());
 }
 
@@ -163,12 +132,14 @@ function logout() {
     <div
       class="flex h-fit w-full flex-col place-content-start gap-8 sm:pl-[72px] md:place-items-center"
     >
+      <!-- Header -->
       <home-header
         :is-editing="isEditing"
         @update:logout="logout"
         @update:add-station="addStation"
         @update:toggle-edit="toggleEdit"
-      ></home-header>
+      />
+
       <section
         v-if="currentPage === page.home"
         class="flex w-full place-content-center place-items-center md:place-content-start md:px-8"
@@ -277,6 +248,8 @@ function logout() {
         </div>
       </section>
     </div>
+
+    <!-- Footer -->
     <home-footer
       :current-page="currentPage"
       @update:logout="logout"

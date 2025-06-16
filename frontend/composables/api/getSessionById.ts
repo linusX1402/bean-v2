@@ -5,7 +5,6 @@ export async function getSessionById(
   sessionId: string,
 ): Promise<BeanSessionDTO | undefined> {
   const baseUrl = getDynamicBaseURL();
-  console.log('baseUrl: ' + baseUrl);
   try {
     const session = await $fetch(`${baseUrl}/api/session/get-by-uuid`, {
       method: 'GET',

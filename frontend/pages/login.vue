@@ -106,8 +106,6 @@ async function submitCreate() {
 }
 
 async function changeView(updatedView: loginViews, resetSession = false) {
-  console.log(JSON.parse(getCookie('bean_sessions') || '[]'));
-  console.log(getCookie('forward'));
   sessionInputError.value = false;
   sessionNameError.value = false;
   currentView.value = updatedView;

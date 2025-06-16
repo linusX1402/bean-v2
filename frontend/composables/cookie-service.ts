@@ -23,7 +23,6 @@ export default function () {
       return false;
     });
 
-    console.log(sessionExists);
     if (sessionExists) {
       return;
     }
