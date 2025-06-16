@@ -18,6 +18,7 @@ const workingState = ref<workingState>('idle');
 
 type workingState = 'working' | 'idle' | 'resting';
 type iconList = 'bean:play' | 'bean:stop';
+0;
 
 const sessionIcon = ref<string>('');
 
