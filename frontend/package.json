@@ -16,8 +16,7 @@
     "typescript-cookie": "^1.0.6",
     "uuid": "^11.1.0",
     "vue": "latest",
-    "vue-router": "latest",
-    "ws": "^8.18.2"
+    "vue-router": "latest"
   },
   "devDependencies": {
     "@nuxt/icon": "^1.10.3",

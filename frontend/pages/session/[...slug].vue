@@ -1,8 +1,9 @@
 <script lang="ts" setup>
 import StationCard from '~/components/data/station-card.vue';
 import { BeanStation } from '../../../models/bean-station';
-import { setCookie } from 'typescript-cookie';
+import { getCookie, setCookie } from 'typescript-cookie';
 import type BeanSessionDTO from '../../../models/bean-session-dto';
+import { cookieService } from '#imports';
 
 const route = useRoute();
 const sessionId = ref<string | undefined>(undefined);
@@ -29,6 +30,8 @@ enum page {
 const currentPage = ref<page>(page.loading);
 
 onMounted(async () => {
+  console.log(JSON.parse(getCookie('bean_sessions') || '[]'));
+  console.log(getCookie('forward'));
   const slug = route.params.slug as string;
   if (slug) {
     sessionId.value = slug[0];
@@ -37,7 +40,7 @@ onMounted(async () => {
       sessionStorage.clear();
       window.location.href = '/';
     } else {
-      setCookie('bean_session', sessionId.value);
+      cookieService().addSession(sessionId.value);
       setCookie('bean_icon', currentSession.value.icon);
     }
     currentPage.value = localStorage.getItem('currentPage')
@@ -142,6 +145,12 @@ function scrollToAddStationCard(delay: number = 0) {
     }
   }, delay);
 }
+
+function logout() {
+  sessionStorage.clear();
+  sessionStorage.setItem('forward', 'false');
+  window.location.href = '/';
+}
 </script>
 
 <template>
@@ -154,6 +163,16 @@ function scrollToAddStationCard(delay: number = 0) {
       <header
         class="grid w-full grid-cols-3 place-content-center place-items-center border-b border-b-gray-400 bg-bean-white-400 p-2 py-4 text-center"
       >
+        <div
+          class="col-start-1 row-start-1 flex h-full min-h-7 w-full place-content-start place-items-center pr-2 md:hidden"
+        >
+          <button
+            class="flex cursor-pointer place-content-center place-items-center text-blue-500"
+            @click="logout"
+          >
+            <LazyIcon class="size-7 -scale-x-100" name="bean:exit" />
+          </button>
+        </div>
         <div
           class="col-start-3 flex h-full min-h-7 w-full place-content-end place-items-center pr-2 md:hidden"
         >

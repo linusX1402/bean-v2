@@ -1,9 +1,10 @@
 <script lang="ts" setup>
 import { iconList } from '../../types/types';
-import { removeCookie, getCookie, setCookie } from 'typescript-cookie';
-import type BeanSession from '../../models/bean-session';
+import { getCookie, removeCookie, setCookie } from 'typescript-cookie';
 import type BeanSessionDTO from '../../models/bean-session-dto';
 import { getDynamicBaseURL } from '~/composables/dynamic-base-url';
+import LoginCopy from '~/components/data/login-copy.vue';
+import cookieService from '~/composables/cookie-service';
 
 enum loginViews {
   join = 0,
@@ -11,13 +12,10 @@ enum loginViews {
   copy = 2,
 }
 
-// let baseURL = useRuntimeConfig().public.baseURL;
 let baseUrl = getDynamicBaseURL();
 
 const currentView = ref<loginViews>(loginViews.join);
 
-const permissions = ref<string[]>(['Admin', 'Edit', 'View']);
-const selectedPermission = ref<string>('Admin');
 const currentSession = ref<BeanSessionDTO | undefined>();
 
 const sessionInput = ref<string>('');
@@ -25,38 +23,43 @@ const sessionInputError = ref<boolean>(false);
 
 const sessionName = ref<string>('');
 const sessionNameError = ref<boolean>(false);
+const doForwardUser = ref<boolean>(cookieService().getForwardCookie());
 const icon = ref<string>('🫘');
-const options = ref<string[]>();
-const copied = ref<boolean>(false);
 
 onMounted(async () => {
-  console.log('baseURL: ' + baseUrl);
-  const cookieSessionId = getCookie('bean_session') || '';
+  const cookieSessionId = cookieService().getLastSession();
+  const doForwardCookie = cookieService().getForwardCookie();
+  const doForwardSession = sessionStorage.getItem('forward') || 'true';
   if (cookieSessionId) {
     currentSession.value = await getSessionById(cookieSessionId);
   }
-  if (currentSession.value) {
-    forwardUser(cookieSessionId);
+
+  if (doForwardSession === 'true' && doForwardCookie && currentSession.value) {
+    forwardUserToUrl(cookieSessionId);
   }
   if (cookieSessionId && !currentSession.value) {
-    removeCookie('bean_session');
+    removeCookie('bean_sessions');
   }
 });
 
-const router = useRouter();
-
-function forwardUser(uuid: string) {
-  const redirectPath = baseUrl + '/session/' + uuid;
-  window.location.href = redirectPath;
+function forwardUserToUrl(uuid: string) {
+  window.location.href = baseUrl + '/session/' + uuid;
 }
 
 async function submitLogin() {
   currentSession.value = await getSessionById(sessionInput.value);
   if (currentSession.value) {
     sessionInputError.value = false;
-    setCookie('bean_session', getHighestPermissionSessionId());
+    const highestPermissionSessionId = getHighestPermissionSessionId();
+    if (highestPermissionSessionId) {
+      cookieService().addSession(
+        highestPermissionSessionId,
+        doForwardUser.value,
+      );
+      sessionStorage.setItem('forward', doForwardUser.value.toString());
+    }
     setCookie('bean_icon', currentSession.value.icon);
-    forwardUser(getHighestPermissionSessionId() || '');
+    forwardUserToUrl(getHighestPermissionSessionId() || '');
   } else {
     sessionInputError.value = true;
     console.error('No session with this id was found');
@@ -86,7 +89,11 @@ async function submitCreate() {
     if (session) {
       sessionNameError.value = false;
       currentSession.value = session as unknown as BeanSessionDTO;
-      setCookie('bean_session', currentSession.value.sessionIdAdmin);
+      cookieService().addSession(
+        currentSession.value.sessionIdAdmin,
+        doForwardUser.value,
+      );
+      sessionStorage.setItem('forward', doForwardUser.value.toString());
     } else {
       console.error('Failed to create session');
       return;
@@ -99,45 +106,20 @@ async function submitCreate() {
 }
 
 async function changeView(updatedView: loginViews, resetSession = false) {
+  console.log(JSON.parse(getCookie('bean_sessions') || '[]'));
+  console.log(getCookie('forward'));
   sessionInputError.value = false;
   sessionNameError.value = false;
   currentView.value = updatedView;
   if (resetSession && currentSession.value) {
-    removeCookie('bean_session');
     const res = await $fetch(baseUrl + '/api/session/close', {
       method: 'DELETE',
       headers: {
         adminSessionId: currentSession.value.sessionIdAdmin,
       },
     });
+    removeCookie('bean_sessions');
   }
-}
-
-function getCurrentLink(permission?: string) {
-  const perm = permission ? permission : selectedPermission.value;
-  let sessionIdByPerm: string | undefined = '';
-  if (perm === 'Admin') {
-    sessionIdByPerm = currentSession.value?.sessionIdAdmin;
-  } else if (perm === 'Edit') {
-    sessionIdByPerm = currentSession.value?.sessionIdEditor;
-  } else if (perm === 'View') {
-    sessionIdByPerm = currentSession.value?.sessionIdUser;
-  }
-
-  return baseUrl + '/session/' + sessionIdByPerm;
-}
-
-function copyToClipboard() {
-  const link = getCurrentLink();
-  navigator.clipboard
-    .writeText(link)
-    .then(() => {
-      copied.value = true;
-      setTimeout(() => (copied.value = false), 2000);
-    })
-    .catch((err) => {
-      console.error('Failed to copy link:', err);
-    });
 }
 </script>
 
@@ -171,6 +153,12 @@ function copyToClipboard() {
                 placeholder="Tim's game"
               />
             </div>
+            <div
+              class="flex w-full place-content-start place-items-center gap-2"
+            >
+              <label>Stay signed in</label>
+              <input class="size-4" type="checkbox" v-model="doForwardUser" />
+            </div>
           </div>
           <div
             class="grid w-full grid-cols-2 place-content-center place-items-center gap-4"
@@ -194,30 +182,40 @@ function copyToClipboard() {
             class="flex w-full flex-col place-content-center place-items-center gap-8"
           >
             <h4>Create a Session</h4>
-            <div class="flex w-full flex-col gap-2">
-              <div class="w-full">
-                <label class="w-full">Session Name:</label>
-                <label v-if="sessionNameError" class="text-red-500">
-                  Invalid Session name!
-                </label>
-                <form-text
-                  :max-length="50"
-                  v-model="sessionName"
-                  :is-required="true"
-                  name="sessionId"
-                  placeholder="Session Name"
-                />
+            <div class="flex w-full flex-col gap-3">
+              <div class="flex w-full flex-col gap-2">
+                <div class="w-full">
+                  <label class="w-full">Session Name:</label>
+                  <label v-if="sessionNameError" class="text-red-500">
+                    Invalid Session name!
+                  </label>
+                  <form-text
+                    :max-length="50"
+                    v-model="sessionName"
+                    :is-required="true"
+                    name="sessionId"
+                    placeholder="Session Name"
+                  />
+                </div>
               </div>
-            </div>
-            <div>
-              <label>icon:</label>
-              <div>
-                <select
-                  v-model="icon"
-                  class="h-fit w-full rounded-md border border-solid border-black/50 p-1"
-                >
-                  <option v-for="i in iconList" :value="i">{{ i }}</option>
-                </select>
+              <div
+                class="flex w-full place-content-start place-items-center gap-2"
+              >
+                <label>icon:</label>
+                <div>
+                  <select
+                    v-model="icon"
+                    class="h-fit w-full rounded-md border border-solid border-black/50 p-1"
+                  >
+                    <option v-for="i in iconList" :value="i">{{ i }}</option>
+                  </select>
+                </div>
+              </div>
+              <div
+                class="flex w-full place-content-start place-items-center gap-2"
+              >
+                <label>Stay signed in</label>
+                <input class="size-4" type="checkbox" v-model="doForwardUser" />
               </div>
             </div>
           </div>
@@ -233,53 +231,11 @@ function copyToClipboard() {
             <ui-button :style="'primary'" :type="'submit'">create</ui-button>
           </div>
         </form>
-        <section
+        <login-copy
           v-if="currentView === loginViews.copy"
-          class="flex h-full flex-col place-content-between place-items-center gap-8"
-        >
-          <h4>Copy to share</h4>
-          <div>
-            <label>permissions:</label>
-            <div>
-              <select
-                v-model="selectedPermission"
-                class="h-fit w-full rounded-md border border-solid border-gray-400 p-1"
-              >
-                <option v-for="i in permissions" :value="i">{{ i }}</option>
-              </select>
-            </div>
-          </div>
-          <div class="flex w-full gap-8">
-            <p class="w-full select-none overflow-x-auto text-nowrap">
-              {{ getCurrentLink() }}
-            </p>
-            <button type="button">
-              <LazyIcon
-                :name="copied ? 'bean:check' : 'bean:copy'"
-                @click="copyToClipboard"
-                class="size-6"
-              />
-            </button>
-          </div>
-          <div
-            class="grid w-full grid-cols-2 place-content-center place-items-center gap-4"
-          >
-            <ui-button
-              @click="changeView(loginViews.create, true)"
-              :style="'secondary'"
-              :type="'button'"
-              >back</ui-button
-            >
-            <a
-              class="w-full"
-              @click="forwardUser(currentSession?.sessionIdAdmin || '')"
-            >
-              <ui-button :style="'primary'" :type="'button'"
-                >continue</ui-button
-              >
-            </a>
-          </div>
-        </section>
+          @update:back="changeView(loginViews.create, true)"
+          :current-session="currentSession"
+        />
       </div>
     </div>
   </main>
