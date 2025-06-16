@@ -5,6 +5,7 @@ import { getCookie, setCookie } from 'typescript-cookie';
 import type BeanSessionDTO from '../../../models/bean-session-dto';
 import { cookieService } from '#imports';
 import HomeFooter from '~/components/ui/home-footer.vue';
+import HomeHeader from '~/components/ui/home-header.vue';
 
 const route = useRoute();
 const sessionId = ref<string | undefined>(undefined);
@@ -161,39 +162,12 @@ function logout() {
     <div
       class="flex h-fit w-full flex-col place-content-start gap-8 sm:pl-[72px] md:place-items-center"
     >
-      <header
-        class="grid w-full grid-cols-3 place-content-center place-items-center border-b border-b-gray-400 bg-bean-white-400 p-2 py-4 text-center"
-      >
-        <div
-          class="col-start-1 row-start-1 flex h-full min-h-7 w-full place-content-start place-items-center pr-2 md:hidden"
-        >
-          <button
-            class="flex cursor-pointer place-content-center place-items-center text-blue-500"
-            @click="logout"
-          >
-            <LazyIcon class="size-7 -scale-x-100" name="bean:exit" />
-          </button>
-        </div>
-        <div
-          class="col-start-3 flex h-full min-h-7 w-full place-content-end place-items-center pr-2 md:hidden"
-        >
-          <button
-            class="flex cursor-pointer place-content-center place-items-center text-blue-500"
-            @click="toggleEdit()"
-            v-if="!isEditing"
-          >
-            <LazyIcon class="size-7" name="bean:add-blue" />
-          </button>
-          <button
-            class="flex cursor-pointer place-content-center place-items-center text-blue-500"
-            @click="addStation"
-            v-else
-          >
-            <p class="text-p text-blue-500">submit</p>
-          </button>
-        </div>
-        <h2 class="col-span-3 text-nowrap">Bean-Counter 🫘</h2>
-      </header>
+      <home-header
+        :is-editing="isEditing"
+        @update:logout="logout"
+        @update:add-station="addStation"
+        @update:toggle-edit="toggleEdit"
+      ></home-header>
       <section
         v-if="currentPage === page.home"
         class="flex w-full place-content-center place-items-center md:place-content-start md:px-8"
@@ -302,7 +276,11 @@ function logout() {
         </div>
       </section>
     </div>
-    <home-footer :current-page="currentPage" :set-page="setPage" />
+    <home-footer
+      :current-page="currentPage"
+      :set-page="setPage"
+      @update:logout="logout"
+    />
   </main>
 </template>
 

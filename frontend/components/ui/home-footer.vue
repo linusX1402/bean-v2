@@ -4,13 +4,13 @@ const props = defineProps<{
   setPage: (page: page) => void;
 }>();
 
-const emit = defineEmits(['update:logout']);
 enum page {
   loading = 0,
   home = 1,
   settings = 2,
   share = 3,
 }
+const emit = defineEmits(['update:logout']);
 
 function logout() {
   emit('update:logout', true);
