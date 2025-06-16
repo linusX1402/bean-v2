@@ -2,8 +2,7 @@
 import ChildRow from '~/components/data/child-row.vue';
 import Child from '../../../models/child';
 import type { BeanStation } from '../../../models/bean-station';
-import { removeCookie, getCookie, setCookie } from 'typescript-cookie';
-import { structuredClone } from 'structured-clone-es';
+import cookieService from '~/composables/cookie-service';
 
 const props = defineProps<{ station: BeanStation }>();
 const emit = defineEmits<{
@@ -20,7 +19,7 @@ const currentOpenMenu = ref<headerMenus>('start');
 type headerMenus = 'reset' | 'start' | 'stop';
 
 onMounted(() => {
-  sessionId.value = getCookie('bean_sessions') || undefined;
+  sessionId.value = cookieService().getLastSession();
 });
 
 async function toggleEdit() {
