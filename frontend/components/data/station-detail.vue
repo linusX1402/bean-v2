@@ -19,7 +19,7 @@ const currentOpenMenu = ref<headerMenus>('start');
 type headerMenus = 'reset' | 'start' | 'stop';
 
 onMounted(() => {
-  sessionId.value = cookieService().getLastSession();
+  sessionId.value = cookieService().getCurrentSession();
 });
 
 async function toggleEdit() {

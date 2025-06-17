@@ -28,26 +28,18 @@ export default class SessionController {
     return this._openSessions;
   }
 
-  getSessionById(sessionId: string) {
+  private getSessionById(sessionId: string) {
+    return [...this._openSessions.entries()].find(([, v]) =>
+      v.containsSessionId(sessionId),
+    )?.[1];
+  }
+
+  getSessionDtoById(sessionId: string) {
     const session = [...this._openSessions.entries()].find(([, v]) =>
       v.containsSessionId(sessionId),
     )?.[1];
     if (session) {
-      return new BeanSessionDTO(
-        session.name || '',
-        session.icon || '',
-        sessionId === session?.sessionIdAdmin ? sessionId : '',
-        sessionId === session?.sessionIdEditor ||
-        sessionId ||
-        sessionId === session?.sessionIdAdmin
-          ? session.sessionIdUser
-          : '',
-        session!.sessionIdUser,
-        session.secondsPerTick,
-        session.beanPerTick,
-        session.startingFunds,
-        Array.from(session.stations.values()),
-      );
+      return this.toDTO(session);
     }
   }
 
@@ -56,17 +48,7 @@ export default class SessionController {
       ([, v]) => v.name === name,
     )?.[1];
     if (session) {
-      return new BeanSessionDTO(
-        session.name,
-        session.icon,
-        '',
-        '',
-        session.sessionIdUser,
-        session.secondsPerTick,
-        session.beanPerTick,
-        session.startingFunds,
-        Array.from(session.stations.values()),
-      );
+      return this.toDTO(session);
     }
   }
 
@@ -92,5 +74,27 @@ export default class SessionController {
       throw new Error(`Session not found.`);
     }
     return session.addStation(stationName, hexColor);
+  }
+
+  toDTO(session: BeanSession): BeanSessionDTO {
+    return new BeanSessionDTO(
+      session.name,
+      session.icon,
+      session.sessionIdAdmin,
+      session.sessionIdEditor,
+      session.sessionIdUser,
+      session.secondsPerTick,
+      session.beanPerTick,
+      session.startingFunds,
+      Array.from(session.stations.values()),
+    );
+  }
+
+  getPermissionOfId(uuid: string) {
+    const session = this.getSessionById(uuid);
+    if (!session) {
+      throw new Error(`Session with ID ${uuid} does not exist.`);
+    }
+    return session.getPermissionOfId(uuid);
   }
 }

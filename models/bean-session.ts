@@ -107,4 +107,16 @@ export default class BeanSession {
       return this.sessionIdUser;
     }
   }
+
+  public getPermissionOfId(uuid: string): string {
+    if (this.sessionIdAdmin === uuid) {
+      return "admin";
+    } else if (this.sessionIdEditor === uuid) {
+      return "edit";
+    } else if (this.sessionIdUser === uuid) {
+      return "view";
+    } else {
+      throw new Error(`Session with ID ${uuid} does not exist.`);
+    }
+  }
 }

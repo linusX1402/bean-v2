@@ -9,7 +9,7 @@ export function openNewSession(name: string, iconId: string) {
 }
 export function getSessionById(sessionId: string) {
   console.log(`open session: (${sessionController.openSessions.size}):`);
-  return sessionController.getSessionById(sessionId);
+  return sessionController.getSessionDtoById(sessionId);
 }
 
 export function getSessionByName(name: string) {
@@ -37,4 +37,8 @@ export function addStation(
   stationId: string,
 ) {
   return sessionController.addStation(stationName, hexColor, stationId);
+}
+
+export function gtePermissionOfId(uuid: string) {
+  return sessionController.getPermissionOfId(uuid);
 }

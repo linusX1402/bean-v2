@@ -27,7 +27,7 @@ const doForwardUser = ref<boolean>(cookieService().getForwardCookie());
 const icon = ref<string>('🫘');
 
 onMounted(async () => {
-  const cookieSessionId = cookieService().getLastSession();
+  const cookieSessionId = cookieService().getCurrentSession();
   const doForwardCookie = cookieService().getForwardCookie();
   const doForwardSession = sessionStorage.getItem('forward') || 'true';
   if (cookieSessionId) {

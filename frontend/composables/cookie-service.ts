@@ -1,11 +1,12 @@
 import { getCookie, setCookie } from 'typescript-cookie';
+import { getSessionById } from '~/composables/api/getSessionById';
 
 export default function () {
   function getForwardCookie() {
     return /true/.test(getCookie('forward') || 'false');
   }
 
-  function getLastSession() {
+  function getCurrentSession() {
     return JSON.parse(getCookie('bean_sessions') || '[]')[0] || '';
   }
 
@@ -33,9 +34,16 @@ export default function () {
       setCookie('forward', forward);
     }
   }
+
+  async function getPermission() {
+    const currentId = getCurrentSession();
+    const currentSession = getSessionById(currentId);
+  }
+
   return {
-    getLastSession,
+    getCurrentSession,
     getForwardCookie,
     addSession,
+    getPermission,
   };
 }
