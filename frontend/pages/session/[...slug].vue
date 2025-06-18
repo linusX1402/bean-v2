@@ -6,6 +6,7 @@ import type BeanSessionDTO from '~/models/bean-session-dto';
 import { cookieService } from '#imports';
 import HomeFooter from '~/components/ui/home-footer.vue';
 import HomeHeader from '~/components/ui/home-header.vue';
+import WebsocketTest from '~/components/utility/websocket-test.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -191,10 +192,9 @@ function logout() {
         @update:add-station="addStation"
         @update:toggle-edit="toggleEdit"
       />
-
       <section
         v-if="currentPage === page.home"
-        class="flex w-full place-content-center place-items-center md:place-content-start md:px-8"
+        class="flex w-full place-content-center place-items-center md:place-content-start"
       >
         <div
           class="flex w-fit flex-wrap place-content-center gap-8 md:place-content-start"
@@ -296,10 +296,11 @@ function logout() {
                 </form>
               </div>
             </transition>
-            <div ref="addStationRef"></div>
+            <div ref="addStationRef" />
           </div>
         </div>
       </section>
+      <websocket-test></websocket-test>
     </div>
 
     <!-- Footer -->

@@ -44,9 +44,9 @@ function toggleDetail() {
     } else {
       document.body.style.overflow = 'auto';
     }
-    isDetailOpen.value
-      ? emit('update:open-detail', props.station.name)
-      : emit('update:close-detail', props.station.name);
+    // isDetailOpen.value
+    //   ? emit('update:open-detail', props.station.name)
+    //   : emit('update:close-detail', props.station.name);
   }
 }
 </script>
@@ -72,10 +72,10 @@ function toggleDetail() {
   </div>
   <transition name="detail" mode="in-out">
     <station-detail
-      @close-detail="toggleDetail"
       :station="station"
       class="fixed left-0 top-0 z-30 h-screen w-screen overflow-y-auto"
       v-if="isDetailOpen"
+      @update:close-detail="toggleDetail"
     />
   </transition>
 </template>

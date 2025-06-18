@@ -48,7 +48,7 @@ function toggleIcon() {
       <div
         class="flex h-full w-full place-content-start place-items-center pl-1"
       >
-        <p class="text-p lg:text-lg-p">
+        <p>
           {{ child.name }}
         </p>
       </div>
