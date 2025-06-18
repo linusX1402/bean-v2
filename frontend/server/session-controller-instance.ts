@@ -1,5 +1,5 @@
 import SessionController from './session-controller';
-import { BeanStation } from '../../models/bean-station';
+import { BeanStation } from '~/models/bean-station';
 
 const sessionController = new SessionController();
 export default sessionController;

@@ -1,8 +1,8 @@
 <script lang="ts" setup>
 import StationCard from '~/components/data/station-card.vue';
-import { BeanStation } from '../../../models/bean-station';
+import { BeanStation } from '~/models/bean-station';
 import { getCookie, setCookie } from 'typescript-cookie';
-import type BeanSessionDTO from '../../../models/bean-session-dto';
+import type BeanSessionDTO from '~/models/bean-session-dto';
 import { cookieService } from '#imports';
 import HomeFooter from '~/components/ui/home-footer.vue';
 import HomeHeader from '~/components/ui/home-header.vue';

@@ -1,8 +1,8 @@
-import BeanSession from '../../models/bean-session';
-import { BeanStation } from '../../models/bean-station';
+import BeanSession from '~/models/bean-session';
+import { BeanStation } from '~/models/bean-station';
 
 import { v4 as uuid4 } from 'uuid';
-import BeanSessionDTO from '../../models/bean-session-dto';
+import BeanSessionDTO from '~/models/bean-session-dto';
 
 export default class SessionController {
   private _openSessions = new Map<string, BeanSession>();

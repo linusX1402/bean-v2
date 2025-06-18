@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type Child from '../../../models/child';
+import type Child from '~/models/child';
 import { getCookie } from 'typescript-cookie';
-import { iconList } from '../../../types/types';
+import { iconList } from '~/types/types';
 
 const props = withDefaults(
   defineProps<{

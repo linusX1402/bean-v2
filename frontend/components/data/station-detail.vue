@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import ChildRow from '~/components/data/child-row.vue';
-import Child from '../../../models/child';
-import type { BeanStation } from '../../../models/bean-station';
+import Child from '~/models/child';
+import type { BeanStation } from '~/models/bean-station';
 import cookieService from '~/composables/cookie-service';
 
 const props = defineProps<{ station: BeanStation }>();
