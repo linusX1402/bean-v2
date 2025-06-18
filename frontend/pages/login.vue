@@ -3,8 +3,9 @@ import { iconList } from '~/types/types';
 import { getCookie, removeCookie, setCookie } from 'typescript-cookie';
 import type BeanSessionDTO from '~/models/bean-session-dto';
 import { getDynamicBaseURL } from '~/composables/dynamic-base-url';
-import LoginCopy from '~/components/data/login-copy.vue';
+import LoginCopy from '~/components/login/login-copy.vue';
 import cookieService from '~/composables/cookie-service';
+import LoginFooter from '~/components/login/login-footer.vue';
 
 enum loginViews {
   join = 0,
@@ -257,33 +258,7 @@ function getGamePlaceholder() {
       </div>
     </div>
   </main>
-  <footer class="absolute bottom-0 left-0 right-0 md:pb-1">
-    <div class="relative flex w-full place-content-center place-items-center">
-      <div class="absolute bottom-1 left-2 md:bottom-auto">
-        <p class="text-xs text-gray-500">
-          Made with by
-          <a
-            class="text-blue-500 hover:underline"
-            target="_blank"
-            href="https://github.com/linusX1402"
-            >Linux
-          </a>
-        </p>
-      </div>
-      <div class="pb-8 md:pb-2">
-        <p>
-          Bugs or features? Write an issue on
-          <a
-            class="text-blue-500 hover:underline"
-            target="_blank"
-            href="https://github.com/linusX1402/bean-v2/issues"
-          >
-            GitHub
-          </a>
-        </p>
-      </div>
-    </div>
-  </footer>
+  <login-footer />
 </template>
 
 <style scoped></style>

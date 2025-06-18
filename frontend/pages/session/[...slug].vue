@@ -1,11 +1,11 @@
 <script lang="ts" setup>
-import StationCard from '~/components/data/station-card.vue';
+import StationCard from '~/components/station/station-card.vue';
 import { BeanStation } from '~/models/bean-station';
 import { getCookie, setCookie } from 'typescript-cookie';
 import type BeanSessionDTO from '~/models/bean-session-dto';
 import { cookieService } from '#imports';
-import HomeFooter from '~/components/ui/home-footer.vue';
-import HomeHeader from '~/components/ui/home-header.vue';
+import HomeFooter from '~/components/session/home-footer.vue';
+import HomeHeader from '~/components/session/home-header.vue';
 import WebsocketTest from '~/components/utility/websocket-test.vue';
 
 const route = useRoute();
