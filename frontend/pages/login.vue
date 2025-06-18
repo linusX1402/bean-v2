@@ -120,7 +120,21 @@ async function changeView(updatedView: loginViews, resetSession = false) {
   }
 }
 
-const placeholders = ["Tim's game", "July's session", "Maxi's game"];
+const placeholders = [
+  "Tim's game",
+  "July's session",
+  "Maxi's game",
+  "Sophia's gathering",
+  "Clemens's party",
+  "Elena's game",
+  "Hanna's party",
+  "Linus's session",
+  "Nina's gathering",
+  "Lara's game",
+  "Paula's session",
+  "Pasis's party",
+  "Tobi's gathering",
+];
 
 function getGamePlaceholder() {
   return placeholders[Math.floor(Math.random() * placeholders.length)];
@@ -154,7 +168,7 @@ function getGamePlaceholder() {
                 v-model="sessionInput"
                 :is-required="true"
                 name="sessionId"
-                :placeholder="getGamePlaceholder"
+                :placeholder="getGamePlaceholder()"
               />
             </div>
             <div

@@ -55,14 +55,13 @@ onMounted(async () => {
       ? (parseInt(sessionStorage.getItem('currentPage') || '') as page)
       : page.home;
   }
-
   setPageOnLoad();
 });
 
 function setPageOnLoad() {
   const slug = route.params.slug as string;
-  setPage(toPage(slug[1]) || page.home);
-  if (slug.length >= 3) {
+  if (slug.length < 2) {
+    setPage(toPage(slug[1]) || page.home);
   }
 }
 
@@ -78,19 +77,24 @@ function setPage(page: page) {
   sessionStorage.setItem('currentPage', page.toString());
   const slug = pageToSlugMap[page];
   if (slug) {
-    router.replace(`/session/${sessionId.value}/${slug}`);
+    router.push(`/session/${sessionId.value}/${slug}`);
   }
 }
 
-function setActiveDetail(name: string | undefined) {
-  //push name if set and not already in slug, remove 3rd element if name is undefined. also check if name is a valid station name
-  currentSession.value?.stations.some((n) => {
-    if (n.name === name) {
-      return true;
-    }
-  });
-  const currentSlug = route.params.slug.slice(0, 3) as string;
-  // ToDo: implement
+function setActiveDetail(name: string) {
+  const slug = route.params.slug;
+  if (slug.length < 3) {
+    router.push(`${slug[1]}/${name?.toLowerCase()}`);
+  } else {
+    router.push(`${name?.toLowerCase()}`);
+  }
+}
+
+function clearDetail() {
+  const slug = route.params.slug;
+  if (slug.length >= 3) {
+    router.push('');
+  }
 }
 
 function addStation() {
@@ -187,15 +191,15 @@ function logout() {
           class="flex w-fit flex-wrap place-content-center gap-8 md:place-content-start"
         >
           <station-card
-            v-for="station in currentSession?.stations"
+            v-for="station in [
+              ...(currentSession?.stations || []),
+              ...tmpStations,
+            ]"
             :key="station.id"
             :station="station"
-          />
-          <station-card
-            v-for="station in tmpStations"
-            :key="station.id"
-            :station="station"
-            :is-unstable="true"
+            :is-unstable="tmpStations.includes(station)"
+            @update:open-detail="setActiveDetail"
+            @update:close-detail="clearDetail"
           />
           <div
             class="relative flex w-60 flex-col rounded-2xl bg-bean-white-400 transition-all duration-[250ms] ease-in-out md:h-60"

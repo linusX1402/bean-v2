@@ -10,7 +10,21 @@ const props = withDefaults(
   { isUnstable: false },
 );
 
+const emit = defineEmits(['update:open-detail', 'update:close-detail']);
 const isDetailOpen = ref<boolean>(false);
+const route = useRoute();
+const skipAnimation = ref<boolean>(false);
+
+onMounted(() => {
+  if (
+    route.params.slug.length >= 3 &&
+    route.params.slug[2] === props.station.name.toLowerCase()
+  ) {
+    // skipAnimation.value = true;
+    toggleDetail();
+    // skipAnimation.value = false;
+  }
+});
 
 function getWorkingChildrenCount(station: BeanStation): number {
   return station.children.filter((child) => child.workState === 'working')
@@ -32,6 +46,9 @@ function toggleDetail() {
     } else {
       document.body.style.overflow = 'auto';
     }
+    isDetailOpen.value
+      ? emit('update:open-detail', props.station.name)
+      : emit('update:close-detail', props.station.name);
   }
 }
 </script>
@@ -55,7 +72,7 @@ function toggleDetail() {
       class="absolute bottom-0 left-0 right-0 top-0 rounded-b-2xl bg-gray-500/15"
     ></div>
   </div>
-  <transition name="detail" mode="in-out">
+  <transition :name="skipAnimation ? '' : 'detail'" mode="in-out">
     <station-detail
       @close-detail="toggleDetail"
       :station="station"
