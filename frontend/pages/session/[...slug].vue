@@ -81,14 +81,23 @@ function setPage(page: page) {
   }
 }
 
-function setActiveDetail(name: string) {
-  const slug = route.params.slug;
-  if (slug.length < 3) {
-    router.push(`${slug[1]}/${name?.toLowerCase()}`);
-  } else {
-    router.push(`${name?.toLowerCase()}`);
-  }
-}
+// ROUTEING;
+// function setActiveDetail(name: string) {
+//   const slug = route.params.slug;
+//   if (slug.length < 3) {
+//     router.push(`${slug[1]}/${name?.toLowerCase()}`);
+//   } else {
+//     router.push(`${name?.toLowerCase()}`);
+//   }
+// }
+
+// function clearActiveDetail() {
+//   console.log('clear detail');
+//   const slug = route.params.slug;
+//   if (slug.length >= 3) {
+//     router.push(`/session/${slug[0]}/${slug[1]}`);
+//   }
+// }
 
 function clearDetail() {
   const slug = route.params.slug;
@@ -198,9 +207,10 @@ function logout() {
             :key="station.id"
             :station="station"
             :is-unstable="tmpStations.includes(station)"
-            @update:open-detail="setActiveDetail"
-            @update:close-detail="clearDetail"
           />
+          <!-- ROUTEING -->
+          <!--            @update:open-detail="setActiveDetail"-->
+          <!--            @update:close-detail="clearActiveDetail"-->
           <div
             class="relative flex w-60 flex-col rounded-2xl bg-bean-white-400 transition-all duration-[250ms] ease-in-out md:h-60"
             :class="[
