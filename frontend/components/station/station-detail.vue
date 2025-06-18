@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import ChildRow from '~/components/data/child-row.vue';
+import ChildRow from '~/components/station/child-row.vue';
 import Child from '~/models/child';
 import type { BeanStation } from '~/models/bean-station';
 import cookieService from '~/composables/cookie-service';
-import StationDetailHeader from '~/components/ui/station-detail-header.vue';
+import StationDetailHeader from '~/components/station/station-detail-header.vue';
 
 const props = defineProps<{ station: BeanStation }>();
 const emit = defineEmits<{

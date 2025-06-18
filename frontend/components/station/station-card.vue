@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import StationDetail from '~/components/data/station-detail.vue';
+import StationDetail from '~/components/station/station-detail.vue';
 import type { BeanStation } from '~/models/bean-station';
 
 const props = withDefaults(

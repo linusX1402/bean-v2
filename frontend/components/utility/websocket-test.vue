@@ -11,19 +11,18 @@
     </ul>
   </div>
 </template>
-
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
-import { getDynamicBaseURL } from '#imports';
 
 const message = ref('');
 const receivedMessages = ref<string[]>([]);
 let ws: WebSocket | null = null;
 
 onMounted(() => {
-  // Determine WebSocket protocol based on window protocol
+  // This code runs on the client, so `window` is available.
   const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-  const wsUrl = getDynamicBaseURL(protocol);
+  const host = window.location.host;
+  const wsUrl = `${protocol}//${host}/ws`;
 
   // Create WebSocket connection
   ws = new WebSocket(wsUrl);
