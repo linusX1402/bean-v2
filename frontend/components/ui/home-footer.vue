@@ -24,7 +24,9 @@ function setPage(page: page) {
   <footer
     class="sm:p fixed bottom-0 left-0 z-20 flex h-[72px] w-screen place-content-around place-items-center border-t border-t-gray-400 bg-bean-white-400 px-10 sm:h-screen sm:w-[72px] sm:flex-col sm:border-r sm:border-r-gray-400 sm:px-0 sm:py-10 md:place-content-start md:gap-16 md:pt-6 lg:pt-10"
   >
-    <div class="flex place-content-center place-items-center rounded-xl p-2">
+    <div
+      class="hidden place-content-center place-items-center rounded-xl p-2 md:flex"
+    >
       <button
         class="flex cursor-pointer place-content-center place-items-center text-blue-500"
         @click="logout"

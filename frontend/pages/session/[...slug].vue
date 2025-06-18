@@ -8,6 +8,7 @@ import HomeFooter from '~/components/ui/home-footer.vue';
 import HomeHeader from '~/components/ui/home-header.vue';
 
 const route = useRoute();
+const router = useRouter();
 const sessionId = ref<string | undefined>(undefined);
 const currentSession = ref<BeanSessionDTO | undefined>(undefined);
 
@@ -29,6 +30,13 @@ enum page {
   settings = 3,
 }
 
+const pageToSlugMap: Record<page, string> = {
+  [page.loading]: 'loading',
+  [page.home]: 'home',
+  [page.share]: 'share',
+  [page.settings]: 'settings',
+};
+
 const currentPage = ref<page>(page.loading);
 
 onMounted(async () => {
@@ -47,11 +55,42 @@ onMounted(async () => {
       ? (parseInt(sessionStorage.getItem('currentPage') || '') as page)
       : page.home;
   }
+
+  setPageOnLoad();
 });
+
+function setPageOnLoad() {
+  const slug = route.params.slug as string;
+  setPage(toPage(slug[1]) || page.home);
+  if (slug.length >= 3) {
+  }
+}
+
+function toPage(slug: string): page | undefined {
+  const entry = Object.entries(pageToSlugMap).find(
+    ([, value]) => value === slug,
+  );
+  return entry ? (parseInt(entry[0]) as page) : undefined;
+}
 
 function setPage(page: page) {
   currentPage.value = page;
   sessionStorage.setItem('currentPage', page.toString());
+  const slug = pageToSlugMap[page];
+  if (slug) {
+    router.replace(`/session/${sessionId.value}/${slug}`);
+  }
+}
+
+function setActiveDetail(name: string | undefined) {
+  //push name if set and not already in slug, remove 3rd element if name is undefined. also check if name is a valid station name
+  currentSession.value?.stations.some((n) => {
+    if (n.name === name) {
+      return true;
+    }
+  });
+  const currentSlug = route.params.slug.slice(0, 3) as string;
+  // ToDo: implement
 }
 
 function addStation() {
@@ -70,7 +109,7 @@ function addStation() {
 }
 
 async function toggleEdit(value?: boolean) {
-  if (value !== undefined) {
+  if (value) {
     isEditing.value = value;
     newStationName.value = '';
     tmpStations.value = [];

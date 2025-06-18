@@ -36,8 +36,14 @@ export default function () {
   }
 
   async function getPermission() {
-    const currentId = getCurrentSession();
-    const currentSession = getSessionById(currentId);
+    const sessionId = getCurrentSession();
+    const res = await $fetch(`/api/session/get-permission`, {
+      method: 'POST',
+      headers: {
+        uuid: sessionId,
+      },
+    });
+    return res;
   }
 
   return {

@@ -43,7 +43,7 @@ function getCurrentLink(permission?: string) {
 }
 
 function forwardUser(uuid: string) {
-  const redirectPath = baseUrl + '/session/' + uuid;
+  const redirectPath = `${baseUrl}/session/${uuid}/home`;
   window.location.href = redirectPath;
 }
 </script>

@@ -43,7 +43,7 @@ onMounted(async () => {
 });
 
 function forwardUserToUrl(uuid: string) {
-  window.location.href = baseUrl + '/session/' + uuid;
+  window.location.href = `${baseUrl}/session/${uuid}/home`;
 }
 
 async function submitLogin() {
@@ -119,6 +119,12 @@ async function changeView(updatedView: loginViews, resetSession = false) {
     removeCookie('bean_sessions');
   }
 }
+
+const placeholders = ["Tim's game", "July's session", "Maxi's game"];
+
+function getGamePlaceholder() {
+  return placeholders[Math.floor(Math.random() * placeholders.length)];
+}
 </script>
 
 <template>
@@ -148,7 +154,7 @@ async function changeView(updatedView: loginViews, resetSession = false) {
                 v-model="sessionInput"
                 :is-required="true"
                 name="sessionId"
-                placeholder="Tim's game"
+                :placeholder="getGamePlaceholder"
               />
             </div>
             <div
