@@ -37,6 +37,7 @@ const props = defineProps<{
   currentView: loginViews;
   doForwardUser: boolean;
   apiError: boolean;
+  scrollDelay?: number | 0;
 }>();
 
 const emit = defineEmits([
@@ -63,7 +64,16 @@ const newSessionError = ref<BeanSessionError>({
   startingFunds: false,
 });
 
-const scrollDivOnOpen = ref<HTMLElement | undefined>(undefined);
+const scrollToDivOnOpen = ref<HTMLElement | undefined>(undefined);
+
+watch(
+  () => props.currentView,
+  (newValue) => {
+    if (newValue === loginViews.create) {
+      scrollToAddStationCard();
+    }
+  },
+);
 
 function submitCreate() {
   emit('update:submit-create', newSession.value);
@@ -129,15 +139,15 @@ const timePerTick = computed(() => {
   return seconds !== 0 ? `${minutes},5 min` : `${minutes} min`;
 });
 
-function scrollToAddStationCard(delay: number = 0) {
+function scrollToAddStationCard() {
   setTimeout(() => {
-    if (addStationRef.value) {
-      addStationRef.value.scrollIntoView({
+    if (scrollToDivOnOpen.value) {
+      scrollToDivOnOpen.value.scrollIntoView({
         behavior: 'smooth',
         block: 'center',
       });
     }
-  }, delay);
+  }, props.scrollDelay);
 }
 </script>
 
@@ -146,6 +156,7 @@ function scrollToAddStationCard(delay: number = 0) {
     v-if="currentView === loginViews.create"
     class="flex h-fit min-h-full flex-col place-content-between place-items-center gap-8"
     @submit.prevent="submitCreate"
+    ref="scrollToDivOnOpen"
   >
     <div
       class="flex w-full flex-col place-content-center place-items-center gap-8"
@@ -268,7 +279,6 @@ function scrollToAddStationCard(delay: number = 0) {
       >
       <ui-button :style="'primary'" :type="'submit'">create</ui-button>
     </div>
-    <div ref="scrollDivOnOpen" />
   </form>
 </template>
 
