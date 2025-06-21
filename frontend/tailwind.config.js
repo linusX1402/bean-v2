@@ -14,6 +14,8 @@ export default {
       colors: {
         'bean-white-400': '#F8F6F9',
         'bean-white-500': '#EFEDF2',
+        'bean-gray-300': '#EAEAEB',
+        'bean-gray-400': '#BBBBC0',
         'bean-gray-500': '#7B7B81',
       },
       fontSize: {

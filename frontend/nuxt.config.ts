@@ -39,7 +39,7 @@ export default defineNuxtConfig({
     },
   ],
   imports: {
-    dirs: ['types/types', 'composables/api', 'components/*'],
+    dirs: ['constants/constants', 'composables/api', 'components/*'],
   },
   runtimeConfig: {
     public: {

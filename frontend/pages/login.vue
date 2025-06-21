@@ -22,6 +22,8 @@ const currentSession = ref<BeanSessionDTO | undefined>();
 const sessionInput = ref<string>('');
 const sessionInputError = ref<boolean>(false);
 
+const createSessionError = ref<boolean>(false);
+
 const doForwardUser = ref<boolean>(cookieService().getForwardCookie());
 
 onMounted(async () => {
@@ -82,7 +84,7 @@ async function submitCreate(newSession: BeanSessionDTO) {
       body: {
         sessionName: newSession.name,
         icon: newSession.icon,
-        beansPerTick: newSession.beanPerTick,
+        beansPerTick: newSession.beansPerTick,
         secondsPerTick: newSession.secondsPerTick,
         startingFunds: newSession.startingFunds,
       },
@@ -94,12 +96,14 @@ async function submitCreate(newSession: BeanSessionDTO) {
         doForwardUser.value,
       );
       sessionStorage.setItem('forward', doForwardUser.value.toString());
+      createSessionError.value = false;
     } else {
       console.error('Failed to create session');
       return;
     }
     currentView.value = loginViews.copy;
   } catch (e: any) {
+    createSessionError.value = true;
     console.error('failed to open new Session');
   }
 }
@@ -111,6 +115,7 @@ function setForwardUser(value: boolean) {
 
 async function changeView(updatedView: loginViews, resetSession = false) {
   sessionInputError.value = false;
+  createSessionError.value = false;
   currentView.value = updatedView;
   if (resetSession && currentSession.value) {
     const res = await $fetch(baseUrl + '/api/session/close', {
@@ -135,7 +140,7 @@ function getGamePlaceholder() {
     >
       <h1 class="py-10">Bean-Counter {{ DEFAULT_ICON }}</h1>
       <div
-        class="min-h-[50%] w-full rounded-2xl bg-white px-12 py-16 sm:min-h-[50%] sm:w-2/3 md:min-h-[33%] lg:w-[500px]"
+        class="h-fit w-full rounded-2xl bg-white px-12 py-16 sm:w-2/3 lg:w-[500px]"
       >
         <form
           v-if="currentView === loginViews.join"
@@ -180,6 +185,7 @@ function getGamePlaceholder() {
         <login-create
           :do-forward-user="doForwardUser"
           :current-view="currentView"
+          :api-error="createSessionError"
           @update:change-view="changeView"
           @update:submit-create="submitCreate"
           @update:forward-user="setForwardUser"
@@ -191,9 +197,9 @@ function getGamePlaceholder() {
           :current-session="currentSession"
         />
       </div>
+      <login-footer />
     </div>
   </main>
-  <login-footer />
 </template>
 
 <style scoped></style>

@@ -232,7 +232,7 @@ function logout() {
                 <transition name="add-icon">
                   <icon
                     v-if="isAddIconVisible"
-                    name="bean:add-blue"
+                    name="bean:plus-blue"
                     class="size-10"
                   />
                 </transition>

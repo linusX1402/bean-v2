@@ -19,7 +19,7 @@ export default class BeanSessionDTO {
     this.sessionIdUser = sessionIdUser;
     this.secondsPerTick = secondsPerTick;
     this.stations = stations;
-    this.beanPerTick = beanPerTick;
+    this.beansPerTick = beanPerTick;
     this.startingFunds = startingFunds;
   }
 
@@ -32,6 +32,6 @@ export default class BeanSessionDTO {
   public name: string;
   public icon: string;
   public secondsPerTick;
-  public beanPerTick;
+  public beansPerTick;
   public startingFunds;
 }

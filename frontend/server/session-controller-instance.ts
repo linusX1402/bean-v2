@@ -1,11 +1,12 @@
 import SessionController from './session-controller';
 import { BeanStation } from '~/models/bean-station';
+import NewBeanSessionDTO from '~/models/new-bean-session-dto';
 
 const sessionController = new SessionController();
 export default sessionController;
 
-export function openNewSession(name: string, iconId: string) {
-  return sessionController.openNewSession(name, iconId);
+export function openNewSession(newSession: NewBeanSessionDTO) {
+  return sessionController.openNewSession(newSession);
 }
 export function getSessionById(sessionId: string) {
   console.log(`open session: (${sessionController.openSessions.size}):`);
