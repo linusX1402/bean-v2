@@ -131,7 +131,7 @@ function getMinValue(property: keyof NewBeanSessionDTO): number {
 const timePerTick = computed(() => {
   const minutes = Math.floor(newSession.value.secondsPerTick / 60);
   const seconds = newSession.value.secondsPerTick % 60;
-  return seconds !== 0 ? `${minutes},5 min` : `${minutes} min`;
+  return seconds !== 0 ? `${minutes}.5 min` : `${minutes} min`;
 });
 
 function scrollToAddStationCard() {
@@ -234,7 +234,10 @@ function scrollToAddStationCard() {
         <div
           class="flex w-full place-content-between place-items-center md:gap-5"
         >
-          <label>Seconds Per Tick: {{ timePerTick }}</label>
+          <label
+            >Tick duration
+            <label class="text-nowrap">{{ timePerTick }}</label></label
+          >
           <stepper
             @update:add="
               updateSessionProperty(
