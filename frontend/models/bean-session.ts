@@ -1,5 +1,10 @@
-import { BeanStation } from "./bean-station";
-import Child from "./child";
+import { BeanStation } from './bean-station';
+import Child from './child';
+import {
+  DEFAULT_BEANS_PER_TICK,
+  DEFAULT_SECONDS_PER_TICK,
+  DEFAULT_STARTING_FUNDS,
+} from '~/constants/constants';
 
 export default class BeanSession {
   constructor(
@@ -8,9 +13,9 @@ export default class BeanSession {
     sessionIdAdmin: string,
     sessionIdEditor: string,
     sessionIdUser: string,
-    secondsPerTick: number = 60,
-    beanPerTick: number = 5,
-    startingFunds: number = 5,
+    secondsPerTick: number = DEFAULT_SECONDS_PER_TICK,
+    beanPerTick: number = DEFAULT_BEANS_PER_TICK,
+    startingFunds: number = DEFAULT_STARTING_FUNDS,
     stations: Map<number, BeanStation> = new Map<number, BeanStation>(),
   ) {
     this._name = name;
@@ -76,14 +81,14 @@ export default class BeanSession {
   public getSessionIdByRole(role: string): string {
     role = role.toLowerCase();
     switch (role) {
-      case "admin":
+      case 'admin':
         return this.sessionIdAdmin;
-      case "edit":
+      case 'edit':
         return this.sessionIdEditor;
-      case "view":
+      case 'view':
         return this.sessionIdUser;
       default:
-        throw new Error("Invalid role");
+        throw new Error('Invalid role');
     }
   }
 
@@ -110,11 +115,11 @@ export default class BeanSession {
 
   public getPermissionOfId(uuid: string): string {
     if (this.sessionIdAdmin === uuid) {
-      return "admin";
+      return 'admin';
     } else if (this.sessionIdEditor === uuid) {
-      return "edit";
+      return 'edit';
     } else if (this.sessionIdUser === uuid) {
-      return "view";
+      return 'view';
     } else {
       throw new Error(`Session with ID ${uuid} does not exist.`);
     }

@@ -1,4 +1,4 @@
-import { BeanStation } from "./bean-station";
+import { BeanStation } from './bean-station';
 
 export default class BeanSessionDTO {
   constructor(
@@ -24,7 +24,7 @@ export default class BeanSessionDTO {
   }
 
   public static runningId = 0;
-  public readonly creationDate: Date = new Date();
+  public readonly creationDate?: Date = new Date();
   public stations: BeanStation[];
   public readonly sessionIdAdmin: string;
   public readonly sessionIdEditor: string;

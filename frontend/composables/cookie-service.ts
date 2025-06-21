@@ -10,6 +10,10 @@ export default function () {
     return JSON.parse(getCookie('bean_sessions') || '[]')[0] || '';
   }
 
+  function setForwardCookie(forward: boolean) {
+    setCookie('forward', forward ? 'true' : 'false');
+  }
+
   function addSession(newSession: string, forward = false) {
     const pastSessions: string[] = JSON.parse(
       getCookie('bean_sessions') || '[]',
@@ -48,6 +52,7 @@ export default function () {
 
   return {
     getCurrentSession,
+    setForwardCookie,
     getForwardCookie,
     addSession,
     getPermission,

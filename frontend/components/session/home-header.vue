@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { DEFAULT_ICON } from '../../constants/constants';
+
 const props = defineProps<{ isEditing: boolean }>();
 
 const emit = defineEmits([
@@ -50,7 +52,7 @@ function addStation() {
         <p class="text-p text-blue-500">submit</p>
       </button>
     </div>
-    <h2 class="col-span-3 text-nowrap">Bean-Counter 🫘</h2>
+    <h2 class="col-span-3 text-nowrap">Bean-Counter {{ DEFAULT_ICON }}</h2>
   </header>
 </template>
 

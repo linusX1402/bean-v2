@@ -13,7 +13,7 @@ const props = withDefaults(
 const emit = defineEmits(['update:open-detail', 'update:close-detail']);
 const isDetailOpen = ref<boolean>(false);
 
-// ROUTEING
+// ROUTING
 // const route = useRoute();
 // onMounted(() => {
 //   if (

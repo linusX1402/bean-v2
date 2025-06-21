@@ -82,7 +82,7 @@ function setPage(page: page) {
   }
 }
 
-// ROUTEING;
+// ROUTING;
 // function setActiveDetail(name: string) {
 //   const slug = route.params.slug;
 //   if (slug.length < 3) {
@@ -300,7 +300,6 @@ function logout() {
           </div>
         </div>
       </section>
-      <websocket-test></websocket-test>
     </div>
 
     <!-- Footer -->

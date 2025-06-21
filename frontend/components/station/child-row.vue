@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type Child from '~/models/child';
 import { getCookie } from 'typescript-cookie';
-import { iconList } from '~/types/types';
+import { DEFAULT_ICON } from '~/constants/constants';
 
 const props = withDefaults(
   defineProps<{
@@ -23,7 +23,7 @@ type iconList = 'bean:play' | 'bean:stop';
 const sessionIcon = ref<string>('');
 
 onMounted(() => {
-  sessionIcon.value = getCookie('bean_icon') || '🫘';
+  sessionIcon.value = getCookie('bean_icon') || DEFAULT_ICON;
 });
 
 function toggleIcon() {
