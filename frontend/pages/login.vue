@@ -1,11 +1,11 @@
 <script lang="ts" setup>
-import { iconList } from '~/types/types';
 import { getCookie, removeCookie, setCookie } from 'typescript-cookie';
 import type BeanSessionDTO from '~/models/bean-session-dto';
 import { getDynamicBaseURL } from '~/composables/dynamic-base-url';
 import LoginCopy from '~/components/login/login-copy.vue';
 import cookieService from '~/composables/cookie-service';
 import LoginFooter from '~/components/login/login-footer.vue';
+import { DEFAULT_ICON, PLACEHOLDERS } from '~/constants/constants';
 
 enum loginViews {
   join = 0,
@@ -22,10 +22,7 @@ const currentSession = ref<BeanSessionDTO | undefined>();
 const sessionInput = ref<string>('');
 const sessionInputError = ref<boolean>(false);
 
-const sessionName = ref<string>('');
-const sessionNameError = ref<boolean>(false);
 const doForwardUser = ref<boolean>(cookieService().getForwardCookie());
-const icon = ref<string>('🫘');
 
 onMounted(async () => {
   const cookieSessionId = cookieService().getCurrentSession();
@@ -78,17 +75,19 @@ function getHighestPermissionSessionId() {
   }
 }
 
-async function submitCreate() {
+async function submitCreate(newSession: BeanSessionDTO) {
   try {
     const session = await $fetch(`${baseUrl}/api/session/open`, {
       method: 'POST',
       body: {
-        sessionName: sessionName.value,
-        icon: icon.value,
+        sessionName: newSession.name,
+        icon: newSession.icon,
+        beansPerTick: newSession.beanPerTick,
+        secondsPerTick: newSession.secondsPerTick,
+        startingFunds: newSession.startingFunds,
       },
     });
     if (session) {
-      sessionNameError.value = false;
       currentSession.value = session as unknown as BeanSessionDTO;
       cookieService().addSession(
         currentSession.value.sessionIdAdmin,
@@ -101,14 +100,17 @@ async function submitCreate() {
     }
     currentView.value = loginViews.copy;
   } catch (e: any) {
-    sessionNameError.value = true;
     console.error('failed to open new Session');
   }
 }
 
+function setForwardUser(value: boolean) {
+  doForwardUser.value = value;
+  cookieService().setForwardCookie(doForwardUser.value);
+}
+
 async function changeView(updatedView: loginViews, resetSession = false) {
   sessionInputError.value = false;
-  sessionNameError.value = false;
   currentView.value = updatedView;
   if (resetSession && currentSession.value) {
     const res = await $fetch(baseUrl + '/api/session/close', {
@@ -121,24 +123,8 @@ async function changeView(updatedView: loginViews, resetSession = false) {
   }
 }
 
-const placeholders = [
-  "Tim's game",
-  "July's session",
-  "Maxi's game",
-  "Sophia's gathering",
-  "Clemens's party",
-  "Elena's game",
-  "Hanna's party",
-  "Linus's session",
-  "Nina's gathering",
-  "Lara's game",
-  "Paula's session",
-  "Pasis's party",
-  "Tobi's gathering",
-];
-
 function getGamePlaceholder() {
-  return placeholders[Math.floor(Math.random() * placeholders.length)];
+  return PLACEHOLDERS[Math.floor(Math.random() * PLACEHOLDERS.length)];
 }
 </script>
 
@@ -147,7 +133,7 @@ function getGamePlaceholder() {
     <div
       class="flex h-screen w-screen flex-col place-content-start place-items-center gap-16 px-10 lg:gap-32"
     >
-      <h1 class="py-10">Bean-Counter 🫘</h1>
+      <h1 class="py-10">Bean-Counter {{ DEFAULT_ICON }}</h1>
       <div
         class="min-h-[50%] w-full rounded-2xl bg-white px-12 py-16 sm:min-h-[50%] sm:w-2/3 md:min-h-[33%] lg:w-[500px]"
       >
@@ -191,65 +177,14 @@ function getGamePlaceholder() {
             <ui-button :style="'primary'" :type="'submit'">submit</ui-button>
           </div>
         </form>
+        <login-create
+          :do-forward-user="doForwardUser"
+          :current-view="currentView"
+          @update:change-view="changeView"
+          @update:submit-create="submitCreate"
+          @update:forward-user="setForwardUser"
+        />
 
-        <form
-          v-if="currentView === loginViews.create"
-          class="flex h-full flex-col place-content-between place-items-center gap-8"
-          @submit.prevent="submitCreate"
-        >
-          <div
-            class="flex w-full flex-col place-content-center place-items-center gap-8"
-          >
-            <h4>Create a Session</h4>
-            <div class="flex w-full flex-col gap-3">
-              <div class="flex w-full flex-col gap-2">
-                <div class="w-full">
-                  <label class="w-full">Session Name:</label>
-                  <label v-if="sessionNameError" class="text-red-500">
-                    Invalid Session name!
-                  </label>
-                  <form-text
-                    :max-length="50"
-                    v-model="sessionName"
-                    :is-required="true"
-                    name="sessionId"
-                    placeholder="Session Name"
-                  />
-                </div>
-              </div>
-              <div
-                class="flex w-full place-content-start place-items-center gap-2"
-              >
-                <label>icon:</label>
-                <div>
-                  <select
-                    v-model="icon"
-                    class="h-fit w-full rounded-md border border-solid border-black/50 p-1"
-                  >
-                    <option v-for="i in iconList" :value="i">{{ i }}</option>
-                  </select>
-                </div>
-              </div>
-              <div
-                class="flex w-full place-content-start place-items-center gap-2"
-              >
-                <label>Stay signed in</label>
-                <input class="size-4" type="checkbox" v-model="doForwardUser" />
-              </div>
-            </div>
-          </div>
-          <div
-            class="grid w-full grid-cols-2 place-content-center place-items-center gap-4"
-          >
-            <ui-button
-              @click="changeView(loginViews.join)"
-              :style="'secondary'"
-              :type="'button'"
-              >join</ui-button
-            >
-            <ui-button :style="'primary'" :type="'submit'">create</ui-button>
-          </div>
-        </form>
         <login-copy
           v-if="currentView === loginViews.copy"
           @update:back="changeView(loginViews.create, true)"
