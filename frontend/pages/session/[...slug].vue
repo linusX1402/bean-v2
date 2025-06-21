@@ -194,7 +194,7 @@ function logout() {
       />
       <section
         v-if="currentPage === page.home"
-        class="flex w-full place-content-center place-items-center md:place-content-start"
+        class="flex w-full place-content-center place-items-center px-2 md:place-content-start md:px-10"
       >
         <div
           class="flex w-fit flex-wrap place-content-center gap-8 md:place-content-start"
