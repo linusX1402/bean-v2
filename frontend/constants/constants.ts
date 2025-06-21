@@ -16,6 +16,12 @@ export const PLACEHOLDERS = [
   "Tobi's gathering",
 ];
 
+export enum loginViews {
+  join = 0,
+  create = 1,
+  copy = 2,
+}
+
 // Beans per tick
 export const DEFAULT_BEANS_PER_TICK = 1;
 export const MIN_BEANS_PER_TICK = 1;

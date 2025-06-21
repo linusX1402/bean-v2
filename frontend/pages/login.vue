@@ -5,13 +5,8 @@ import { getDynamicBaseURL } from '~/composables/dynamic-base-url';
 import LoginCopy from '~/components/login/login-copy.vue';
 import cookieService from '~/composables/cookie-service';
 import LoginFooter from '~/components/login/login-footer.vue';
-import { DEFAULT_ICON, PLACEHOLDERS } from '~/constants/constants';
-
-enum loginViews {
-  join = 0,
-  create = 1,
-  copy = 2,
-}
+import { DEFAULT_ICON, loginViews, PLACEHOLDERS } from '~/constants/constants';
+import LoginJoin from '~/components/login/login-join.vue';
 
 let baseUrl = getDynamicBaseURL();
 
@@ -19,10 +14,8 @@ const currentView = ref<loginViews>(loginViews.join);
 
 const currentSession = ref<BeanSessionDTO | undefined>();
 
-const sessionInput = ref<string>('');
-const sessionInputError = ref<boolean>(false);
-
 const createSessionError = ref<boolean>(false);
+const loginSessionError = ref<boolean>(false);
 
 const doForwardUser = ref<boolean>(cookieService().getForwardCookie());
 
@@ -46,10 +39,9 @@ function forwardUserToUrl(uuid: string) {
   window.location.href = `${baseUrl}/session/${uuid}/home`;
 }
 
-async function submitLogin() {
-  currentSession.value = await getSessionById(sessionInput.value);
+async function submitLogin(sessionNameInput: string) {
+  currentSession.value = await getSessionById(sessionNameInput);
   if (currentSession.value) {
-    sessionInputError.value = false;
     const highestPermissionSessionId = getHighestPermissionSessionId();
     if (highestPermissionSessionId) {
       cookieService().addSession(
@@ -59,9 +51,10 @@ async function submitLogin() {
       sessionStorage.setItem('forward', doForwardUser.value.toString());
     }
     setCookie('bean_icon', currentSession.value.icon);
+    loginSessionError.value = false;
     forwardUserToUrl(getHighestPermissionSessionId() || '');
   } else {
-    sessionInputError.value = true;
+    loginSessionError.value = true;
     console.error('No session with this id was found');
     return;
   }
@@ -114,7 +107,7 @@ function setForwardUser(value: boolean) {
 }
 
 async function changeView(updatedView: loginViews, resetSession = false) {
-  sessionInputError.value = false;
+  loginSessionError.value = false;
   createSessionError.value = false;
   currentView.value = updatedView;
   if (resetSession && currentSession.value) {
@@ -127,10 +120,6 @@ async function changeView(updatedView: loginViews, resetSession = false) {
     removeCookie('bean_sessions');
   }
 }
-
-function getGamePlaceholder() {
-  return PLACEHOLDERS[Math.floor(Math.random() * PLACEHOLDERS.length)];
-}
 </script>
 
 <template>
@@ -142,46 +131,14 @@ function getGamePlaceholder() {
       <div
         class="h-fit w-full rounded-2xl bg-white px-12 py-16 sm:w-2/3 lg:w-[500px]"
       >
-        <form
-          v-if="currentView === loginViews.join"
-          class="flex h-full flex-col place-content-between place-items-center gap-8"
-          @submit.prevent="submitLogin"
-        >
-          <div
-            class="flex w-full flex-col place-content-center place-items-center gap-8"
-          >
-            <h4>Join a Session</h4>
-            <div class="w-full">
-              <label class="w-full">Session ID / Session Name: </label>
-              <label class="text-red-500" v-if="sessionInputError"
-                >No session with this id was found</label
-              >
-              <form-text
-                v-model="sessionInput"
-                :is-required="true"
-                name="sessionId"
-                :placeholder="getGamePlaceholder()"
-              />
-            </div>
-            <div
-              class="flex w-full place-content-start place-items-center gap-2"
-            >
-              <label>Stay signed in</label>
-              <input class="size-4" type="checkbox" v-model="doForwardUser" />
-            </div>
-          </div>
-          <div
-            class="grid w-full grid-cols-2 place-content-center place-items-center gap-4"
-          >
-            <ui-button
-              @click="changeView(loginViews.create)"
-              :style="'secondary'"
-              :type="'button'"
-              >create</ui-button
-            >
-            <ui-button :style="'primary'" :type="'submit'">submit</ui-button>
-          </div>
-        </form>
+        <login-join
+          :current-view="currentView"
+          :do-forward-user="doForwardUser"
+          :api-error="loginSessionError"
+          @update:change-view="changeView"
+          @update:forward-user="setForwardUser"
+          @update:submit-login="submitLogin"
+        />
         <login-create
           :do-forward-user="doForwardUser"
           :current-view="currentView"

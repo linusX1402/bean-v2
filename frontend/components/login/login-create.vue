@@ -6,6 +6,7 @@ import {
   DEFAULT_SECONDS_PER_TICK,
   DEFAULT_STARTING_FUNDS,
   ICON_LIST,
+  loginViews,
   MAX_BEANS_PER_TICK,
   MAX_SECONDS_PER_TICK,
   MAX_STARTING_FUNDS,
@@ -26,12 +27,6 @@ type BeanSessionError = {
   beanPerTick: boolean;
   startingFunds: boolean;
 };
-
-enum loginViews {
-  join = 0,
-  create = 1,
-  copy = 2,
-}
 
 const props = defineProps<{
   currentView: loginViews;
