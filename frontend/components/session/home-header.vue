@@ -42,7 +42,7 @@ function addStation() {
         @click="toggleEdit()"
         v-if="!isEditing"
       >
-        <LazyIcon class="size-7" name="bean:add-blue" />
+        <LazyIcon class="size-7" name="bean:plus-blue" />
       </button>
       <button
         class="flex cursor-pointer place-content-center place-items-center text-blue-500"

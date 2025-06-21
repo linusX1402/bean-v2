@@ -52,7 +52,7 @@ function toggleEdit() {
         @click="toggleEdit"
         class="flex place-content-center place-items-center text-blue-500"
       >
-        <LazyIcon v-if="!isEditing" name="bean:add-blue" class="size-7" />
+        <LazyIcon v-if="!isEditing" name="bean:plus-blue" class="size-7" />
         <p v-else class="text-p text-blue-500">submit</p>
       </button>
     </div>
