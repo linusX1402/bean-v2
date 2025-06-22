@@ -4,6 +4,8 @@ import { BeanStation } from '~/models/bean-station';
 import { v4 as uuid4 } from 'uuid';
 import BeanSessionDTO from '~/models/bean-session-dto';
 import NewBeanSessionDTO from '~/models/new-bean-session-dto';
+import Child from '~/models/child';
+import { type workingState } from '~/constants/constants';
 
 export default class SessionController {
   private _openSessions = new Map<string, BeanSession>();
@@ -100,5 +102,17 @@ export default class SessionController {
       throw new Error(`Session with ID ${uuid} does not exist.`);
     }
     return session.getPermissionOfId(uuid);
+  }
+  updateChildWorkingState(
+    sessionId: string,
+    stationId: number,
+    childId: number,
+    workState: workingState,
+  ): Child {
+    const session = this.getSessionById(sessionId);
+    if (!session) {
+      throw new Error(`Session with ID ${sessionId} does not exist.`);
+    }
+    return session.updateChildWorkingState(stationId, childId, workState);
   }
 }

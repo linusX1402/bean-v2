@@ -1,13 +1,14 @@
 <script setup lang="ts">
+//ToDo: delete in production
 import { ref, onMounted, onUnmounted } from 'vue';
-import { useWebSocket } from '~/composables/websocket';
+import { useWebSocket } from '~/composables/ws-client';
 
 const message = ref('');
 const receivedMessages = ref<string[]>([]);
 let ws: WebSocket | undefined = undefined;
 
 onMounted(() => {
-  useWebSocket().openConnection();
+  useWebSocket().openConnection('');
   ws = useWebSocket().ws.value;
   if (ws) {
     ws.onopen = () => {

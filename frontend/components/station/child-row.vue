@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import type Child from '~/models/child';
 import { getCookie } from 'typescript-cookie';
-import { DEFAULT_ICON } from '~/constants/constants';
+import {
+  DEFAULT_ICON,
+  type iconList,
+  type workingState,
+} from '~/constants/constants';
 
 const props = withDefaults(
   defineProps<{
@@ -11,14 +15,10 @@ const props = withDefaults(
   { isUnstable: false },
 );
 
-// const { $websocket } = useNuxtApp<{ websocket: Websocked }>();
+const emit = defineEmits(['update:work-state']);
 
 const currentIcon = ref<iconList>('bean:play');
 const workingState = ref<workingState>('idle');
-
-type workingState = 'working' | 'idle' | 'resting';
-type iconList = 'bean:play' | 'bean:stop';
-0;
 
 const sessionIcon = ref<string>('');
 
@@ -30,11 +30,11 @@ function toggleIcon() {
   if (currentIcon.value === 'bean:stop') {
     currentIcon.value = 'bean:play';
     workingState.value = 'resting';
-    // $websocket.send('message');
   } else {
     currentIcon.value = 'bean:stop';
-    workingState.value = 'idle';
+    workingState.value = 'working';
   }
+  emit('update:work-state', workingState.value);
 }
 </script>
 

@@ -4,6 +4,7 @@ import Child from '~/models/child';
 import type { BeanStation } from '~/models/bean-station';
 import cookieService from '~/composables/cookie-service';
 import StationDetailHeader from '~/components/station/station-detail-header.vue';
+import type { workingState } from '~/constants/constants';
 
 const props = defineProps<{ station: BeanStation }>();
 const emit = defineEmits<{
@@ -13,7 +14,7 @@ const isEditing = ref<boolean>(false);
 const childInput = ref<string>('');
 const childRef = ref<HTMLInputElement | null>(null);
 const newChildNameError = ref<boolean>(false);
-const tempChildren = ref<Child[]>([]);
+const tmpChildren = ref<Child[]>([]);
 const sessionId = ref<string | undefined>(undefined);
 
 onMounted(() => {
@@ -26,7 +27,7 @@ async function toggleEdit() {
     nextTick(() => childRef.value?.focus());
   } else {
     await submitChildren();
-    tempChildren.value = [];
+    tmpChildren.value = [];
   }
 }
 
@@ -36,13 +37,13 @@ function addChild() {
     return;
   }
   const newChild = new Child(childInput.value.trim());
-  tempChildren.value.push(newChild);
+  tmpChildren.value.push(newChild);
   childInput.value = '';
 }
 
 async function submitChildren() {
-  while (tempChildren.value.length > 0) {
-    const child = tempChildren.value.shift();
+  while (tmpChildren.value.length > 0) {
+    const child = tmpChildren.value.shift();
     if (child) {
       let res = await $fetch('/api/session/addChild', {
         method: 'POST',
@@ -55,6 +56,10 @@ async function submitChildren() {
       props.station.children.push((res as unknown as Child) || undefined);
     }
   }
+}
+
+function updateChildWorkState(child: Child, workState: workingState) {
+  useWebSocket().updateChild(child.id, props.station.id, workState);
 }
 </script>
 
@@ -75,11 +80,11 @@ async function submitChildren() {
         >
           <p>Children</p>
         </li>
-        <child-row v-for="child in station.children" :child="child" />
         <child-row
-          v-for="child in tempChildren"
+          v-for="child in [...station.children, ...tmpChildren]"
           :child="child"
-          :is-unstable="true"
+          :is-unstable="tmpChildren.includes(child)"
+          @update:work-state="updateChildWorkState(child, $event)"
         />
         <transition name="edit">
           <li

@@ -1,6 +1,7 @@
+import { type workingState } from '~/constants/constants';
 import SessionController from './session-controller';
-import { BeanStation } from '~/models/bean-station';
 import NewBeanSessionDTO from '~/models/new-bean-session-dto';
+import Child from '~/models/child';
 
 const sessionController = new SessionController();
 export default sessionController;
@@ -40,6 +41,20 @@ export function addStation(
   return sessionController.addStation(stationName, hexColor, stationId);
 }
 
-export function gtePermissionOfId(uuid: string) {
+export function getPermissionOfId(uuid: string) {
   return sessionController.getPermissionOfId(uuid);
+}
+
+export function updateChildWorkingState(
+  sessionId: string,
+  stationId: number,
+  childId: number,
+  workState: workingState,
+): Child {
+  return sessionController.updateChildWorkingState(
+    sessionId,
+    stationId,
+    childId,
+    workState,
+  );
 }

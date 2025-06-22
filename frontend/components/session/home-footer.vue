@@ -1,21 +1,17 @@
 <script setup lang="ts">
+import { dashboardViews } from '~/constants/constants';
+
 const props = defineProps<{
-  currentPage: page;
+  currentPage: dashboardViews;
 }>();
 
-enum page {
-  loading = 0,
-  home = 1,
-  share = 2,
-  settings = 3,
-}
 const emit = defineEmits(['update:logout', 'update:set-page']);
 
 function logout() {
   emit('update:logout', true);
 }
 
-function setPage(page: page) {
+function setPage(page: dashboardViews) {
   emit('update:set-page', page);
 }
 </script>
@@ -36,39 +32,51 @@ function setPage(page: page) {
     </div>
 
     <div
-      :class="[currentPage === page.home ? 'bg-blue-600' : 'bg-black/10']"
-      class="flex place-content-center place-items-center rounded-xl p-2"
-    >
-      <LazyIcon
-        :name="currentPage === page.home ? 'bean:home-light' : 'bean:home-dark'"
-        class="aspect-square size-8 cursor-pointer"
-        @click="setPage(page.home)"
-      />
-    </div>
-    <div
-      :class="[currentPage === page.share ? 'bg-blue-600' : 'bg-black/10']"
+      :class="[
+        currentPage === dashboardViews.home ? 'bg-blue-600' : 'bg-black/10',
+      ]"
       class="flex place-content-center place-items-center rounded-xl p-2"
     >
       <LazyIcon
         :name="
-          currentPage === page.share ? 'bean:share-light' : 'bean:share-dark'
+          currentPage === dashboardViews.home
+            ? 'bean:home-light'
+            : 'bean:home-dark'
         "
         class="aspect-square size-8 cursor-pointer"
-        @click="setPage(page.share)"
+        @click="setPage(dashboardViews.home)"
       />
     </div>
     <div
-      :class="[currentPage === page.settings ? 'bg-blue-600' : 'bg-black/10']"
+      :class="[
+        currentPage === dashboardViews.share ? 'bg-blue-600' : 'bg-black/10',
+      ]"
       class="flex place-content-center place-items-center rounded-xl p-2"
     >
       <LazyIcon
         :name="
-          currentPage === page.settings
+          currentPage === dashboardViews.share
+            ? 'bean:share-light'
+            : 'bean:share-dark'
+        "
+        class="aspect-square size-8 cursor-pointer"
+        @click="setPage(dashboardViews.share)"
+      />
+    </div>
+    <div
+      :class="[
+        currentPage === dashboardViews.settings ? 'bg-blue-600' : 'bg-black/10',
+      ]"
+      class="flex place-content-center place-items-center rounded-xl p-2"
+    >
+      <LazyIcon
+        :name="
+          currentPage === dashboardViews.settings
             ? 'bean:settings-light'
             : 'bean:settings-dark'
         "
         class="aspect-square size-8 cursor-pointer"
-        @click="setPage(page.settings)"
+        @click="setPage(dashboardViews.settings)"
       />
     </div>
   </footer>

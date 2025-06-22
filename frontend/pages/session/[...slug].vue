@@ -3,10 +3,10 @@ import StationCard from '~/components/station/station-card.vue';
 import { BeanStation } from '~/models/bean-station';
 import { getCookie, setCookie } from 'typescript-cookie';
 import type BeanSessionDTO from '~/models/bean-session-dto';
-import { cookieService } from '#imports';
+import { cookieService, useWebSocket } from '#imports';
 import HomeFooter from '~/components/session/home-footer.vue';
 import HomeHeader from '~/components/session/home-header.vue';
-import WebsocketTest from '~/components/utility/websocket-test.vue';
+import { dashboardViews } from '~/constants/constants';
 
 const route = useRoute();
 const router = useRouter();
@@ -24,21 +24,14 @@ const stationRef = ref<HTMLInputElement | null>(null);
 const isAddIconVisible = ref<boolean>(true);
 const addStationRef = ref<HTMLDivElement | null>(null);
 
-enum page {
-  loading = 0,
-  home = 1,
-  share = 2,
-  settings = 3,
-}
-
-const pageToSlugMap: Record<page, string> = {
-  [page.loading]: 'loading',
-  [page.home]: 'home',
-  [page.share]: 'share',
-  [page.settings]: 'settings',
+const pageToSlugMap: Record<dashboardViews, string> = {
+  [dashboardViews.loading]: 'loading',
+  [dashboardViews.home]: 'home',
+  [dashboardViews.share]: 'share',
+  [dashboardViews.settings]: 'settings',
 };
 
-const currentPage = ref<page>(page.loading);
+const currentPage = ref<dashboardViews>(dashboardViews.loading);
 
 onMounted(async () => {
   const slug = route.params.slug as string;
@@ -53,27 +46,30 @@ onMounted(async () => {
       setCookie('bean_icon', currentSession.value.icon);
     }
     currentPage.value = sessionStorage.getItem('currentPage')
-      ? (parseInt(sessionStorage.getItem('currentPage') || '') as page)
-      : page.home;
+      ? (parseInt(
+          sessionStorage.getItem('currentPage') || '',
+        ) as dashboardViews)
+      : dashboardViews.home;
   }
   setPageOnLoad();
+  useWebSocket().openConnection(sessionId.value || '');
 });
 
 function setPageOnLoad() {
   const slug = route.params.slug as string;
   if (slug.length < 2) {
-    setPage(toPage(slug[1]) || page.home);
+    setPage(toPage(slug[1]) || dashboardViews.home);
   }
 }
 
-function toPage(slug: string): page | undefined {
+function toPage(slug: string): dashboardViews | undefined {
   const entry = Object.entries(pageToSlugMap).find(
     ([, value]) => value === slug,
   );
-  return entry ? (parseInt(entry[0]) as page) : undefined;
+  return entry ? (parseInt(entry[0]) as dashboardViews) : undefined;
 }
 
-function setPage(page: page) {
+function setPage(page: dashboardViews) {
   currentPage.value = page;
   sessionStorage.setItem('currentPage', page.toString());
   const slug = pageToSlugMap[page];
@@ -193,7 +189,7 @@ function logout() {
         @update:toggle-edit="toggleEdit"
       />
       <section
-        v-if="currentPage === page.home"
+        v-if="currentPage === dashboardViews.home"
         class="flex w-full place-content-center place-items-center px-2 md:place-content-start md:px-10"
       >
         <div

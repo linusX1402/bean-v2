@@ -41,7 +41,7 @@ function toggleEdit() {
         @click="$emit('update:close-detail')"
         class="flex cursor-pointer place-content-center place-items-center text-blue-500"
       >
-        <LazyIcon name="bean:chevron-left-blue" class="size-7" />
+        <icon name="bean:chevron-left-blue" class="size-7" />
         <p class="text-p">Back</p>
       </button>
     </div>
@@ -52,7 +52,7 @@ function toggleEdit() {
         @click="toggleEdit"
         class="flex place-content-center place-items-center text-blue-500"
       >
-        <LazyIcon v-if="!isEditing" name="bean:plus-blue" class="size-7" />
+        <icon v-if="!isEditing" name="bean:plus-blue" class="size-7" />
         <p v-else class="text-p text-blue-500">submit</p>
       </button>
     </div>
@@ -63,45 +63,53 @@ function toggleEdit() {
     name="icon-menu"
     type="transition"
     key="icon-menu"
-    :duration="300"
     class="flex place-content-center place-items-center gap-2"
   >
     <li
       key="menu-start"
       @click="setHederMenu('start')"
       :class="[currentOpenMenu === 'start' ? 'px-3' : 'aspect-square min-w-8']"
-      class="flex h-10 cursor-pointer select-none place-content-center place-items-center rounded-xl bg-green-500 p-1 transition-all duration-300 ease-in-out"
+      class="flex h-10 cursor-pointer select-none place-content-center place-items-center rounded-xl bg-green-500 p-1 font-semibold transition-all duration-300 ease-in-out"
     >
-      <icon
-        v-if="currentOpenMenu !== 'start'"
-        name="bean:play"
-        class="size-8"
-      />
-      <h6 class="text-white" v-else>Start</h6>
+      <icon name="bean:play" class="size-7" />
+      <h6 class="text-white" v-if="currentOpenMenu === 'start'">Start</h6>
     </li>
     <li
       key="menu-stop"
       @click="setHederMenu('stop')"
       :class="[currentOpenMenu === 'stop' ? 'px-3' : 'aspect-square min-w-8']"
-      class="flex h-10 cursor-pointer select-none place-content-center place-items-center rounded-xl bg-red-500 p-1 text-red-50 transition-all duration-300 ease-in-out"
+      class="flex h-10 cursor-pointer select-none place-content-center place-items-center rounded-xl bg-red-500 p-1 font-semibold text-red-50 transition-all duration-300 ease-in-out"
     >
-      <icon v-if="currentOpenMenu !== 'stop'" name="bean:stop" class="size-8" />
-      <h6 class="text-white" v-else>Stop</h6>
+      <icon name="bean:stop" class="size-7" />
+      <h6 class="text-white" v-if="currentOpenMenu === 'stop'">Stop</h6>
     </li>
     <li
       key="menu-reset"
       @click="setHederMenu('reset')"
       :class="[currentOpenMenu === 'reset' ? 'px-3' : 'aspect-square min-w-8']"
-      class="flex h-10 cursor-pointer select-none place-content-center place-items-center rounded-xl bg-orange-400 p-1 transition-all duration-300 ease-in-out"
+      class="flex h-10 cursor-pointer select-none place-content-center place-items-center rounded-xl bg-orange-400 p-1 font-semibold transition-all duration-300 ease-in-out"
     >
-      <icon
-        v-if="currentOpenMenu !== 'reset'"
-        name="bean:reset"
-        class="size-8"
-      />
-      <h6 class="text-white" v-else>Reset</h6>
+      <icon name="bean:reset" class="size-7" />
+      <h6 class="text-white" v-if="currentOpenMenu === 'reset'">Reset</h6>
     </li>
   </transition-group>
 </template>
 
-<style scoped></style>
+<style scoped>
+.icon-menu-enter-active,
+.icon-menu-leave-active {
+  transition: all 0.3s ease-in-out;
+}
+
+.icon-menu-enter-from,
+.icon-menu-leave-to {
+  transform: scaleX(0);
+  opacity: 0;
+}
+
+.icon-menu-enter-to,
+.icon-menu-leave-from {
+  transform: scaleX(1);
+  opacity: 1;
+}
+</style>

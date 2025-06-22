@@ -4,7 +4,9 @@ import {
   DEFAULT_BEANS_PER_TICK,
   DEFAULT_SECONDS_PER_TICK,
   DEFAULT_STARTING_FUNDS,
+  type workingState,
 } from '~/constants/constants';
+import { Payout } from '~/models/payout';
 
 export default class BeanSession {
   constructor(
@@ -43,6 +45,31 @@ export default class BeanSession {
 
   get stations(): Map<number, BeanStation> {
     return this._stations;
+  }
+
+  public updateChildWorkingState(
+    stationId: number,
+    childId: number,
+    workState: workingState,
+  ): Child {
+    const child = this._stations
+      .get(stationId)
+      ?.children.find((child) => child.id === childId);
+    if (workState === 'working' && child?.workState !== 'idle') {
+      child?.updateWorkState(workState);
+      console.log('payout time!');
+      try {
+        child!.lastCheckout = new Date();
+        const beansToPayout =
+          child!.lastCheckout.getTime() -
+          (child!.lastCheckin!.getTime() / this.secondsPerTick) *
+            this.beanPerTick;
+        child!.addPayout(beansToPayout);
+      } catch (error) {
+        console.error('Error calculating payout: (' + child?.id + ')', error);
+      }
+    }
+    return child!;
   }
 
   public addStation(stationName: string, hexColor: string): BeanStation {
