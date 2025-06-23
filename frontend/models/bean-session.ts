@@ -55,8 +55,8 @@ export default class BeanSession {
     const child = this._stations
       .get(stationId)
       ?.children.find((child) => child.id === childId);
+    console.log(child?.workState, ' ----- ', workState);
     if (workState === 'working' && child?.workState !== 'idle') {
-      child?.updateWorkState(workState);
       console.log('payout time!');
       try {
         child!.lastCheckout = new Date();
@@ -69,6 +69,7 @@ export default class BeanSession {
         console.error('Error calculating payout: (' + child?.id + ')', error);
       }
     }
+    child?.updateWorkState(workState);
     return child!;
   }
 

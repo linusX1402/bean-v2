@@ -33,7 +33,11 @@ export const useWebSocket = () => {
       ws.value.onmessage = (event) => {
         if (typeof event.data === 'string') {
           console.log('[ws] message received:', event.data);
+          const data = JSON.parse(event.data);
           receivedMessage.value.push(event.data);
+          if (data.header === 'update-child') {
+            handleUpdateChild(data);
+          }
         }
       };
     }
@@ -48,42 +52,23 @@ export const useWebSocket = () => {
     childId: number,
     stationId: number,
     workState: workingState,
-  ): Promise<Child> => {
-    return new Promise((resolve, reject) => {
-      if (ws.value && ws.value.readyState === WebSocket.OPEN) {
-        const message = {
-          header: 'update-child',
-          stationId: stationId,
-          childId: childId,
-          workState: workState,
-        };
+  ) => {
+    if (ws.value && ws.value.readyState === WebSocket.OPEN) {
+      const message = {
+        header: 'update-child',
+        stationId: stationId,
+        childId: childId,
+        workState: workState,
+      };
 
-        ws.value.send(JSON.stringify(message));
-
-        const handleMessage = (event: MessageEvent) => {
-          try {
-            const data = JSON.parse(event.data);
-            if (data.header === 'update-child' && data.childId === childId) {
-              ws.value?.removeEventListener('message', handleMessage);
-              resolve(data);
-            }
-          } catch (error) {
-            reject(error);
-          }
-        };
-
-        ws.value.addEventListener('message', handleMessage);
-
-        // Optional: Add a timeout to reject the promise if no response is received
-        setTimeout(() => {
-          ws.value?.removeEventListener('message', handleMessage);
-          reject(new Error('Timeout waiting for update-child response'));
-        }, 5000); // 5 seconds timeout
-      } else {
-        reject(new Error('WebSocket is not open'));
-      }
-    });
+      ws.value.send(JSON.stringify(message));
+    }
   };
+
+  function handleUpdateChild(data: any) {
+    const child = data.child as Child;
+    // useSession().
+  }
 
   if (getCurrentInstance()) {
     onUnmounted(() => {

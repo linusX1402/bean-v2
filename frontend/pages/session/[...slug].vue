@@ -7,11 +7,10 @@ import { cookieService, useWebSocket } from '#imports';
 import HomeFooter from '~/components/session/home-footer.vue';
 import HomeHeader from '~/components/session/home-header.vue';
 import { dashboardViews } from '~/constants/constants';
+import { useSession } from '~/composables/viewModel';
 
 const route = useRoute();
 const router = useRouter();
-const sessionId = ref<string | undefined>(undefined);
-const currentSession = ref<BeanSessionDTO | undefined>(undefined);
 
 // station input
 const isEditing = ref<boolean>(false);
@@ -36,14 +35,10 @@ const currentPage = ref<dashboardViews>(dashboardViews.loading);
 onMounted(async () => {
   const slug = route.params.slug as string;
   if (slug) {
-    sessionId.value = slug[0];
-    currentSession.value = await getSessionById(sessionId.value);
-    if (!currentSession.value) {
+    const res = await useSession().loadSessionBySlug(slug[0]);
+    if (!res) {
       sessionStorage.clear();
       window.location.href = '/';
-    } else {
-      cookieService().addSession(sessionId.value);
-      setCookie('bean_icon', currentSession.value.icon);
     }
     currentPage.value = sessionStorage.getItem('currentPage')
       ? (parseInt(
@@ -52,7 +47,9 @@ onMounted(async () => {
       : dashboardViews.home;
   }
   setPageOnLoad();
-  useWebSocket().openConnection(sessionId.value || '');
+  useWebSocket().openConnection(
+    useSession().get()?.getHighestPermissionStationId() || '',
+  );
 });
 
 function setPageOnLoad() {
@@ -74,7 +71,9 @@ function setPage(page: dashboardViews) {
   sessionStorage.setItem('currentPage', page.toString());
   const slug = pageToSlugMap[page];
   if (slug) {
-    router.push(`/session/${sessionId.value}/${slug}`);
+    router.push(
+      `/session/${useSession().get()?.getHighestPermissionStationId()}/${slug}`,
+    );
   }
 }
 
@@ -96,12 +95,12 @@ function setPage(page: dashboardViews) {
 //   }
 // }
 
-function clearDetail() {
-  const slug = route.params.slug;
-  if (slug.length >= 3) {
-    router.push('');
-  }
-}
+// function clearDetail() {
+//   const slug = route.params.slug;
+//   if (slug.length >= 3) {
+//     router.push('');
+//   }
+// }
 
 function addStation() {
   if (newStationName.value.trim() === '') {
@@ -146,10 +145,10 @@ async function submitStations() {
         body: {
           stationName: station.name,
           hexColor: station.hexColor,
-          sessionId: sessionId.value,
+          sessionId: useSession().get()?.getHighestPermissionStationId(),
         },
       });
-      currentSession.value?.stations.push(res as unknown as BeanStation);
+      useSession().addStation(res as unknown as BeanStation);
     }
   } catch (error) {
     console.error('Error submitting stations:', error);
@@ -197,7 +196,7 @@ function logout() {
         >
           <station-card
             v-for="station in [
-              ...(currentSession?.stations || []),
+              ...(useSession().get()?.stations || []),
               ...tmpStations,
             ]"
             :key="station.id"

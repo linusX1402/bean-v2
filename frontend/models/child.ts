@@ -26,6 +26,7 @@ export default class Child {
   public addPayout(amount: number): Child {
     this.payoutHistory.unshift(new Payout(amount));
     this.numberOfBeansEarned += amount;
+    this.numberOfBeansToPayout = 0;
     return this;
   }
 

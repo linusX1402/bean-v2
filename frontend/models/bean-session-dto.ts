@@ -34,4 +34,15 @@ export default class BeanSessionDTO {
   public secondsPerTick;
   public beansPerTick;
   public startingFunds;
+
+  public getHighestPermissionStationId(): string {
+    if (this.sessionIdAdmin) {
+      return this.sessionIdAdmin;
+    } else if (this.sessionIdEditor) {
+      return this.sessionIdEditor;
+    } else if (this.sessionIdUser) {
+      return this.sessionIdUser;
+    }
+    return '';
+  }
 }

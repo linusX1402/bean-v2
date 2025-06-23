@@ -21,9 +21,20 @@ const currentIcon = ref<iconList>('bean:play');
 const workingState = ref<workingState>('idle');
 
 const sessionIcon = ref<string>('');
+const timeResting = ref<string>('00:00');
 
 onMounted(() => {
   sessionIcon.value = getCookie('bean_icon') || DEFAULT_ICON;
+  console.log(props.child.lastCheckout);
+  const interval = setInterval(() => {
+    timeResting.value = (
+      props.child.lastCheckout?.getTime() || 0 - new Date().getTime()
+    ).toString();
+  }, 1000);
+
+  onUnmounted(() => {
+    clearInterval(interval);
+  });
 });
 
 function toggleIcon() {
@@ -64,10 +75,11 @@ function toggleIcon() {
       <div
         class="col-start-3 flex h-full w-full place-content-end place-items-center pr-1"
       >
-        <p>
+        <p v-if="workingState !== 'resting'">
           {{ isUnstable ? '-' : child.numberOfBeansToPayout }}
           {{ ' ' + sessionIcon }}
         </p>
+        <p v-else>{{ timeResting }}</p>
       </div>
     </div>
 

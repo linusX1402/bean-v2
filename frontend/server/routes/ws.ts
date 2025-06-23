@@ -47,10 +47,20 @@ function handleUpdateChild(peer: Peer<any>, data: any) {
       data.childId,
       data.workState,
     );
-    const message = JSON.stringify({ header: 'update-child', child: child });
+    const message = JSON.stringify({
+      header: 'update-child',
+      success: '200',
+      stationId: data.stationId,
+      child: child,
+    });
     peer.send(message);
   } catch (e: any) {
-    peer.send(`[ws] child update failed: ${e.message}`);
+    const message = JSON.stringify({
+      header: 'update-child',
+      success: 401,
+      error: e.message,
+    });
+    peer.send(message);
     console.error(`[ws] child update failed (${peer.id}):`, e);
   }
 }
@@ -58,9 +68,19 @@ function handlePermission(peer: Peer<any>, data: any) {
   try {
     getPermissionOfId(data.sessionId);
     clients.set(peer.id, { sessionId: data.sessionId, peer: peer });
-    peer.send('[ws] verification successful');
+    const message = JSON.stringify({
+      header: 'verification',
+      success: 200,
+      error: '',
+    });
+    peer.send(message);
   } catch (e: any) {
-    peer.send(`[ws] verification failed`);
+    const message = JSON.stringify({
+      header: 'verification',
+      success: 401,
+      error: e.message,
+    });
+    peer.send(message);
     console.error(`[ws] verification failed (${peer.id}):`, e);
     peer.close();
   }
@@ -70,7 +90,12 @@ function handleTimout(peer: Peer<any>) {
   setTimeout(() => {
     try {
       if (!clients.get(peer.id)?.sessionId) {
-        peer.send('verification timed out');
+        const message = JSON.stringify({
+          header: 'verification',
+          success: 200,
+          error: 'verification timed out',
+        });
+        peer.send(message);
         console.log(`[ws] verification timed out (${peer.id})`);
         peer.close();
       }
