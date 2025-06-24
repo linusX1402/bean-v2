@@ -26,26 +26,37 @@ const timeResting = ref<string>('00:00');
 onMounted(() => {
   sessionIcon.value = getCookie('bean_icon') || DEFAULT_ICON;
   console.log(props.child.lastCheckout);
-  const interval = setInterval(() => {
-    timeResting.value = (
-      props.child.lastCheckout?.getTime() || 0 - new Date().getTime()
-    ).toString();
-  }, 1000);
+  console.log(typeof props.child.lastCheckout);
+  try {
+    const interval = setInterval(() => {
+      const timeDifference =
+        new Date().getTime() -
+        (props.child.lastCheckout?.getTime() || new Date().getTime());
+      const minutes = Math.floor(timeDifference / 60000);
+      const seconds = Math.floor((timeDifference % 60000) / 1000);
+      timeResting.value = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }, 1000);
 
-  onUnmounted(() => {
-    clearInterval(interval);
-  });
+    onUnmounted(() => {
+      clearInterval(interval);
+    });
+  } catch (error) {
+    console.error('Error calculating time resting:', error);
+    timeResting.value = '00:00';
+  }
 });
 
 function toggleIcon() {
-  if (currentIcon.value === 'bean:stop') {
-    currentIcon.value = 'bean:play';
-    workingState.value = 'resting';
-  } else {
-    currentIcon.value = 'bean:stop';
-    workingState.value = 'working';
+  if (!props.isUnstable) {
+    if (currentIcon.value === 'bean:stop') {
+      currentIcon.value = 'bean:play';
+      workingState.value = 'resting';
+    } else {
+      currentIcon.value = 'bean:stop';
+      workingState.value = 'working';
+    }
+    emit('update:work-state', workingState.value);
   }
-  emit('update:work-state', workingState.value);
 }
 </script>
 
@@ -59,7 +70,7 @@ function toggleIcon() {
       <div
         class="flex h-full w-full place-content-start place-items-center pl-1"
       >
-        <p>
+        <p class="w-full truncate text-left">
           {{ child.name }}
         </p>
       </div>

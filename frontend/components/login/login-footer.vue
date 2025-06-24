@@ -1,7 +1,7 @@
 <script setup lang="ts"></script>
 
 <template>
-  <footer class="bottom-0 left-0 right-0 w-full md:pb-1">
+  <footer class="bottom-0 left-0 right-0 w-full md:absolute md:pb-1">
     <div class="relative flex w-full place-content-center place-items-center">
       <div class="absolute bottom-1 left-2 md:bottom-auto">
         <p class="text-xs text-gray-500">

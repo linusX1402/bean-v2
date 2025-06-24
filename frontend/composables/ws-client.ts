@@ -32,8 +32,8 @@ export const useWebSocket = () => {
 
       ws.value.onmessage = (event) => {
         if (typeof event.data === 'string') {
-          console.log('[ws] message received:', event.data);
           const data = JSON.parse(event.data);
+          console.log('[ws] message received:', data);
           receivedMessage.value.push(event.data);
           if (data.header === 'update-child') {
             handleUpdateChild(data);
@@ -67,7 +67,7 @@ export const useWebSocket = () => {
 
   function handleUpdateChild(data: any) {
     const child = data.child as Child;
-    // useSession().
+    useSession().updateChild(data.stationId, child);
   }
 
   if (getCurrentInstance()) {

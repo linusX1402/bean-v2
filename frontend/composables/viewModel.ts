@@ -41,11 +41,23 @@ export const useSession = () => {
   }
 
   function updateChild(stationId: number, child: Child) {
-    session.value?.stations.find((station) => station.id === stationId)
-      ?.children;
+    const station = session.value?.stations.find(
+      (station) => station.id === stationId,
+    );
+    if (station) {
+      const childIndex = station.children.findIndex((c) => c.id === child.id);
+      if (childIndex !== -1) {
+        station.children[childIndex] = child;
+        if (typeof station.children[childIndex].lastCheckout === 'string') {
+          station.children[childIndex].lastCheckout = new Date(
+            station.children[childIndex].lastCheckout,
+          );
+        }
+      }
+    }
   }
 
   function reloadChild(childId: number) {}
 
-  return { loadSessionBySlug, get, addStation };
+  return { loadSessionBySlug, get, addStation, updateChild };
 };

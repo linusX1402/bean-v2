@@ -125,35 +125,39 @@ async function changeView(updatedView: loginViews, resetSession = false) {
 <template>
   <main>
     <div
-      class="flex h-screen w-screen flex-col place-content-start place-items-center gap-16 px-10 lg:gap-32"
+      class="flex h-screen w-screen flex-col place-content-start place-items-center gap-8 px-10"
     >
       <h1 class="py-10">Bean-Counter {{ DEFAULT_ICON }}</h1>
-      <div
-        class="h-fit w-full rounded-2xl bg-white px-12 py-16 sm:w-2/3 lg:w-[500px]"
+      <section
+        class="flex h-full w-full place-content-center place-items-start"
       >
-        <login-join
-          :current-view="currentView"
-          :do-forward-user="doForwardUser"
-          :api-error="loginSessionError"
-          @update:change-view="changeView"
-          @update:forward-user="setForwardUser"
-          @update:submit-login="submitLogin"
-        />
-        <login-create
-          :do-forward-user="doForwardUser"
-          :current-view="currentView"
-          :api-error="createSessionError"
-          @update:change-view="changeView"
-          @update:submit-create="submitCreate"
-          @update:forward-user="setForwardUser"
-        />
+        <div
+          class="h-fit w-full rounded-2xl bg-white px-12 py-16 sm:w-2/3 lg:w-[500px]"
+        >
+          <login-join
+            :current-view="currentView"
+            :do-forward-user="doForwardUser"
+            :api-error="loginSessionError"
+            @update:change-view="changeView"
+            @update:forward-user="setForwardUser"
+            @update:submit-login="submitLogin"
+          />
+          <login-create
+            :do-forward-user="doForwardUser"
+            :current-view="currentView"
+            :api-error="createSessionError"
+            @update:change-view="changeView"
+            @update:submit-create="submitCreate"
+            @update:forward-user="setForwardUser"
+          />
 
-        <login-copy
-          v-if="currentView === loginViews.copy"
-          @update:back="changeView(loginViews.create, true)"
-          :current-session="currentSession"
-        />
-      </div>
+          <login-copy
+            v-if="currentView === loginViews.copy"
+            @update:back="changeView(loginViews.create, true)"
+            :current-session="currentSession"
+          />
+        </div>
+      </section>
       <login-footer />
     </div>
   </main>
