@@ -20,7 +20,7 @@ export default defineWebSocketHandler({
 
   message(peer, message) {
     const data = JSON.parse(message.data?.toString() || '{}');
-    console.log(`[ws] message received:`, data);
+    // console.log(`[ws] message received:`, data);
     if (data.header === 'verify') {
       handlePermission(peer, data);
     } else if (data.header === 'update-child') {

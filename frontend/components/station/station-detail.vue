@@ -45,15 +45,7 @@ async function submitChildren() {
   while (tmpChildren.value.length > 0) {
     const child = tmpChildren.value.shift();
     if (child) {
-      let res = await $fetch('/api/session/addChild', {
-        method: 'POST',
-        body: {
-          name: child.name,
-          stationId: props.station.id,
-          sessionId: sessionId.value,
-        },
-      });
-      props.station.children.push((res as unknown as Child) || undefined);
+      await useSession().addChild(props.station.id, child);
     }
   }
 }
@@ -82,6 +74,7 @@ function updateChildWorkState(child: Child, workState: workingState) {
         </li>
         <child-row
           v-for="child in [...station.children, ...tmpChildren]"
+          :station-id="station.id"
           :child="child"
           :is-unstable="tmpChildren.includes(child)"
           @update:work-state="updateChildWorkState(child, $event)"

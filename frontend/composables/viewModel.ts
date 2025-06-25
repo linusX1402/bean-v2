@@ -1,9 +1,9 @@
-import type { BeanStation } from '~/models/bean-station';
+import { BeanStation } from '~/models/bean-station';
 import BeanSession from '~/models/bean-session';
 import { cookieService } from '#build/imports';
 import { setCookie } from 'typescript-cookie';
 import BeanSessionDTO from '~/models/bean-session-dto';
-import type Child from '~/models/child';
+import Child from '~/models/child';
 
 const session = ref<BeanSessionDTO>();
 export const useSession = () => {
@@ -22,6 +22,17 @@ export const useSession = () => {
       res?.startingFunds,
       res?.stations || [],
     );
+    session.value?.stations.forEach((station) => {
+      station.children.forEach((child) => {
+        if (typeof child.lastCheckout === 'string') {
+          child.lastCheckout = new Date(child.lastCheckout);
+        }
+        if (typeof child.lastCheckin === 'string') {
+          child.lastCheckin = new Date(child.lastCheckin);
+        }
+      });
+    });
+
     if (session.value.getHighestPermissionStationId() === '') {
       console.log('invalid session');
       return false;
@@ -37,7 +48,12 @@ export const useSession = () => {
   }
 
   function addStation(station: BeanStation) {
-    session.value?.stations.push(station);
+    const newStation = new BeanStation(
+      station.hexColor,
+      station.name,
+      station.id,
+    );
+    session.value?.stations.push(newStation);
   }
 
   function updateChild(stationId: number, child: Child) {
@@ -53,11 +69,67 @@ export const useSession = () => {
             station.children[childIndex].lastCheckout,
           );
         }
+        if (typeof station.children[childIndex].lastCheckin === 'string') {
+          station.children[childIndex].lastCheckin = new Date(
+            station.children[childIndex].lastCheckin,
+          );
+        }
       }
     }
   }
 
-  function reloadChild(childId: number) {}
+  async function addChild(stationId: number, child: Child) {
+    const stationIndex = session.value?.stations.findIndex(
+      (station) => station.id === stationId,
+    );
+    try {
+      let res = (await $fetch('/api/session/addChild', {
+        method: 'POST',
+        body: {
+          name: child.name,
+          stationId: stationId,
+          sessionId: get()?.getHighestPermissionStationId(),
+        },
+      })) as unknown as Child;
+      const resChild = new Child(
+        res.name,
+        res.id,
+        res.numberOfBeansEarned,
+        res.numberOfBeansToPayout,
+      );
+      session.value?.stations[stationIndex!].children.push(resChild);
+    } catch (error) {
+      console.error('Error adding child:', error);
+    }
+  }
 
-  return { loadSessionBySlug, get, addStation, updateChild };
+  function setBeans(stationId: number, childId: number, amount: number) {
+    const stationIndex = session.value?.stations.findIndex(
+      (station) => station.id === stationId,
+    );
+    const childIndex = session.value?.stations[
+      stationIndex ?? -1
+    ].children.findIndex((child) => child.id === childId);
+    if (stationIndex !== undefined && childIndex !== undefined) {
+      const child = session.value?.stations[stationIndex].children[childIndex];
+      if (child) {
+        session.value!.stations[stationIndex].children[
+          childIndex
+        ].numberOfBeansEarned += amount;
+        session.value!.stations[stationIndex].children[
+          childIndex
+        ].numberOfBeansToPayout += amount;
+      }
+      console.log('beans to pay out: ', child?.numberOfBeansToPayout);
+    }
+  }
+
+  return {
+    loadSessionBySlug,
+    get,
+    addStation,
+    updateChild,
+    addChild,
+    addBeans: setBeans,
+  };
 };

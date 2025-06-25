@@ -10,7 +10,6 @@ export function openNewSession(newSession: NewBeanSessionDTO) {
   return sessionController.openNewSession(newSession);
 }
 export function getSessionById(sessionId: string) {
-  console.log(`open session: (${sessionController.openSessions.size}):`);
   return sessionController.getSessionDtoById(sessionId);
 }
 

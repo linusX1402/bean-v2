@@ -11,10 +11,27 @@ export default class Child {
   public lastCheckout: Date | null = null;
   public lastCheckin: Date | null = null;
   public payoutHistory: Payout[] = [];
+  public storedTimeForNextBean: number = 0;
 
-  constructor(name: string, startCapital?: number) {
+  constructor(
+    name: string,
+    id?: number,
+    startCapital?: number,
+    numberOfBeansEarned?: number,
+    numberOfBeansToPayout?: number,
+    lastCheckout?: Date | null,
+    lastCheckin?: Date | null,
+    payoutHistory?: Payout[],
+    workState?: workingState,
+  ) {
     this.name = name;
-    this.id = Child.runningChildId++;
+    this.id = id ?? Child.runningChildId++;
+    this.numberOfBeansEarned = numberOfBeansEarned ?? 0;
+    this.numberOfBeansToPayout = numberOfBeansToPayout ?? 0;
+    this.lastCheckout = lastCheckout ?? null;
+    this.lastCheckin = lastCheckin ?? null;
+    this.payoutHistory = payoutHistory ?? [];
+    this.workState = workState ?? 'idle';
     if (startCapital) this.addBeans(startCapital);
   }
 
@@ -30,6 +47,10 @@ export default class Child {
     return this;
   }
 
+  public setStoredTimeForNextBean(seconds: number) {
+    this.storedTimeForNextBean = seconds;
+  }
+
   public updateWorkState(newState: workingState): Child {
     this.workState = newState;
     if (newState === 'working') {
@@ -37,9 +58,6 @@ export default class Child {
     } else if (newState === 'resting') {
       this.lastCheckout = new Date();
     }
-    console.log(
-      `Child ${this.id} (${this.name}) work state updated to ${newState}`,
-    );
     console.log(this);
     return this;
   }

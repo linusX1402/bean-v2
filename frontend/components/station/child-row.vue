@@ -2,14 +2,18 @@
 import type Child from '~/models/child';
 import { getCookie } from 'typescript-cookie';
 import {
+  DEFAULT_BEANS_PER_TICK,
   DEFAULT_ICON,
+  DEFAULT_SECONDS_PER_TICK,
   type iconList,
-  type workingState,
+  type workingState as workState,
 } from '~/constants/constants';
+import useBeanCalculation from '~/composables/bean-calculation';
 
 const props = withDefaults(
   defineProps<{
     child: Child;
+    stationId: number;
     isUnstable?: boolean;
   }>(),
   { isUnstable: false },
@@ -17,45 +21,97 @@ const props = withDefaults(
 
 const emit = defineEmits(['update:work-state']);
 
+const workState = ref<workState>(props.child.workState ?? 'idle');
 const currentIcon = ref<iconList>('bean:play');
-const workingState = ref<workingState>('idle');
+const beansToPayout = computed(
+  () =>
+    useSession()
+      .get()
+      ?.stations.find((s) => s.id === props.stationId)
+      ?.children.find((c) => c.id === props.child.id)?.numberOfBeansToPayout ??
+    '-',
+);
 
 const sessionIcon = ref<string>('');
-const timeResting = ref<string>('00:00');
+const timeResting = ref('00:00');
+const tickCounter = ref(0);
 
 onMounted(() => {
+  setIconBasedOnWorkingState();
   sessionIcon.value = getCookie('bean_icon') || DEFAULT_ICON;
-  console.log(props.child.lastCheckout);
-  console.log(typeof props.child.lastCheckout);
-  try {
-    const interval = setInterval(() => {
-      const timeDifference =
-        new Date().getTime() -
-        (props.child.lastCheckout?.getTime() || new Date().getTime());
-      const minutes = Math.floor(timeDifference / 60000);
-      const seconds = Math.floor((timeDifference % 60000) / 1000);
-      timeResting.value = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-    }, 1000);
+  let isFirstLoopAfterInit = true;
+  const interval = setInterval(() => {
+    if (workState.value === 'resting') {
+      calculateRestingTimer(props.child, timeResting);
+    } else if (workState.value === 'working') {
+      timeResting.value = '00:00';
+      const timeSinceLastCheckin =
+        Math.floor(
+          (new Date().getTime() -
+            (props.child.lastCheckin?.getTime() || new Date().getTime())) /
+            1000,
+        ) + (props.child.storedTimeForNextBean ?? 0);
+      console.log('storedTimeForNextBean: ', props.child.storedTimeForNextBean);
+      const secondsPerTick =
+        useSession().get()?.secondsPerTick || DEFAULT_SECONDS_PER_TICK;
+      const beansPerTick =
+        useSession().get()?.beansPerTick || DEFAULT_BEANS_PER_TICK;
+      console.log('timeSinceLastCheckin', timeSinceLastCheckin);
+      console.log(timeSinceLastCheckin / secondsPerTick);
+      let ticksPassed = Math.floor(timeSinceLastCheckin / secondsPerTick);
 
-    onUnmounted(() => {
-      clearInterval(interval);
-    });
-  } catch (error) {
-    console.error('Error calculating time resting:', error);
-    timeResting.value = '00:00';
-  }
+      if (ticksPassed > tickCounter.value) {
+        console.log('add a Bean');
+        let beansToAdd = beansPerTick;
+        if (isFirstLoopAfterInit) {
+          beansToAdd = ticksPassed * beansPerTick;
+          tickCounter.value = ticksPassed;
+        } else {
+          tickCounter.value++;
+        }
+        isFirstLoopAfterInit = false;
+        try {
+          useSession().addBeans(props.stationId, props.child.id, beansToAdd);
+        } catch (error) {
+          console.error('Error updating child beans:', error);
+        }
+      }
+    }
+  }, 1000);
+
+  onUnmounted(() => {
+    clearInterval(interval);
+  });
 });
+
+function calculateRestingTimer(child: Child, timeResting: Ref<string>) {
+  const timeDifference =
+    new Date().getTime() -
+    (child.lastCheckout?.getTime() || new Date().getTime());
+  const minutes = Math.floor(timeDifference / 60000);
+  const seconds = Math.floor((timeDifference % 60000) / 1000);
+  timeResting.value = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+}
 
 function toggleIcon() {
   if (!props.isUnstable) {
     if (currentIcon.value === 'bean:stop') {
       currentIcon.value = 'bean:play';
-      workingState.value = 'resting';
+      workState.value = 'resting';
+      tickCounter.value = 0;
     } else {
       currentIcon.value = 'bean:stop';
-      workingState.value = 'working';
+      workState.value = 'working';
     }
-    emit('update:work-state', workingState.value);
+    emit('update:work-state', workState.value);
+  }
+}
+
+function setIconBasedOnWorkingState() {
+  if (workState.value === 'working') {
+    currentIcon.value = 'bean:stop';
+  } else {
+    currentIcon.value = 'bean:play';
   }
 }
 </script>
@@ -86,8 +142,8 @@ function toggleIcon() {
       <div
         class="col-start-3 flex h-full w-full place-content-end place-items-center pr-1"
       >
-        <p v-if="workingState !== 'resting'">
-          {{ isUnstable ? '-' : child.numberOfBeansToPayout }}
+        <p v-if="workState !== 'resting'">
+          {{ isUnstable ? '-' : beansToPayout }}
           {{ ' ' + sessionIcon }}
         </p>
         <p v-else>{{ timeResting }}</p>
@@ -103,8 +159,7 @@ function toggleIcon() {
       @click="toggleIcon"
       id="overlay-unstable"
       :class="{
-        'bg-gray-500/15':
-          currentIcon === 'bean:play' && workingState !== 'idle',
+        'bg-gray-500/15': currentIcon === 'bean:play' && workState !== 'idle',
       }"
       class="absolute bottom-[3px] left-0 right-0 top-[3px] rounded-lg"
     />

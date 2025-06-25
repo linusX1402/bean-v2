@@ -8,8 +8,8 @@ export class BeanStation {
   public name: string;
   public children: Child[] = [];
 
-  constructor(hexColor: string, name: string) {
-    this.id = BeanStation.runningStationId++;
+  constructor(hexColor: string, name: string, id?: number) {
+    this.id = id ?? BeanStation.runningStationId++;
     this.hexColor = hexColor;
     this.name = name;
   }
