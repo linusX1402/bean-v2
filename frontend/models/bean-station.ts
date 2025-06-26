@@ -1,14 +1,16 @@
-import Child from "./child";
+import Child from './child';
 
 export class BeanStation {
   public static runningStationId = 0;
-  public id: number;
+
+  public readonly id: number;
   public hexColor: string;
   public name: string;
   public children: Child[] = [];
 
-  constructor(hexColor: string, name: string) {
-    this.id = BeanStation.runningStationId++;
+  constructor(hexColor: string, name: string, id?: number) {
+    this.id = id ?? BeanStation.runningStationId;
+    BeanStation.runningStationId++;
     this.hexColor = hexColor;
     this.name = name;
   }

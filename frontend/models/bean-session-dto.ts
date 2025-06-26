@@ -1,4 +1,4 @@
-import { BeanStation } from "./bean-station";
+import { BeanStation } from './bean-station';
 
 export default class BeanSessionDTO {
   constructor(
@@ -19,12 +19,12 @@ export default class BeanSessionDTO {
     this.sessionIdUser = sessionIdUser;
     this.secondsPerTick = secondsPerTick;
     this.stations = stations;
-    this.beanPerTick = beanPerTick;
+    this.beansPerTick = beanPerTick;
     this.startingFunds = startingFunds;
   }
 
   public static runningId = 0;
-  public readonly creationDate: Date = new Date();
+  public readonly creationDate?: Date = new Date();
   public stations: BeanStation[];
   public readonly sessionIdAdmin: string;
   public readonly sessionIdEditor: string;
@@ -32,6 +32,17 @@ export default class BeanSessionDTO {
   public name: string;
   public icon: string;
   public secondsPerTick;
-  public beanPerTick;
+  public beansPerTick;
   public startingFunds;
+
+  public getHighestPermissionStationId(): string {
+    if (this.sessionIdAdmin) {
+      return this.sessionIdAdmin;
+    } else if (this.sessionIdEditor) {
+      return this.sessionIdEditor;
+    } else if (this.sessionIdUser) {
+      return this.sessionIdUser;
+    }
+    return '';
+  }
 }

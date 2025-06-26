@@ -14,6 +14,8 @@ export default {
       colors: {
         'bean-white-400': '#F8F6F9',
         'bean-white-500': '#EFEDF2',
+        'bean-gray-300': '#EAEAEB',
+        'bean-gray-400': '#BBBBC0',
         'bean-gray-500': '#7B7B81',
       },
       fontSize: {
@@ -23,8 +25,8 @@ export default {
         h4: '1.728rem', // 27.648px
         h5: '1.44rem', // 23.04px
         h6: '1.2rem', // 19.2px
-        p: '1rem', // 16px
-        sm: '0.833rem', // 13.328px
+        p: '0.9rem', //
+        sm: '0.8rem', //
         xs: '0.694rem', // 11.104px
         'lg-h1': '3.7325rem', // 59.72px
         'lg-h2': '3.11rem', // 49.77px

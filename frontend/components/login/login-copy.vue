@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { getDynamicBaseURL } from '~/composables/dynamic-base-url';
-import type BeanSessionDTO from '../../../models/bean-session-dto';
+import type BeanSessionDTO from '~/models/bean-session-dto';
 
 const props = defineProps<{ currentSession: BeanSessionDTO | undefined }>();
 

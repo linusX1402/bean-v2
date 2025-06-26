@@ -1,5 +1,12 @@
-import { BeanStation } from "./bean-station";
-import Child from "./child";
+import { BeanStation } from './bean-station';
+import Child from './child';
+import {
+  DEFAULT_BEANS_PER_TICK,
+  DEFAULT_SECONDS_PER_TICK,
+  DEFAULT_STARTING_FUNDS,
+  type workingState,
+} from '~/constants/constants';
+import { Payout } from '~/models/payout';
 
 export default class BeanSession {
   constructor(
@@ -8,9 +15,9 @@ export default class BeanSession {
     sessionIdAdmin: string,
     sessionIdEditor: string,
     sessionIdUser: string,
-    secondsPerTick: number = 60,
-    beanPerTick: number = 5,
-    startingFunds: number = 5,
+    secondsPerTick: number = DEFAULT_SECONDS_PER_TICK,
+    beanPerTick: number = DEFAULT_BEANS_PER_TICK,
+    startingFunds: number = DEFAULT_STARTING_FUNDS,
     stations: Map<number, BeanStation> = new Map<number, BeanStation>(),
   ) {
     this._name = name;
@@ -38,6 +45,45 @@ export default class BeanSession {
 
   get stations(): Map<number, BeanStation> {
     return this._stations;
+  }
+
+  public updateChildWorkingState(
+    stationId: number,
+    childId: number,
+    workState: workingState,
+  ): Child {
+    const child = this._stations
+      .get(stationId)
+      ?.children.find((child) => child.id === childId);
+    if (workState === 'working' && child?.workState !== 'idle') {
+      console.log('------------------------------------------------------');
+      console.log('payout time!');
+      console.log('param: ', workState, 'child: ', child?.workState);
+      console.log(this.stations);
+      try {
+        child!.lastCheckout = new Date();
+        const timeSinceLastCheckout = Math.floor(
+          (new Date().getTime() -
+            (child?.lastCheckin?.getTime() || new Date().getTime())) /
+            1000 +
+            (child?.storedTimeForNextBean ?? 0),
+        );
+        const ticksPassed = Math.floor(
+          timeSinceLastCheckout / this.secondsPerTick,
+        );
+        const restTime =
+          timeSinceLastCheckout - ticksPassed * this.secondsPerTick;
+        console.log('------------------------------------------------------');
+        child!.setStoredTimeForNextBean(restTime);
+        if (ticksPassed > 0) {
+          child!.addPayout(ticksPassed * this.beanPerTick);
+        }
+      } catch (error) {
+        console.error('Error calculating payout: (' + child?.id + ')', error);
+      }
+    }
+    child?.updateWorkState(workState);
+    return child!;
   }
 
   public addStation(stationName: string, hexColor: string): BeanStation {
@@ -76,14 +122,14 @@ export default class BeanSession {
   public getSessionIdByRole(role: string): string {
     role = role.toLowerCase();
     switch (role) {
-      case "admin":
+      case 'admin':
         return this.sessionIdAdmin;
-      case "edit":
+      case 'edit':
         return this.sessionIdEditor;
-      case "view":
+      case 'view':
         return this.sessionIdUser;
       default:
-        throw new Error("Invalid role");
+        throw new Error('Invalid role');
     }
   }
 
@@ -110,11 +156,11 @@ export default class BeanSession {
 
   public getPermissionOfId(uuid: string): string {
     if (this.sessionIdAdmin === uuid) {
-      return "admin";
+      return 'admin';
     } else if (this.sessionIdEditor === uuid) {
-      return "edit";
+      return 'edit';
     } else if (this.sessionIdUser === uuid) {
-      return "view";
+      return 'view';
     } else {
       throw new Error(`Session with ID ${uuid} does not exist.`);
     }

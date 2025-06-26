@@ -1,8 +1,8 @@
 import {
-  gtePermissionOfId,
+  getPermissionOfId,
   getSessionByName,
 } from '../../session-controller-instance';
-import BeanSessionDTO from '../../../../models/bean-session-dto';
+import BeanSessionDTO from '~/models/bean-session-dto';
 
 export default defineEventHandler(async (event) => {
   const method = getMethod(event);
@@ -16,6 +16,6 @@ export default defineEventHandler(async (event) => {
         statusMessage: 'Missing required fields',
       });
     }
-    return gtePermissionOfId(uuid as string);
+    return getPermissionOfId(uuid as string);
   }
 });

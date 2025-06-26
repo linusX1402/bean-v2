@@ -1,16 +1,16 @@
 <script lang="ts" setup>
-import StationCard from '~/components/data/station-card.vue';
-import { BeanStation } from '../../../models/bean-station';
+import StationCard from '~/components/station/station-card.vue';
+import { BeanStation } from '~/models/bean-station';
 import { getCookie, setCookie } from 'typescript-cookie';
-import type BeanSessionDTO from '../../../models/bean-session-dto';
-import { cookieService } from '#imports';
-import HomeFooter from '~/components/ui/home-footer.vue';
-import HomeHeader from '~/components/ui/home-header.vue';
+import type BeanSessionDTO from '~/models/bean-session-dto';
+import { cookieService, useWebSocket } from '#imports';
+import HomeFooter from '~/components/session/home-footer.vue';
+import HomeHeader from '~/components/session/home-header.vue';
+import { dashboardViews } from '~/constants/constants';
+import { useSession } from '~/composables/viewModel';
 
 const route = useRoute();
 const router = useRouter();
-const sessionId = ref<string | undefined>(undefined);
-const currentSession = ref<BeanSessionDTO | undefined>(undefined);
 
 // station input
 const isEditing = ref<boolean>(false);
@@ -23,75 +23,84 @@ const stationRef = ref<HTMLInputElement | null>(null);
 const isAddIconVisible = ref<boolean>(true);
 const addStationRef = ref<HTMLDivElement | null>(null);
 
-enum page {
-  loading = 0,
-  home = 1,
-  share = 2,
-  settings = 3,
-}
-
-const pageToSlugMap: Record<page, string> = {
-  [page.loading]: 'loading',
-  [page.home]: 'home',
-  [page.share]: 'share',
-  [page.settings]: 'settings',
+const pageToSlugMap: Record<dashboardViews, string> = {
+  [dashboardViews.loading]: 'loading',
+  [dashboardViews.home]: 'home',
+  [dashboardViews.share]: 'share',
+  [dashboardViews.settings]: 'settings',
 };
 
-const currentPage = ref<page>(page.loading);
+const currentPage = ref<dashboardViews>(dashboardViews.loading);
 
 onMounted(async () => {
   const slug = route.params.slug as string;
   if (slug) {
-    sessionId.value = slug[0];
-    currentSession.value = await getSessionById(sessionId.value);
-    if (!currentSession.value) {
+    const res = await useSession().loadSessionBySlug(slug[0]);
+    if (!res) {
       sessionStorage.clear();
       window.location.href = '/';
-    } else {
-      cookieService().addSession(sessionId.value);
-      setCookie('bean_icon', currentSession.value.icon);
     }
     currentPage.value = sessionStorage.getItem('currentPage')
-      ? (parseInt(sessionStorage.getItem('currentPage') || '') as page)
-      : page.home;
+      ? (parseInt(
+          sessionStorage.getItem('currentPage') || '',
+        ) as dashboardViews)
+      : dashboardViews.home;
   }
-
   setPageOnLoad();
+  useWebSocket().openConnection(
+    useSession().get()?.getHighestPermissionStationId() || '',
+  );
 });
 
 function setPageOnLoad() {
   const slug = route.params.slug as string;
-  setPage(toPage(slug[1]) || page.home);
-  if (slug.length >= 3) {
+  if (slug.length < 2) {
+    setPage(toPage(slug[1]) || dashboardViews.home);
   }
 }
 
-function toPage(slug: string): page | undefined {
+function toPage(slug: string): dashboardViews | undefined {
   const entry = Object.entries(pageToSlugMap).find(
     ([, value]) => value === slug,
   );
-  return entry ? (parseInt(entry[0]) as page) : undefined;
+  return entry ? (parseInt(entry[0]) as dashboardViews) : undefined;
 }
 
-function setPage(page: page) {
+function setPage(page: dashboardViews) {
   currentPage.value = page;
   sessionStorage.setItem('currentPage', page.toString());
   const slug = pageToSlugMap[page];
   if (slug) {
-    router.replace(`/session/${sessionId.value}/${slug}`);
+    router.push(
+      `/session/${useSession().get()?.getHighestPermissionStationId()}/${slug}`,
+    );
   }
 }
 
-function setActiveDetail(name: string | undefined) {
-  //push name if set and not already in slug, remove 3rd element if name is undefined. also check if name is a valid station name
-  currentSession.value?.stations.some((n) => {
-    if (n.name === name) {
-      return true;
-    }
-  });
-  const currentSlug = route.params.slug.slice(0, 3) as string;
-  // ToDo: implement
-}
+// ROUTING;
+// function setActiveDetail(name: string) {
+//   const slug = route.params.slug;
+//   if (slug.length < 3) {
+//     router.push(`${slug[1]}/${name?.toLowerCase()}`);
+//   } else {
+//     router.push(`${name?.toLowerCase()}`);
+//   }
+// }
+
+// function clearActiveDetail() {
+//   console.log('clear detail');
+//   const slug = route.params.slug;
+//   if (slug.length >= 3) {
+//     router.push(`/session/${slug[0]}/${slug[1]}`);
+//   }
+// }
+
+// function clearDetail() {
+//   const slug = route.params.slug;
+//   if (slug.length >= 3) {
+//     router.push('');
+//   }
+// }
 
 function addStation() {
   if (newStationName.value.trim() === '') {
@@ -136,10 +145,10 @@ async function submitStations() {
         body: {
           stationName: station.name,
           hexColor: station.hexColor,
-          sessionId: sessionId.value,
+          sessionId: useSession().get()?.getHighestPermissionStationId(),
         },
       });
-      currentSession.value?.stations.push(res as unknown as BeanStation);
+      useSession().addStation(res as unknown as BeanStation);
     }
   } catch (error) {
     console.error('Error submitting stations:', error);
@@ -178,25 +187,25 @@ function logout() {
         @update:add-station="addStation"
         @update:toggle-edit="toggleEdit"
       />
-
       <section
-        v-if="currentPage === page.home"
-        class="flex w-full place-content-center place-items-center md:place-content-start md:px-8"
+        v-if="currentPage === dashboardViews.home"
+        class="flex w-full place-content-center place-items-center px-2 md:place-content-start md:px-10"
       >
         <div
           class="flex w-fit flex-wrap place-content-center gap-8 md:place-content-start"
         >
           <station-card
-            v-for="station in currentSession?.stations"
+            v-for="station in [
+              ...(useSession().get()?.stations || []),
+              ...tmpStations,
+            ]"
             :key="station.id"
             :station="station"
+            :is-unstable="tmpStations.includes(station)"
           />
-          <station-card
-            v-for="station in tmpStations"
-            :key="station.id"
-            :station="station"
-            :is-unstable="true"
-          />
+          <!-- ROUTEING -->
+          <!--            @update:open-detail="setActiveDetail"-->
+          <!--            @update:close-detail="clearActiveDetail"-->
           <div
             class="relative flex w-60 flex-col rounded-2xl bg-bean-white-400 transition-all duration-[250ms] ease-in-out md:h-60"
             :class="[
@@ -218,7 +227,7 @@ function logout() {
                 <transition name="add-icon">
                   <icon
                     v-if="isAddIconVisible"
-                    name="bean:add-blue"
+                    name="bean:plus-blue"
                     class="size-10"
                   />
                 </transition>
@@ -282,7 +291,7 @@ function logout() {
                 </form>
               </div>
             </transition>
-            <div ref="addStationRef"></div>
+            <div ref="addStationRef" />
           </div>
         </div>
       </section>

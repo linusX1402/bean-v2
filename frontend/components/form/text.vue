@@ -22,5 +22,3 @@ const returnVal = ref<string>('');
     :maxlength="maxLength"
   />
 </template>
-
-<style scoped></style>

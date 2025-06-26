@@ -1,4 +1,4 @@
-import type BeanSessionDTO from '../../../models/bean-session-dto';
+import type BeanSessionDTO from '~/models/bean-session-dto';
 import { getDynamicBaseURL } from '~/composables/dynamic-base-url';
 
 export async function getSessionById(

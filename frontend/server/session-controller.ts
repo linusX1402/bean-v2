@@ -1,24 +1,30 @@
-import BeanSession from '../../models/bean-session';
-import { BeanStation } from '../../models/bean-station';
+import BeanSession from '~/models/bean-session';
+import { BeanStation } from '~/models/bean-station';
 
 import { v4 as uuid4 } from 'uuid';
-import BeanSessionDTO from '../../models/bean-session-dto';
+import BeanSessionDTO from '~/models/bean-session-dto';
+import NewBeanSessionDTO from '~/models/new-bean-session-dto';
+import Child from '~/models/child';
+import { type workingState } from '~/constants/constants';
 
 export default class SessionController {
   private _openSessions = new Map<string, BeanSession>();
 
-  public openNewSession(name: string, iconId: string): BeanSession {
+  public openNewSession(newSession: NewBeanSessionDTO): BeanSession {
     let sessionIdAdmin = uuid4();
     let sessionIdEditor = uuid4();
     let sessionIdUser = uuid4();
     this._openSessions.set(
       sessionIdAdmin,
       new BeanSession(
-        name,
-        iconId,
+        newSession.name,
+        newSession.icon,
         sessionIdAdmin,
         sessionIdEditor,
         sessionIdUser,
+        newSession.secondsPerTick,
+        newSession.beansPerTick,
+        newSession.startingFunds,
       ),
     );
     return this.openSessions.get(sessionIdAdmin)!;
@@ -96,5 +102,17 @@ export default class SessionController {
       throw new Error(`Session with ID ${uuid} does not exist.`);
     }
     return session.getPermissionOfId(uuid);
+  }
+  updateChildWorkingState(
+    sessionId: string,
+    stationId: number,
+    childId: number,
+    workState: workingState,
+  ): Child {
+    const session = this.getSessionById(sessionId);
+    if (!session) {
+      throw new Error(`Session with ID ${sessionId} does not exist.`);
+    }
+    return session.updateChildWorkingState(stationId, childId, workState);
   }
 }
