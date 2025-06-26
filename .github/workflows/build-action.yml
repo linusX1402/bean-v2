@@ -5,6 +5,7 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
@@ -21,6 +22,9 @@ jobs:
       id-token: write
 
     steps:
+    - name: Checkout the repository
+      uses: actions/checkout@v4
+
     - uses: actions/checkout@v4
     - uses: actions/setup-node@v4
     - name: add execute flag to build.sh
@@ -31,6 +35,13 @@ jobs:
       working-directory: ./
       run: ./build.sh
 
+    - name: setup node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+
     - name: Cache Node.js modules
       uses: actions/cache@v3
       with:
@@ -38,11 +49,14 @@ jobs:
         key: ${{ runner.os }}-node-${{ hashFiles('frontend/package-lock.json') }}
         restore-keys: |
           ${{ runner.os }}-node-
-
       ## Pushing to gitHub docker registry
     - name: Log in to GitHub Container Registry
-      run: echo "${{ secrets.CTS_GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.CTS_GITHUB_TOKEN }}
+#      run: echo "${{ secrets.CTS_GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
     - name: Tag the Docker image
       run: docker tag bean-v2 ghcr.io/linusx1402/bean-v2:latest
       working-directory: ./frontend
