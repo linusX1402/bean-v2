@@ -29,17 +29,17 @@ jobs:
       working-directory: ./
       run: chmod +x build.sh
 
+
+    - name: Build the Docker image
+      working-directory: ./
+      run: ./build.sh
+
     - name: setup node.js
       uses: actions/setup-node@v4
       with:
         node-version: '22'
         cache: 'npm'
         cache-dependency-path: frontend/package-lock.json
-
-    - name: Build the Docker image
-      working-directory: ./
-      run: ./build.sh
-
 #    - name: Cache Node.js modules
 #      uses: actions/cache@v3
 #      with:
