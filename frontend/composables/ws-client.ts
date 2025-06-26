@@ -53,6 +53,7 @@ export const useWebSocket = () => {
     stationId: number,
     workState: workingState,
   ) => {
+    console.log('childId: ', childId);
     if (ws.value && ws.value.readyState === WebSocket.OPEN) {
       const message = {
         header: 'update-child',

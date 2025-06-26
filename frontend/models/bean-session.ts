@@ -59,6 +59,7 @@ export default class BeanSession {
       console.log('------------------------------------------------------');
       console.log('payout time!');
       console.log('param: ', workState, 'child: ', child?.workState);
+      console.log(this.stations);
       try {
         child!.lastCheckout = new Date();
         const timeSinceLastCheckout = Math.floor(

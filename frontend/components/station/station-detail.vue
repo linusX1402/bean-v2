@@ -51,6 +51,7 @@ async function submitChildren() {
 }
 
 function updateChildWorkState(child: Child, workState: workingState) {
+  console.log('Updating child work state:', child.name, child.id, workState);
   useWebSocket().updateChild(child.id, props.station.id, workState);
 }
 </script>
@@ -77,6 +78,7 @@ function updateChildWorkState(child: Child, workState: workingState) {
           :station-id="station.id"
           :child="child"
           :is-unstable="tmpChildren.includes(child)"
+          :key="child.id"
           @update:work-state="updateChildWorkState(child, $event)"
         />
         <transition name="edit">

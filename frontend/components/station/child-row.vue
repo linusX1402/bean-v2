@@ -9,6 +9,7 @@ import {
   type workingState as workState,
 } from '~/constants/constants';
 import useBeanCalculation from '~/composables/bean-calculation';
+import Login from '~/pages/login.vue';
 
 const props = withDefaults(
   defineProps<{
@@ -33,13 +34,15 @@ const beansToPayout = computed(
 );
 
 const sessionIcon = ref<string>('');
-const timeResting = ref('00:00');
 const tickCounter = ref(0);
+const timeResting = ref('00:00');
 
 onMounted(() => {
   setIconBasedOnWorkingState();
   sessionIcon.value = getCookie('bean_icon') || DEFAULT_ICON;
+
   let isFirstLoopAfterInit = true;
+
   const interval = setInterval(() => {
     if (workState.value === 'resting') {
       calculateRestingTimer(props.child, timeResting);
@@ -51,13 +54,15 @@ onMounted(() => {
             (props.child.lastCheckin?.getTime() || new Date().getTime())) /
             1000,
         ) + (props.child.storedTimeForNextBean ?? 0);
-      console.log('storedTimeForNextBean: ', props.child.storedTimeForNextBean);
       const secondsPerTick =
         useSession().get()?.secondsPerTick || DEFAULT_SECONDS_PER_TICK;
       const beansPerTick =
         useSession().get()?.beansPerTick || DEFAULT_BEANS_PER_TICK;
+      // console.log('storedTimeForNextBean: ', props.child.storedTimeForNextBean);
       console.log('timeSinceLastCheckin', timeSinceLastCheckin);
-      console.log(timeSinceLastCheckin / secondsPerTick);
+      console.log(props.child.lastCheckin);
+      // console.log(timeSinceLastCheckin / secondsPerTick);
+      // console.log('child: ', props.child);
       let ticksPassed = Math.floor(timeSinceLastCheckin / secondsPerTick);
 
       if (ticksPassed > tickCounter.value) {

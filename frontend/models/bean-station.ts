@@ -9,7 +9,8 @@ export class BeanStation {
   public children: Child[] = [];
 
   constructor(hexColor: string, name: string, id?: number) {
-    this.id = id ?? BeanStation.runningStationId++;
+    this.id = id ?? BeanStation.runningStationId;
+    BeanStation.runningStationId++;
     this.hexColor = hexColor;
     this.name = name;
   }

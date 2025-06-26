@@ -25,7 +25,8 @@ export default class Child {
     workState?: workingState,
   ) {
     this.name = name;
-    this.id = id ?? Child.runningChildId++;
+    this.id = id ?? Child.runningChildId;
+    Child.runningChildId++;
     this.numberOfBeansEarned = numberOfBeansEarned ?? 0;
     this.numberOfBeansToPayout = numberOfBeansToPayout ?? 0;
     this.lastCheckout = lastCheckout ?? null;
