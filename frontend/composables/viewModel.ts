@@ -12,16 +12,21 @@ export const useSession = () => {
 
     const res = await getSessionById(sessionId);
     session.value = new BeanSessionDTO(
-      res?.name || '',
-      res?.icon || '',
-      res?.sessionIdAdmin || '',
-      res?.sessionIdEditor || '',
-      res?.sessionIdUser || '',
+      res?.name ?? '',
+      res?.icon ?? '',
+      res?.sessionIdAdmin ?? '',
+      res?.sessionIdEditor ?? '',
+      res?.sessionIdUser ?? '',
       res?.secondsPerTick,
       res?.beansPerTick,
       res?.startingFunds,
-      res?.stations || [],
+      [],
     );
+    let newStations: BeanStation[] = [];
+    newStations =
+      res?.stations.map((s) => new BeanStation(s.hexColor, s.name, s.id)) || [];
+    session.value.stations = newStations ?? [];
+    console.log(typeof session.value.stations);
     session.value?.stations.forEach((station) => {
       station.children.forEach((child) => {
         if (typeof child.lastCheckout === 'string') {

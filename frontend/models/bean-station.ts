@@ -10,7 +10,9 @@ export class BeanStation {
 
   constructor(hexColor: string, name: string, id?: number) {
     this.id = id ?? BeanStation.runningStationId;
-    BeanStation.runningStationId++;
+    if (!id) {
+      BeanStation.runningStationId++;
+    }
     this.hexColor = hexColor;
     this.name = name;
   }

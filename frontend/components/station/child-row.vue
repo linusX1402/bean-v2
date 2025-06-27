@@ -8,7 +8,6 @@ import {
   type iconList,
   type workingState as workState,
 } from '~/constants/constants';
-import useBeanCalculation from '~/composables/bean-calculation';
 import Login from '~/pages/login.vue';
 
 const props = withDefaults(
