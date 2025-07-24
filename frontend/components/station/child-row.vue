@@ -53,9 +53,10 @@ onMounted(() => {
 });
 
 function calculateRestingTimer(child: Child, timeResting: Ref<string>) {
-  const timeDifference =
-    new Date().getTime() -
-    (child.lastCheckout?.getTime() || new Date().getTime());
+  const lastCheckoutTime = child.lastCheckout
+    ? new Date(child.lastCheckout).getTime()
+    : new Date().getTime();
+  const timeDifference = new Date().getTime() - lastCheckoutTime;
   const minutes = Math.floor(timeDifference / 60000);
   const seconds = Math.floor((timeDifference % 60000) / 1000);
   timeResting.value = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
