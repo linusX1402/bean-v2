@@ -1,5 +1,6 @@
 export const DEFAULT_ICON = '🫘';
 export const ICON_LIST = ['🫘', '🐋', '🪨', '💸'];
+export const INTERVAL_DURATION = 1000;
 export const PLACEHOLDERS = [
   "Tim's game",
   "July's session",

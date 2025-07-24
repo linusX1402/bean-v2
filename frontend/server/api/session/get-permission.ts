@@ -1,8 +1,4 @@
-import {
-  getPermissionOfId,
-  getSessionByName,
-} from '../../session-controller-instance';
-import BeanSessionDTO from '~/models/bean-session-dto';
+import { getPermissionOfId } from '../../session-controller-instance';
 
 export default defineEventHandler(async (event) => {
   const method = getMethod(event);

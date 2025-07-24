@@ -1,9 +1,6 @@
 <script lang="ts" setup>
 import StationCard from '~/components/station/station-card.vue';
 import { BeanStation } from '~/models/bean-station';
-import { getCookie, setCookie } from 'typescript-cookie';
-import type BeanSessionDTO from '~/models/bean-session-dto';
-import { cookieService, useWebSocket } from '#imports';
 import HomeFooter from '~/components/session/home-footer.vue';
 import HomeHeader from '~/components/session/home-header.vue';
 import { dashboardViews } from '~/constants/constants';
@@ -16,8 +13,9 @@ const router = useRouter();
 const isEditing = ref<boolean>(false);
 const newStationName = ref<string>('');
 const hexColor = ref<string>('#0A60FF');
-const tmpStations = ref<BeanStation[]>([]);
+const tmpStations = ref<Map<number, BeanStation>>(new Map());
 const stationRef = ref<HTMLInputElement | null>(null);
+let runningId = -1;
 
 // animations
 const isAddIconVisible = ref<boolean>(true);
@@ -47,9 +45,17 @@ onMounted(async () => {
       : dashboardViews.home;
   }
   setPageOnLoad();
+  console.log('session: ');
+  console.log(useSession().get());
   useWebSocket().openConnection(
-    useSession().get()?.getHighestPermissionStationId() || '',
+    useSession().get()?.getHighestPermissionSessionId() || '',
   );
+
+  // Child interval
+  // const interval = setInterval(() => {}, 1000);
+  // onUnmounted(() => {
+  //   clearInterval(interval);
+  // });
 });
 
 function setPageOnLoad() {
@@ -72,7 +78,7 @@ function setPage(page: dashboardViews) {
   const slug = pageToSlugMap[page];
   if (slug) {
     router.push(
-      `/session/${useSession().get()?.getHighestPermissionStationId()}/${slug}`,
+      `/session/${useSession().get()?.getHighestPermissionSessionId()}/${slug}`,
     );
   }
 }
@@ -111,8 +117,10 @@ function addStation() {
   const newStation = new BeanStation(
     hexColor.value,
     newStationName.value.trim(),
+    runningId,
   );
-  tmpStations.value.push(newStation);
+  runningId--;
+  tmpStations.value.set(newStation.id, newStation);
   newStationName.value = '';
   scrollToAddStationCard();
 }
@@ -121,7 +129,7 @@ async function toggleEdit(value?: boolean) {
   if (value) {
     isEditing.value = value;
     newStationName.value = '';
-    tmpStations.value = [];
+    tmpStations.value = new Map();
   } else {
     isEditing.value = !isEditing.value;
   }
@@ -132,23 +140,26 @@ async function toggleEdit(value?: boolean) {
     });
   } else {
     await submitStations();
-    tmpStations.value = [];
+    tmpStations.value = new Map();
   }
   newStationName.value = '';
 }
 
 async function submitStations() {
   try {
-    for (const station of tmpStations.value) {
+    for (const station of tmpStations.value.values()) {
       let res = await $fetch('/api/session/addStation', {
         method: 'POST',
         body: {
           stationName: station.name,
           hexColor: station.hexColor,
-          sessionId: useSession().get()?.getHighestPermissionStationId(),
+          sessionId: useSession().get()?.getHighestPermissionSessionId(),
         },
       });
-      useSession().addStation(res as unknown as BeanStation);
+
+      console.log('Submitted station:', res);
+      console.log('all stations:', useSession().get()?.stations);
+      useSession().addStation(jsonMapService().station.fromJson(res));
     }
   } catch (error) {
     console.error('Error submitting stations:', error);
@@ -171,6 +182,8 @@ function logout() {
   sessionStorage.setItem('forward', 'false');
   window.location.href = '/';
 }
+
+// Child interval
 </script>
 
 <template>
@@ -194,15 +207,36 @@ function logout() {
         <div
           class="flex w-fit flex-wrap place-content-center gap-8 md:place-content-start"
         >
+          <!--          <station-card-->
+          <!--            v-for="station in [-->
+          <!--              ...(useSession().get()?.stations || []),-->
+          <!--              ...tmpStations,-->
+          <!--            ]"-->
+          <!--            :key="station.id"-->
+          <!--            :station="station"-->
+          <!--            :is-unstable="tmpStations.includes(station)"-->
+          <!--          />-->
+          <!--          <station-card-->
+          <!--            v-for="station in [-->
+          <!--              ...(useSession().get()?.stations || []),-->
+          <!--              ...tmpStations,-->
+          <!--            ]"-->
+          <!--            :key="station.id"-->
+          <!--            :station="station"-->
+          <!--            :is-unstable="tmpStations.includes(station)"-->
+          <!--          />-->
           <station-card
-            v-for="station in [
-              ...(useSession().get()?.stations || []),
-              ...tmpStations,
+            v-for="station of [
+              ...(useSession().get()?.stations.values() ??
+                new Map<number, BeanStation>().values()),
+              ...(tmpStations.values() ??
+                new Map<number, BeanStation>().values()),
             ]"
             :key="station.id"
-            :station="station"
-            :is-unstable="tmpStations.includes(station)"
+            :station="station as BeanStation"
+            :is-unstable="tmpStations.has(station.id)"
           />
+
           <!-- ROUTEING -->
           <!--            @update:open-detail="setActiveDetail"-->
           <!--            @update:close-detail="clearActiveDetail"-->

@@ -1,5 +1,6 @@
 import type Child from '~/models/child';
 import type { workingState } from '~/constants/constants';
+import { useRouter } from 'vue-router';
 
 const ws = ref<WebSocket | undefined>(undefined);
 const receivedMessage = ref<string[]>([]);
@@ -14,6 +15,7 @@ export const useWebSocket = () => {
 
       ws.value.onopen = () => {
         console.log('[ws] open');
+        console.log(`[ws] sessionId: ${sessionId}`);
         const message = {
           header: 'verify',
           sessionId: sessionId,
@@ -28,6 +30,10 @@ export const useWebSocket = () => {
 
       ws.value.onerror = (error) => {
         console.error('WebSocket error:', error);
+        console.log('[ws] trying to reconnect...');
+        setTimeout(() => {
+          openConnection(sessionId);
+        }, 2000);
       };
 
       ws.value.onmessage = (event) => {
@@ -35,6 +41,9 @@ export const useWebSocket = () => {
           const data = JSON.parse(event.data);
           console.log('[ws] message received:', data);
           receivedMessage.value.push(event.data);
+          if (data.code === 401) {
+            window.location.href = '/login';
+          }
           if (data.header === 'update-child') {
             handleUpdateChild(data);
           }
@@ -61,7 +70,6 @@ export const useWebSocket = () => {
         childId: childId,
         workState: workState,
       };
-
       ws.value.send(JSON.stringify(message));
     }
   };

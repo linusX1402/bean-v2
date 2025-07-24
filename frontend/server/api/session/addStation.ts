@@ -1,5 +1,6 @@
-import { addStation } from '../../session-controller-instance';
-
+import jsonMapService from '~/composables/json-map-service';
+import sessionController from '../../session-controller-instance';
+import { BeanStation } from '~/models/bean-station';
 export default defineEventHandler(async (event) => {
   const method = getMethod(event);
 
@@ -10,10 +11,22 @@ export default defineEventHandler(async (event) => {
     if (!stationName || !hexColor || !sessionId) {
       throw createError({
         statusCode: 400,
-        statusMessage: 'Missing required fields',
+        statusMessage: '[add-station] Missing required fields',
       });
     }
 
-    return addStation(stationName, hexColor, sessionId as string);
+    const station = sessionController.addStation(
+      stationName,
+      hexColor,
+      sessionId,
+    );
+    if (station) {
+      return jsonMapService().station.toJson(station);
+    } else {
+      throw createError({
+        statusCode: 404,
+        statusMessage: '[add-station] Session not found',
+      });
+    }
   }
 });

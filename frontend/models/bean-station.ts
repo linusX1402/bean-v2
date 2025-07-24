@@ -6,7 +6,7 @@ export class BeanStation {
   public readonly id: number;
   public hexColor: string;
   public name: string;
-  public children: Child[] = [];
+  public children = new Map<number, Child>();
 
   constructor(hexColor: string, name: string, id?: number) {
     this.id = id ?? BeanStation.runningStationId;
@@ -18,6 +18,6 @@ export class BeanStation {
   }
 
   public addChild(child: Child): void {
-    this.children.push(child);
+    this.children.set(child.id, child);
   }
 }

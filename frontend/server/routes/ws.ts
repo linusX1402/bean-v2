@@ -1,6 +1,7 @@
 import { defineWebSocketHandler } from 'h3';
 import { Peer } from 'crossws';
 import {
+  getAllSessions,
   getPermissionOfId,
   updateChildWorkingState,
 } from '../session-controller-instance';
@@ -49,7 +50,7 @@ function handleUpdateChild(peer: Peer<any>, data: any) {
     );
     const message = JSON.stringify({
       header: 'update-child',
-      success: '200',
+      code: '200',
       stationId: data.stationId,
       child: child,
     });
@@ -57,7 +58,7 @@ function handleUpdateChild(peer: Peer<any>, data: any) {
   } catch (e: any) {
     const message = JSON.stringify({
       header: 'update-child',
-      success: 401,
+      code: 401,
       error: e.message,
     });
     peer.send(message);
@@ -70,18 +71,19 @@ function handlePermission(peer: Peer<any>, data: any) {
     clients.set(peer.id, { sessionId: data.sessionId, peer: peer });
     const message = JSON.stringify({
       header: 'verification',
-      success: 200,
+      code: 200,
       error: '',
     });
     peer.send(message);
   } catch (e: any) {
     const message = JSON.stringify({
       header: 'verification',
-      success: 401,
+      code: 401,
       error: e.message,
     });
     peer.send(message);
     console.error(`[ws] verification failed (${peer.id}):`, e);
+    console.log(getAllSessions());
     peer.close();
   }
 }
@@ -92,7 +94,7 @@ function handleTimout(peer: Peer<any>) {
       if (!clients.get(peer.id)?.sessionId) {
         const message = JSON.stringify({
           header: 'verification',
-          success: 200,
+          code: 200,
           error: 'verification timed out',
         });
         peer.send(message);

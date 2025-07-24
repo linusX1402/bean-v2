@@ -12,6 +12,7 @@ export default class Child {
   public lastCheckin: Date | null = null;
   public payoutHistory: Payout[] = [];
   public storedTimeForNextBean: number = 0;
+  public timeResting: string = '00:00';
 
   constructor(
     name: string,

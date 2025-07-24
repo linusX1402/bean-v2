@@ -1,10 +1,9 @@
-import { addChild } from '../../session-controller-instance';
+import sessionController from '~/server/session-controller-instance';
 
 export default defineEventHandler(async (event) => {
   const method = getMethod(event);
 
   if (method === 'POST') {
-    // const { sessionId } = event.context.params || {};
     const body = await readBody(event);
     const { name, stationId, sessionId } = body;
 
@@ -16,7 +15,14 @@ export default defineEventHandler(async (event) => {
     }
 
     // Ensure `addChild` returns the created child
-    const child = addChild(name, stationId, sessionId);
+    const child = sessionController.addChild(name, stationId, sessionId);
+    console.log('added child', child);
+    console.log(
+      'children currently in station',
+      stationId,
+      'are',
+      sessionController.getSessionDtoById(sessionId),
+    );
     return child; // Return the child as the response
   }
 });

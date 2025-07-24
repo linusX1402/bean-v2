@@ -9,14 +9,6 @@ export default sessionController;
 export function openNewSession(newSession: NewBeanSessionDTO) {
   return sessionController.openNewSession(newSession);
 }
-export function getSessionById(sessionId: string) {
-  return sessionController.getSessionDtoById(sessionId);
-}
-
-export function getSessionByName(name: string) {
-  return sessionController.getSessionByName(name);
-}
-
 export function validateName(name: string) {
   return (
     name.length <= 50 &&
@@ -26,18 +18,6 @@ export function validateName(name: string) {
 
 export function closeSession(adminId: string) {
   return sessionController.closeSession(adminId);
-}
-
-export function addChild(name: string, stationId: number, sessionId: string) {
-  return sessionController.addChild(name, stationId, sessionId);
-}
-
-export function addStation(
-  stationName: string,
-  hexColor: string,
-  stationId: string,
-) {
-  return sessionController.addStation(stationName, hexColor, stationId);
 }
 
 export function getPermissionOfId(uuid: string) {
@@ -56,4 +36,8 @@ export function updateChildWorkingState(
     childId,
     workState,
   );
+}
+
+export function getAllSessions() {
+  return sessionController.openSessions;
 }

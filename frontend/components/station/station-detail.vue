@@ -14,7 +14,8 @@ const isEditing = ref<boolean>(false);
 const childInput = ref<string>('');
 const childRef = ref<HTMLInputElement | null>(null);
 const newChildNameError = ref<boolean>(false);
-const tmpChildren = ref<Child[]>([]);
+const tmpChildren = ref<Map<number, Child>>(new Map());
+let runningId = -1;
 const sessionId = ref<string | undefined>(undefined);
 
 onMounted(() => {
@@ -27,7 +28,7 @@ async function toggleEdit() {
     nextTick(() => childRef.value?.focus());
   } else {
     await submitChildren();
-    tmpChildren.value = [];
+    tmpChildren.value = new Map();
   }
 }
 
@@ -37,16 +38,13 @@ function addChild() {
     return;
   }
   const newChild = new Child(childInput.value.trim());
-  tmpChildren.value.push(newChild);
+  tmpChildren.value.set(newChild.id, newChild);
   childInput.value = '';
 }
 
 async function submitChildren() {
-  while (tmpChildren.value.length > 0) {
-    const child = tmpChildren.value.shift();
-    if (child) {
-      await useSession().addChild(props.station.id, child);
-    }
+  for (const child of tmpChildren.value.values()) {
+    await useSession().addChild(props.station.id, child);
   }
 }
 
@@ -74,10 +72,13 @@ function updateChildWorkState(child: Child, workState: workingState) {
           <p>Children</p>
         </li>
         <child-row
-          v-for="child in [...station.children, ...tmpChildren]"
+          v-for="child of [
+            ...station.children.values(),
+            ...tmpChildren.values(),
+          ]"
           :station-id="station.id"
           :child="child"
-          :is-unstable="tmpChildren.includes(child)"
+          :is-unstable="tmpChildren.has(child.id)"
           :key="child.id"
           @update:work-state="updateChildWorkState(child, $event)"
         />

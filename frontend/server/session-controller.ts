@@ -2,10 +2,10 @@ import BeanSession from '~/models/bean-session';
 import { BeanStation } from '~/models/bean-station';
 
 import { v4 as uuid4 } from 'uuid';
-import BeanSessionDTO from '~/models/bean-session-dto';
 import NewBeanSessionDTO from '~/models/new-bean-session-dto';
 import Child from '~/models/child';
 import { type workingState } from '~/constants/constants';
+import jsonMapService from '~/composables/json-map-service';
 
 export default class SessionController {
   private _openSessions = new Map<string, BeanSession>();
@@ -45,7 +45,7 @@ export default class SessionController {
       v.containsSessionId(sessionId),
     )?.[1];
     if (session) {
-      return this.toDTO(session);
+      return jsonMapService().session.toJson(session);
     }
   }
 
@@ -54,7 +54,7 @@ export default class SessionController {
       ([, v]) => v.name === name,
     )?.[1];
     if (session) {
-      return this.toDTO(session);
+      return jsonMapService().session.toJson(session);
     }
   }
 
@@ -69,7 +69,9 @@ export default class SessionController {
     if (!session) {
       throw new Error(`Session with ID ${sessionId} does not exist.`);
     }
-    return session.addChild(name, stationId);
+    return this._openSessions
+      .get(session.sessionIdAdmin)
+      ?.addChild(name, stationId);
   }
 
   addStation(stationName: string, hexColor: string, sessionId: string) {
@@ -79,23 +81,10 @@ export default class SessionController {
     if (!session) {
       throw new Error(`Session not found.`);
     }
-    return session.addStation(stationName, hexColor);
+    return this._openSessions
+      .get(session.sessionIdAdmin)
+      ?.addStation(stationName, hexColor);
   }
-
-  toDTO(session: BeanSession): BeanSessionDTO {
-    return new BeanSessionDTO(
-      session.name,
-      session.icon,
-      session.sessionIdAdmin,
-      session.sessionIdEditor,
-      session.sessionIdUser,
-      session.secondsPerTick,
-      session.beanPerTick,
-      session.startingFunds,
-      Array.from(session.stations.values()),
-    );
-  }
-
   getPermissionOfId(uuid: string) {
     const session = this.getSessionById(uuid);
     if (!session) {

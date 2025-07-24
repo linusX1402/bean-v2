@@ -1,18 +1,18 @@
 <script lang="ts" setup>
 import { getCookie, removeCookie, setCookie } from 'typescript-cookie';
-import type BeanSessionDTO from '~/models/bean-session-dto';
 import { getDynamicBaseURL } from '~/composables/dynamic-base-url';
 import LoginCopy from '~/components/login/login-copy.vue';
 import cookieService from '~/composables/cookie-service';
 import LoginFooter from '~/components/login/login-footer.vue';
 import { DEFAULT_ICON, loginViews, PLACEHOLDERS } from '~/constants/constants';
 import LoginJoin from '~/components/login/login-join.vue';
+import type BeanSession from '~/models/bean-session';
 
 let baseUrl = getDynamicBaseURL();
 
 const currentView = ref<loginViews>(loginViews.join);
 
-const currentSession = ref<BeanSessionDTO | undefined>();
+const currentSession = ref<BeanSession | undefined>();
 
 const createSessionError = ref<boolean>(false);
 const loginSessionError = ref<boolean>(false);
@@ -70,7 +70,7 @@ function getHighestPermissionSessionId() {
   }
 }
 
-async function submitCreate(newSession: BeanSessionDTO) {
+async function submitCreate(newSession: BeanSession) {
   try {
     const session = await $fetch(`${baseUrl}/api/session/open`, {
       method: 'POST',
@@ -83,7 +83,7 @@ async function submitCreate(newSession: BeanSessionDTO) {
       },
     });
     if (session) {
-      currentSession.value = session as unknown as BeanSessionDTO;
+      currentSession.value = session as unknown as BeanSession;
       cookieService().addSession(
         currentSession.value.sessionIdAdmin,
         doForwardUser.value,

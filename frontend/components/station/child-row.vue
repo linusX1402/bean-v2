@@ -27,9 +27,8 @@ const beansToPayout = computed(
   () =>
     useSession()
       .get()
-      ?.stations.find((s) => s.id === props.stationId)
-      ?.children.find((c) => c.id === props.child.id)?.numberOfBeansToPayout ??
-    '-',
+      ?.stations.get(props.stationId)
+      ?.children.get(props.child.id)?.numberOfBeansToPayout ?? '-',
 );
 
 const sessionIcon = ref<string>('');
@@ -42,50 +41,13 @@ onMounted(() => {
 
   let isFirstLoopAfterInit = true;
 
-  const interval = setInterval(() => {
-    if (workState.value === 'resting') {
-      calculateRestingTimer(props.child, timeResting);
-    } else if (workState.value === 'working') {
-      timeResting.value = '00:00';
-      const timeSinceLastCheckin =
-        Math.floor(
-          (new Date().getTime() -
-            (props.child.lastCheckin?.getTime() || new Date().getTime())) /
-            1000,
-        ) + (props.child.storedTimeForNextBean ?? 0);
-      const secondsPerTick =
-        useSession().get()?.secondsPerTick || DEFAULT_SECONDS_PER_TICK;
-      const beansPerTick =
-        useSession().get()?.beansPerTick || DEFAULT_BEANS_PER_TICK;
-      // console.log('storedTimeForNextBean: ', props.child.storedTimeForNextBean);
-      console.log('timeSinceLastCheckin', timeSinceLastCheckin);
-      console.log(props.child.lastCheckin);
-      // console.log(timeSinceLastCheckin / secondsPerTick);
-      // console.log('child: ', props.child);
-      let ticksPassed = Math.floor(timeSinceLastCheckin / secondsPerTick);
+  requestAnimationFrame(calculateRestingTimer(props.child, timeResting));
 
-      if (ticksPassed > tickCounter.value) {
-        console.log('add a Bean');
-        let beansToAdd = beansPerTick;
-        if (isFirstLoopAfterInit) {
-          beansToAdd = ticksPassed * beansPerTick;
-          tickCounter.value = ticksPassed;
-        } else {
-          tickCounter.value++;
-        }
-        isFirstLoopAfterInit = false;
-        try {
-          useSession().addBeans(props.stationId, props.child.id, beansToAdd);
-        } catch (error) {
-          console.error('Error updating child beans:', error);
-        }
-      }
-    }
-  }, 1000);
-
-  onUnmounted(() => {
-    clearInterval(interval);
-  });
+  // const interval = setInterval(() => {}, 1000);
+  //
+  // onUnmounted(() => {
+  //   clearInterval(interval);
+  // });
 });
 
 function calculateRestingTimer(child: Child, timeResting: Ref<string>) {
