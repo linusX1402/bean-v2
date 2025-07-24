@@ -68,6 +68,7 @@ function toggleIcon() {
       currentIcon.value = 'bean:play';
       workState.value = 'resting';
       tickCounter.value = 0;
+      timeResting.value = '00:00';
     } else {
       currentIcon.value = 'bean:stop';
       workState.value = 'working';
