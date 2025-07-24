@@ -41,13 +41,15 @@ onMounted(() => {
 
   let isFirstLoopAfterInit = true;
 
-  requestAnimationFrame(calculateRestingTimer(props.child, timeResting));
+  // requestAnimationFrame(calculateRestingTimer(props.child, timeResting));
 
-  // const interval = setInterval(() => {}, 1000);
-  //
-  // onUnmounted(() => {
-  //   clearInterval(interval);
-  // });
+  const interval = setInterval(() => {
+    calculateRestingTimer(props.child, timeResting);
+  }, 1000);
+
+  onUnmounted(() => {
+    clearInterval(interval);
+  });
 });
 
 function calculateRestingTimer(child: Child, timeResting: Ref<string>) {

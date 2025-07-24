@@ -1,32 +1,26 @@
 import BeanSession from '~/models/bean-session';
 import { BeanStation } from '~/models/bean-station';
+import type Child from '~/models/child';
 
 export default function () {
   const session = {
     toJson(obj: BeanSession): string {
-      console.log('[toJson]', obj);
-      let stations = obj.stations as Map<number, any>;
-      stations.forEach((s) => {
-        Object.defineProperty(s, 'children', {
-          value: Array.from(s.children),
-          writable: true,
-          configurable: true,
-        });
+      const stations = obj.stations as Map<number, any>;
+      const arrayJsonStations = Array.from(stations, ([key, value]) => {
+        return [key, { ...value, children: Array.from(value.children || []) }];
       });
-      let arrayJsonStations = Array.from(stations);
-      let jsonObj = JSON.parse(JSON.stringify(obj)) as any;
-      jsonObj.stations = arrayJsonStations;
+      const jsonObj = { ...obj, stations: arrayJsonStations };
       return JSON.stringify(jsonObj);
     },
 
     fromJson(jsonString: any): BeanSession {
       const jsonObj = JSON.parse(jsonString);
-      let stationsArray = jsonObj.stations as [number, any][];
-      let stationsMap = new Map<number, any>(stationsArray);
-      stationsMap.forEach((s) => {
-        s.children = new Map(s.children);
-      });
-      jsonObj.stations = stationsMap;
+      const stationsArray = jsonObj.stations as [number, any][];
+      const stationsMap = new Map<number, any>(
+        stationsArray.map(([key, value]) => {
+          return [key, { ...value, children: new Map(value.children || []) }];
+        }),
+      );
       return new BeanSession(
         jsonObj._name,
         jsonObj._icon,
@@ -43,26 +37,20 @@ export default function () {
 
   const station = {
     toJson(obj: BeanStation): string {
-      let children = obj.children as Map<number, any>;
-      children.forEach((c) => {
-        Object.defineProperty(c, 'id', {
-          value: c.id,
-          writable: true,
-          configurable: true,
-        });
-      });
-      let arrayJsonChildren = Array.from(children);
-      let jsonObj = JSON.parse(JSON.stringify(obj)) as any;
-      jsonObj.children = arrayJsonChildren;
+      const childrenArray = Array.from(obj.children || []);
+      const jsonObj = { ...obj, children: childrenArray };
       return JSON.stringify(jsonObj);
     },
 
     fromJson(jsonString: any): BeanStation {
       const jsonObj = JSON.parse(jsonString);
-      let childrenArray = jsonObj.children as [number, any][];
-      let childrenMap = new Map<number, any>(childrenArray);
-      jsonObj.children = childrenMap;
-      return new BeanStation(jsonObj.hexColor, jsonObj.name, jsonObj.id);
+      const childrenMap = new Map(jsonObj.children || []) as Map<number, Child>;
+      return new BeanStation(
+        jsonObj.hexColor,
+        jsonObj.name,
+        jsonObj.id,
+        childrenMap,
+      );
     },
   };
 

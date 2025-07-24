@@ -15,14 +15,6 @@ export default defineEventHandler(async (event) => {
     }
 
     // Ensure `addChild` returns the created child
-    const child = sessionController.addChild(name, stationId, sessionId);
-    console.log('added child', child);
-    console.log(
-      'children currently in station',
-      stationId,
-      'are',
-      sessionController.getSessionDtoById(sessionId),
-    );
-    return child; // Return the child as the response
+    return sessionController.addChild(name, stationId, sessionId);
   }
 });

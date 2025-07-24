@@ -56,6 +56,7 @@ function handleUpdateChild(peer: Peer<any>, data: any) {
     });
     peer.send(message);
   } catch (e: any) {
+    console.warn(`[ws] update child failed (${peer.id}):`, e);
     const message = JSON.stringify({
       header: 'update-child',
       code: 401,
