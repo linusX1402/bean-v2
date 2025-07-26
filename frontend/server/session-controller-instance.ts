@@ -24,20 +24,7 @@ export function getPermissionOfId(uuid: string) {
   return sessionController.getPermissionOfId(uuid);
 }
 
-export function updateChildWorkingState(
-  sessionId: string,
-  stationId: number,
-  childId: number,
-  workState: workingState,
-): Child {
-  return sessionController.updateChildWorkingState(
-    sessionId,
-    stationId,
-    childId,
-    workState,
-  );
-}
-
+// TODO: remove function + API rounte
 export function getAllSessions() {
   return sessionController.openSessions;
 }

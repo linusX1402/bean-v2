@@ -8,7 +8,6 @@ import {
   type iconList,
   type workingState as workState,
 } from '~/constants/constants';
-import Login from '~/pages/login.vue';
 
 const props = withDefaults(
   defineProps<{
@@ -21,6 +20,7 @@ const props = withDefaults(
 
 const emit = defineEmits(['update:work-state']);
 
+let ticksPassed = 0;
 const workState = ref<workState>(props.child.workState ?? 'idle');
 const currentIcon = ref<iconList>('bean:play');
 const beansToPayout = computed(
@@ -38,19 +38,24 @@ const timeResting = ref('00:00');
 onMounted(() => {
   setIconBasedOnWorkingState();
   sessionIcon.value = getCookie('bean_icon') || DEFAULT_ICON;
-
-  let isFirstLoopAfterInit = true;
-
-  // requestAnimationFrame(calculateRestingTimer(props.child, timeResting));
+  calculateBeans(props.child);
 
   const interval = setInterval(() => {
-    calculateRestingTimer(props.child, timeResting);
+    updateChildProps(props.child, timeResting);
   }, 1000);
 
   onUnmounted(() => {
     clearInterval(interval);
   });
 });
+
+function updateChildProps(child: Child, timeResting: Ref<string>) {
+  if (workState.value === 'resting') {
+    calculateRestingTimer(child, timeResting);
+  } else if (workState.value === 'working') {
+    calculateBeans(child);
+  }
+}
 
 function calculateRestingTimer(child: Child, timeResting: Ref<string>) {
   const lastCheckoutTime = child.lastCheckout
@@ -62,12 +67,51 @@ function calculateRestingTimer(child: Child, timeResting: Ref<string>) {
   timeResting.value = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 }
 
+function calculateBeans(child: Child) {
+  try {
+    const lastCheckin = child.lastCheckin
+      ? new Date(child.lastCheckin).getTime()
+      : new Date().getTime();
+    const currentTime = new Date().getTime();
+    const timeSinceLastCheckin = Math.floor(
+      (currentTime - lastCheckin) / 1000 + (child?.storedTimeForNextBean ?? 0),
+    );
+
+    const secondsPerTick =
+      useSession().get()?.secondsPerTick ?? DEFAULT_SECONDS_PER_TICK;
+    const beansPerTick =
+      useSession().get()?.beansPerTick ?? DEFAULT_BEANS_PER_TICK;
+
+    const totalTicksPassed = Math.floor(timeSinceLastCheckin / secondsPerTick);
+    const bonusTimeForNextBean = timeSinceLastCheckin % secondsPerTick;
+
+    useSession()
+      .get()!
+      .stations.get(props.stationId)!
+      .children.get(child.id)!.storedTimeForNextBean = bonusTimeForNextBean;
+
+    const beansToAdd = totalTicksPassed - ticksPassed;
+    if (beansToAdd > 0) {
+      useSession().addBeans(
+        props.stationId,
+        child.id,
+        beansToAdd * beansPerTick,
+      );
+      ticksPassed += beansToAdd;
+    }
+  } catch (error) {
+    console.error('Error calculating payout: (' + child?.id + ')', error);
+  }
+  return child!;
+}
+
 function toggleIcon() {
   if (!props.isUnstable) {
+    ticksPassed = 0;
+    tickCounter.value = 0;
     if (currentIcon.value === 'bean:stop') {
       currentIcon.value = 'bean:play';
       workState.value = 'resting';
-      tickCounter.value = 0;
       timeResting.value = '00:00';
     } else {
       currentIcon.value = 'bean:stop';

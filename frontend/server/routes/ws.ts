@@ -1,9 +1,8 @@
 import { defineWebSocketHandler } from 'h3';
 import { Peer } from 'crossws';
-import {
+import sessionController, {
   getAllSessions,
   getPermissionOfId,
-  updateChildWorkingState,
 } from '../session-controller-instance';
 
 const MAX_VERIFICATION_TIME = 5000;
@@ -42,7 +41,7 @@ export default defineWebSocketHandler({
 function handleUpdateChild(peer: Peer<any>, data: any) {
   const sessionId = clients.get(peer.id)?.sessionId;
   try {
-    const child = updateChildWorkingState(
+    const child = sessionController.updateChildWorkingState(
       sessionId || '',
       data.stationId,
       data.childId,

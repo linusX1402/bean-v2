@@ -51,7 +51,7 @@ export default class BeanSession {
     workState: workingState,
   ): Child {
     const child = this._stations.get(stationId)?.children.get(childId);
-    if (workState === 'working' && child?.workState !== 'idle') {
+    if (workState === 'resting' && child?.workState === 'working') {
       console.log('------------------------------------------------------');
       console.log('payout time!');
       console.log('param: ', workState, 'child: ', child?.workState);
