@@ -31,7 +31,7 @@ export enum dashboardViews {
 }
 
 // Interval time if the value is not availabel
-export const INTERVAL_TIME = 1;
+export const FALLBACK_INTERVAL_TIME = 1;
 
 // ToDo: adjust values for production
 // Beans per tick
