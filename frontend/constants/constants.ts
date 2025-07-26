@@ -30,6 +30,9 @@ export enum dashboardViews {
   settings = 3,
 }
 
+// Interval time if the value is not availabel
+export const INTERVAL_TIME = 1;
+
 // ToDo: adjust values for production
 // Beans per tick
 export const DEFAULT_BEANS_PER_TICK = 1;
@@ -39,7 +42,7 @@ export const BEANS_PER_TICK_STEP_SIZE = 1;
 
 // Seconds per tick
 // TODO: 300
-export const DEFAULT_SECONDS_PER_TICK = 1;
+export const DEFAULT_SECONDS_PER_TICK = 2;
 // TODO: 30
 export const MIN_SECONDS_PER_TICK = 0;
 export const MAX_SECONDS_PER_TICK = 600;

@@ -5,6 +5,7 @@ import {
   DEFAULT_BEANS_PER_TICK,
   DEFAULT_ICON,
   DEFAULT_SECONDS_PER_TICK,
+  FALLBACK_INTERVAL_TIME,
   type iconList,
   type workingState as workState,
 } from '~/constants/constants';
@@ -42,7 +43,7 @@ onMounted(() => {
 
   const interval = setInterval(() => {
     updateChildProps(props.child, timeResting);
-  }, 1000);
+  }, DEFAULT_SECONDS_PER_TICK * 1000);
 
   onUnmounted(() => {
     clearInterval(interval);
@@ -68,6 +69,7 @@ function calculateRestingTimer(child: Child, timeResting: Ref<string>) {
 }
 
 function calculateBeans(child: Child) {
+  console.log('calculating beans');
   try {
     const lastCheckin = child.lastCheckin
       ? new Date(child.lastCheckin).getTime()
