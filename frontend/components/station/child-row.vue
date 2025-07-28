@@ -172,12 +172,12 @@ function setIconBasedOnWorkingState() {
 function handleSwipeAction(optionIndex: number) {
   if (props.isUnstable) return;
   switch (optionIndex) {
+    // case 0:
+    //   break;
     case 0:
-      break;
-    case 1:
       resetChild();
       break;
-    case 2:
+    case 1:
       useSession().removeChild(props.stationId, props.child.id);
       break;
     default:
@@ -190,15 +190,15 @@ function handleSwipeAction(optionIndex: number) {
   <li
     class="relative flex h-12 w-full place-content-center place-items-center border-t border-t-gray-300"
   >
+    <!--      :option1="-->
+    <!--        new swipeOption('bean:edit-light', 'bg-blue-500 text-white', 'Edit')-->
+    <!--      "-->
     <gesture-swipe
       :duration="300"
       :option1="
-        new swipeOption('bean:edit-light', 'bg-blue-500 text-white', 'Edit')
-      "
-      :option2="
         new swipeOption('bean:reset', 'bg-orange-400 text-white', 'Reset')
       "
-      :option3="
+      :option2="
         new swipeOption('bean:trash-light', 'bg-red-500 text-white', 'Delete')
       "
       :is-unstable="isUnstable"
