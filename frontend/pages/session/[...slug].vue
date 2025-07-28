@@ -148,7 +148,7 @@ async function toggleEdit(value?: boolean) {
 async function submitStations() {
   try {
     for (const station of tmpStations.value.values()) {
-      let res = await $fetch('/api/session/addStation', {
+      let res = await $fetch('/api/session/station', {
         method: 'POST',
         body: {
           stationName: station.name,

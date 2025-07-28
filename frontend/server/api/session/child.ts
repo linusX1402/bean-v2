@@ -1,5 +1,6 @@
 import sessionController from '~/server/session-controller-instance';
 import { child } from 'winston';
+import { handleAddChild } from '~/server/routes/ws';
 
 export default defineEventHandler(async (event) => {
   const method = getMethod(event);
@@ -14,9 +15,16 @@ export default defineEventHandler(async (event) => {
         statusMessage: 'Missing required fields',
       });
     }
-
-    // Ensure `addChild` returns the created child
-    return sessionController.addChild(name, stationId, sessionId);
+    const child = sessionController.addChild(name, stationId, sessionId);
+    if (!child) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: 'Session not found',
+      });
+    } else {
+      handleAddChild(child);
+      return child;
+    }
   } else if (method === 'DELETE') {
     const body = await readBody(event);
     const { childId, stationId, sessionId } = body;

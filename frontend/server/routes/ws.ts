@@ -4,6 +4,8 @@ import sessionController, {
   getAllSessions,
   getPermissionOfId,
 } from '../session-controller-instance';
+import Child from '~/models/child';
+import { BeanStation } from '~/models/bean-station';
 
 const MAX_VERIFICATION_TIME = 5000;
 type wsClient = {
@@ -64,6 +66,23 @@ function handleUpdateChild(peer: Peer<any>, data: any) {
     peer.send(message);
     console.error(`[ws] child update failed (${peer.id}):`, e);
   }
+}
+
+export function handleAddStation(data: string) {
+  const message = JSON.stringify({
+    header: 'add-station',
+    code: 200,
+    station: data,
+  });
+  broadcast(message);
+}
+export function handleAddChild(data: Child) {
+  const message = JSON.stringify({
+    header: 'add-child',
+    code: 200,
+    child: data,
+  });
+  broadcast(message);
 }
 function handlePermission(peer: Peer<any>, data: any) {
   try {

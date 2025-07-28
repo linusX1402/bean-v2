@@ -1,6 +1,7 @@
 import jsonMapService from '~/composables/json-map-service';
 import sessionController from '../../session-controller-instance';
 import { BeanStation } from '~/models/bean-station';
+import { handleAddStation } from '~/server/routes/ws';
 export default defineEventHandler(async (event) => {
   const method = getMethod(event);
 
@@ -21,7 +22,9 @@ export default defineEventHandler(async (event) => {
       sessionId,
     );
     if (station) {
-      return jsonMapService().station.toJson(station);
+      const jsonStation = jsonMapService().station.toJson(station);
+      handleAddStation(jsonStation);
+      return jsonStation;
     } else {
       throw createError({
         statusCode: 404,
