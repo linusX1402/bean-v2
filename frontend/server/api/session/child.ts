@@ -1,6 +1,6 @@
 import sessionController from '~/server/session-controller-instance';
 import { child } from 'winston';
-import { handleAddChild } from '~/server/routes/ws';
+import { broadcastUpdateChild } from '~/server/routes/ws';
 
 export default defineEventHandler(async (event) => {
   const method = getMethod(event);
@@ -22,7 +22,7 @@ export default defineEventHandler(async (event) => {
         statusMessage: 'Session not found',
       });
     } else {
-      handleAddChild(child);
+      broadcastUpdateChild(stationId, child);
       return child;
     }
   } else if (method === 'DELETE') {

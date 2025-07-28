@@ -1,6 +1,7 @@
 import type Child from '~/models/child';
 import type { workingState } from '~/constants/constants';
 import { useRouter } from 'vue-router';
+import JsonMapService from '~/composables/json-map-service';
 
 const ws = ref<WebSocket | undefined>(undefined);
 const receivedMessage = ref<string[]>([]);
@@ -44,8 +45,15 @@ export const useWebSocket = () => {
           if (data.code === 401) {
             window.location.href = '/login';
           }
-          if (data.header === 'update-child') {
-            handleUpdateChild(data);
+          switch (data.header) {
+            case 'update-child':
+              handleUpdateChild(data);
+              break;
+            case 'update-station':
+              handleUpdateStation(data);
+              break;
+            default:
+              console.warn('[ws] unknown message header:', data.header);
           }
         }
       };
@@ -75,8 +83,14 @@ export const useWebSocket = () => {
   };
 
   function handleUpdateChild(data: any) {
+    console.log(data.child);
     const child = data.child as Child;
     useSession().updateChild(data.stationId, child);
+  }
+
+  function handleUpdateStation(data: any) {
+    const station = JsonMapService().station.fromJson(data.station);
+    useSession().updateStation(station);
   }
 
   if (getCurrentInstance()) {

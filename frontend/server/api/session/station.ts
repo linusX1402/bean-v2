@@ -1,7 +1,7 @@
 import jsonMapService from '~/composables/json-map-service';
 import sessionController from '../../session-controller-instance';
 import { BeanStation } from '~/models/bean-station';
-import { handleAddStation } from '~/server/routes/ws';
+import { broadcastUpdateStation } from '~/server/routes/ws';
 export default defineEventHandler(async (event) => {
   const method = getMethod(event);
 
@@ -23,7 +23,7 @@ export default defineEventHandler(async (event) => {
     );
     if (station) {
       const jsonStation = jsonMapService().station.toJson(station);
-      handleAddStation(jsonStation);
+      broadcastUpdateStation(jsonStation);
       return jsonStation;
     } else {
       throw createError({

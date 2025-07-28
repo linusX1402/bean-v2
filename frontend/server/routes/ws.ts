@@ -68,18 +68,19 @@ function handleUpdateChild(peer: Peer<any>, data: any) {
   }
 }
 
-export function handleAddStation(data: string) {
+export function broadcastUpdateStation(data: string) {
   const message = JSON.stringify({
-    header: 'add-station',
+    header: 'update-station',
     code: 200,
     station: data,
   });
   broadcast(message);
 }
-export function handleAddChild(data: Child) {
+export function broadcastUpdateChild(stationId: number, data: Child) {
   const message = JSON.stringify({
-    header: 'add-child',
+    header: 'update-child',
     code: 200,
+    stationId: stationId,
     child: data,
   });
   broadcast(message);

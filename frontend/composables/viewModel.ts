@@ -41,6 +41,10 @@ export const useSession = () => {
     session.value?.stations.get(stationId)?.children.set(child.id, child);
   }
 
+  function updateStation(station: BeanStation) {
+    session.value?.stations.set(station.id, station);
+  }
+
   async function addChild(stationId: number, child: Child) {
     console.log('trying to add child', child, 'with stationId', stationId);
     try {
@@ -115,6 +119,7 @@ export const useSession = () => {
     get,
     addStation,
     updateChild,
+    updateStation,
     addChild,
     addBeans: setBeans,
     removeChild,
