@@ -10,9 +10,6 @@ import {
   openNewSession,
   validateName,
 } from '../../session-controller-instance';
-import { MAX } from 'uuid';
-import BeanSessionDTO from '~/models/bean-session-dto';
-import NewBeanSessionDTO from '~/models/new-bean-session-dto';
 
 export default defineEventHandler(async (event) => {
   const method = getMethod(event);

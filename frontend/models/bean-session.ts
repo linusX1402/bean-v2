@@ -6,9 +6,11 @@ import {
   DEFAULT_STARTING_FUNDS,
   type workingState,
 } from '~/constants/constants';
-import { Payout } from '~/models/payout';
 
 export default class BeanSession {
+  get stations(): Map<number, BeanStation> {
+    return this._stations;
+  }
   constructor(
     name: string,
     icon: string,
@@ -16,9 +18,9 @@ export default class BeanSession {
     sessionIdEditor: string,
     sessionIdUser: string,
     secondsPerTick: number = DEFAULT_SECONDS_PER_TICK,
-    beanPerTick: number = DEFAULT_BEANS_PER_TICK,
+    beansPerTick: number = DEFAULT_BEANS_PER_TICK,
     startingFunds: number = DEFAULT_STARTING_FUNDS,
-    stations: Map<number, BeanStation> = new Map<number, BeanStation>(),
+    stations = new Map<number, BeanStation>(),
   ) {
     this._name = name;
     this._icon = icon;
@@ -27,7 +29,7 @@ export default class BeanSession {
     this.sessionIdUser = sessionIdUser;
     this.secondsPerTick = secondsPerTick;
     this._stations = stations;
-    this.beanPerTick = beanPerTick;
+    this.beansPerTick = beansPerTick;
     this.startingFunds = startingFunds;
   }
 
@@ -40,26 +42,17 @@ export default class BeanSession {
   private _name: string;
   private _icon: string;
   public secondsPerTick;
-  public beanPerTick;
+  public beansPerTick;
   public startingFunds;
-
-  get stations(): Map<number, BeanStation> {
-    return this._stations;
-  }
+  public lastInteractionDate: Date = new Date();
 
   public updateChildWorkingState(
     stationId: number,
     childId: number,
     workState: workingState,
   ): Child {
-    const child = this._stations
-      .get(stationId)
-      ?.children.find((child) => child.id === childId);
-    if (workState === 'working' && child?.workState !== 'idle') {
-      console.log('------------------------------------------------------');
-      console.log('payout time!');
-      console.log('param: ', workState, 'child: ', child?.workState);
-      console.log(this.stations);
+    const child = this._stations.get(stationId)?.children.get(childId);
+    if (workState === 'resting' && child?.workState === 'working') {
       try {
         child!.lastCheckout = new Date();
         const timeSinceLastCheckout = Math.floor(
@@ -73,14 +66,15 @@ export default class BeanSession {
         );
         const restTime =
           timeSinceLastCheckout - ticksPassed * this.secondsPerTick;
-        console.log('------------------------------------------------------');
         child!.setStoredTimeForNextBean(restTime);
         if (ticksPassed > 0) {
-          child!.addPayout(ticksPassed * this.beanPerTick);
+          child!.addPayout(ticksPassed * this.beansPerTick);
         }
       } catch (error) {
         console.error('Error calculating payout: (' + child?.id + ')', error);
       }
+    } else if (workState === 'idle') {
+      return child!.resetChild(this.startingFunds);
     }
     child?.updateWorkState(workState);
     return child!;
@@ -94,12 +88,8 @@ export default class BeanSession {
   }
 
   public addChild(name: string, stationId: number) {
-    const child = new Child(name, this.startingFunds);
-    this._stations.forEach((key, value) => {
-      if (value === stationId) {
-        key.addChild(child);
-      }
-    });
+    const child = new Child(name, undefined, this.startingFunds);
+    this._stations.get(stationId)?.addChild(child);
     return child;
   }
 
@@ -164,5 +154,9 @@ export default class BeanSession {
     } else {
       throw new Error(`Session with ID ${uuid} does not exist.`);
     }
+  }
+
+  removeChild(childId: any, stationId: any): boolean {
+    return this._stations.get(stationId)?.removeChild(childId) ?? false;
   }
 }

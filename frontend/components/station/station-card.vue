@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import StationDetail from '~/components/station/station-detail.vue';
 import type { BeanStation } from '~/models/bean-station';
+import Login from '~/pages/login.vue';
 
 const props = withDefaults(
   defineProps<{
@@ -25,12 +26,18 @@ const isDetailOpen = ref<boolean>(false);
 // });
 
 function getWorkingChildrenCount(station: BeanStation): number {
-  return station.children.filter((child) => child.workState === 'working')
-    .length;
+  try {
+    return Array.from(station.children.values()).filter(
+      (child) => child.workState === 'working',
+    ).length;
+  } catch (e: any) {
+    console.warn('failed to get working children', e);
+  }
+  return 0;
 }
 
 function getTotalBeansEarned(station: BeanStation): number {
-  return station.children.reduce(
+  return Array.from(station.children.values()).reduce(
     (total, child) => total + child.numberOfBeansEarned,
     0,
   );
@@ -60,9 +67,9 @@ function toggleDetail() {
   >
     <h6 class="w-full text-center">{{ station.name }}</h6>
     <ul>
-      <li>children: {{ station.children.length }}</li>
+      <li>children: {{ station.children?.size ?? 0 }}</li>
       <li>working: {{ getWorkingChildrenCount(station) }}</li>
-      <li>total Beans Earned: {{ station.children.length }}</li>
+      <li>total Beans Earned: {{ station.children?.size ?? 0 }}</li>
     </ul>
     <div
       v-if="isUnstable"

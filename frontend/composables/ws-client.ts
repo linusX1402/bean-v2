@@ -1,5 +1,7 @@
 import type Child from '~/models/child';
 import type { workingState } from '~/constants/constants';
+import { useRouter } from 'vue-router';
+import JsonMapService from '~/composables/json-map-service';
 
 const ws = ref<WebSocket | undefined>(undefined);
 const receivedMessage = ref<string[]>([]);
@@ -14,6 +16,7 @@ export const useWebSocket = () => {
 
       ws.value.onopen = () => {
         console.log('[ws] open');
+        console.log(`[ws] sessionId: ${sessionId}`);
         const message = {
           header: 'verify',
           sessionId: sessionId,
@@ -28,6 +31,10 @@ export const useWebSocket = () => {
 
       ws.value.onerror = (error) => {
         console.error('WebSocket error:', error);
+        console.log('[ws] trying to reconnect...');
+        setTimeout(() => {
+          openConnection(sessionId);
+        }, 2000);
       };
 
       ws.value.onmessage = (event) => {
@@ -35,8 +42,18 @@ export const useWebSocket = () => {
           const data = JSON.parse(event.data);
           console.log('[ws] message received:', data);
           receivedMessage.value.push(event.data);
-          if (data.header === 'update-child') {
-            handleUpdateChild(data);
+          if (data.code === 401) {
+            window.location.href = '/login';
+          }
+          switch (data.header) {
+            case 'update-child':
+              handleUpdateChild(data);
+              break;
+            case 'update-station':
+              handleUpdateStation(data);
+              break;
+            default:
+              console.warn('[ws] unknown message header:', data.header);
           }
         }
       };
@@ -61,14 +78,19 @@ export const useWebSocket = () => {
         childId: childId,
         workState: workState,
       };
-
       ws.value.send(JSON.stringify(message));
     }
   };
 
   function handleUpdateChild(data: any) {
+    console.log(data.child);
     const child = data.child as Child;
     useSession().updateChild(data.stationId, child);
+  }
+
+  function handleUpdateStation(data: any) {
+    const station = JsonMapService().station.fromJson(data.station);
+    useSession().updateStation(station);
   }
 
   if (getCurrentInstance()) {

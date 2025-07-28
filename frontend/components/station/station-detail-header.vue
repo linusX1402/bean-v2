@@ -1,28 +1,20 @@
 <script setup lang="ts">
+import type { headerUpdateStates } from '~/constants/constants';
+
 const props = defineProps<{ stationName: string; isEditing: boolean }>();
 
-const currentOpenMenu = ref<headerMenus>('start');
-const emit = defineEmits(['update:close-detail', 'update:toggle-edit']);
+const currentOpenMenu = ref<headerUpdateStates>('start');
+const emit = defineEmits([
+  'update:close-detail',
+  'update:toggle-edit',
+  'update:set-all-children-work-states',
+]);
 
-type headerMenus = 'reset' | 'start' | 'stop';
-
-function setHederMenu(to: headerMenus) {
+function setHederMenu(to: headerUpdateStates) {
+  if (currentOpenMenu.value === to) {
+    emit('update:set-all-children-work-states', to);
+  }
   currentOpenMenu.value = to;
-}
-
-function startAll() {
-  if (currentOpenMenu.value === 'start') {
-  }
-}
-
-function stopAll() {
-  if (currentOpenMenu.value === 'stop') {
-  }
-}
-
-function restAll() {
-  if (currentOpenMenu.value === 'reset') {
-  }
 }
 
 function toggleEdit() {

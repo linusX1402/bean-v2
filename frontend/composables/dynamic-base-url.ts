@@ -8,6 +8,5 @@ export const getDynamicBaseURL = (
     const host = window.location.host;
     baseURL = `${protocol}//${host}`;
   }
-
   return baseURL;
 };

@@ -2,40 +2,24 @@ import { BeanStation } from '~/models/bean-station';
 import BeanSession from '~/models/bean-session';
 import { cookieService } from '#build/imports';
 import { setCookie } from 'typescript-cookie';
-import BeanSessionDTO from '~/models/bean-session-dto';
 import Child from '~/models/child';
 
-const session = ref<BeanSessionDTO>();
+const session = ref<BeanSession>();
+
 export const useSession = () => {
   async function loadSessionBySlug(slug: string) {
     const sessionId = slug;
 
     const res = await getSessionById(sessionId);
-    session.value = new BeanSessionDTO(
-      res?.name || '',
-      res?.icon || '',
-      res?.sessionIdAdmin || '',
-      res?.sessionIdEditor || '',
-      res?.sessionIdUser || '',
-      res?.secondsPerTick,
-      res?.beansPerTick,
-      res?.startingFunds,
-      res?.stations || [],
-    );
-    session.value?.stations.forEach((station) => {
-      station.children.forEach((child) => {
-        if (typeof child.lastCheckout === 'string') {
-          child.lastCheckout = new Date(child.lastCheckout);
-        }
-        if (typeof child.lastCheckin === 'string') {
-          child.lastCheckin = new Date(child.lastCheckin);
-        }
-      });
-    });
+    if (res === undefined) {
+      // TODO: Toast message or forward to start page
+      return new Error('Session not found');
+    }
+    session.value = res;
 
-    if (session.value.getHighestPermissionStationId() === '') {
-      console.log('invalid session');
-      return false;
+    if (session.value.getHighestPermissionSessionId() === '') {
+      // TODO: Toast message or forward to start page
+      return new Error('invalid session');
     } else {
       cookieService().addSession(sessionId);
       setCookie('bean_icon', session.value.icon);
@@ -47,48 +31,29 @@ export const useSession = () => {
     return session.value;
   }
 
+  function getStationById(stationId: number) {}
+
   function addStation(station: BeanStation) {
-    const newStation = new BeanStation(
-      station.hexColor,
-      station.name,
-      station.id,
-    );
-    session.value?.stations.push(newStation);
+    session.value?.stations.set(station.id, station);
   }
 
   function updateChild(stationId: number, child: Child) {
-    const station = session.value?.stations.find(
-      (station) => station.id === stationId,
-    );
-    if (station) {
-      const childIndex = station.children.findIndex((c) => c.id === child.id);
-      if (childIndex !== -1) {
-        station.children[childIndex] = child;
-        if (typeof station.children[childIndex].lastCheckout === 'string') {
-          station.children[childIndex].lastCheckout = new Date(
-            station.children[childIndex].lastCheckout,
-          );
-        }
-        if (typeof station.children[childIndex].lastCheckin === 'string') {
-          station.children[childIndex].lastCheckin = new Date(
-            station.children[childIndex].lastCheckin,
-          );
-        }
-      }
-    }
+    session.value?.stations.get(stationId)?.children.set(child.id, child);
+  }
+
+  function updateStation(station: BeanStation) {
+    session.value?.stations.set(station.id, station);
   }
 
   async function addChild(stationId: number, child: Child) {
-    const stationIndex = session.value?.stations.findIndex(
-      (station) => station.id === stationId,
-    );
+    console.log('trying to add child', child, 'with stationId', stationId);
     try {
-      let res = (await $fetch('/api/session/addChild', {
+      let res = (await $fetch('/api/session/child', {
         method: 'POST',
         body: {
           name: child.name,
           stationId: stationId,
-          sessionId: get()?.getHighestPermissionStationId(),
+          sessionId: get()?.getHighestPermissionSessionId(),
         },
       })) as unknown as Child;
       const resChild = new Child(
@@ -97,30 +62,55 @@ export const useSession = () => {
         res.numberOfBeansEarned,
         res.numberOfBeansToPayout,
       );
-      session.value?.stations[stationIndex!].children.push(resChild);
+      session.value?.stations
+        .get(stationId)
+        ?.children.set(resChild.id, resChild);
     } catch (error) {
+      // TODO: Toast message
       console.error('Error adding child:', error);
     }
   }
 
   function setBeans(stationId: number, childId: number, amount: number) {
-    const stationIndex = session.value?.stations.findIndex(
-      (station) => station.id === stationId,
-    );
-    const childIndex = session.value?.stations[
-      stationIndex ?? -1
-    ].children.findIndex((child) => child.id === childId);
-    if (stationIndex !== undefined && childIndex !== undefined) {
-      const child = session.value?.stations[stationIndex].children[childIndex];
-      if (child) {
-        session.value!.stations[stationIndex].children[
-          childIndex
-        ].numberOfBeansEarned += amount;
-        session.value!.stations[stationIndex].children[
-          childIndex
-        ].numberOfBeansToPayout += amount;
+    try {
+      const child = session.value?.stations
+        .get(stationId)
+        ?.children.get(childId);
+      child!.numberOfBeansToPayout += amount;
+      child!.numberOfBeansEarned += amount;
+      session.value?.stations.get(stationId)?.children.set(childId, child!);
+    } catch (error) {
+      // TODO: Toast message (child not found ...)
+      console.error('Error setting beans:', error);
+    }
+  }
+
+  async function removeChild(stationId: number, childId: number) {
+    try {
+      const station = session.value?.stations.get(stationId);
+      if (station) {
+        console.log(
+          'childId: ',
+          childId,
+          'stationId:',
+          stationId,
+          'sessionId:',
+          get()?.getHighestPermissionSessionId(),
+        );
+        (await $fetch('/api/session/child', {
+          method: 'DELETE',
+          body: {
+            childId: childId,
+            stationId: stationId,
+            sessionId: get()?.getHighestPermissionSessionId(),
+          },
+        }),
+          station.children.delete(childId));
+      } else {
+        throw new Error(`Station with ID ${stationId} not found.`);
       }
-      console.log('beans to pay out: ', child?.numberOfBeansToPayout);
+    } catch (error) {
+      console.error('Error removing child:', error);
     }
   }
 
@@ -129,7 +119,9 @@ export const useSession = () => {
     get,
     addStation,
     updateChild,
+    updateStation,
     addChild,
     addBeans: setBeans,
+    removeChild,
   };
 };

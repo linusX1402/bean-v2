@@ -1,9 +1,11 @@
 import { defineWebSocketHandler } from 'h3';
 import { Peer } from 'crossws';
-import {
+import sessionController, {
+  getAllSessions,
   getPermissionOfId,
-  updateChildWorkingState,
 } from '../session-controller-instance';
+import Child from '~/models/child';
+import { BeanStation } from '~/models/bean-station';
 
 const MAX_VERIFICATION_TIME = 5000;
 type wsClient = {
@@ -41,7 +43,7 @@ export default defineWebSocketHandler({
 function handleUpdateChild(peer: Peer<any>, data: any) {
   const sessionId = clients.get(peer.id)?.sessionId;
   try {
-    const child = updateChildWorkingState(
+    const child = sessionController.updateChildWorkingState(
       sessionId || '',
       data.stationId,
       data.childId,
@@ -49,20 +51,39 @@ function handleUpdateChild(peer: Peer<any>, data: any) {
     );
     const message = JSON.stringify({
       header: 'update-child',
-      success: '200',
+      code: '200',
       stationId: data.stationId,
       child: child,
     });
-    peer.send(message);
+    broadcast(message);
   } catch (e: any) {
+    console.warn(`[ws] update child failed (${peer.id}):`, e);
     const message = JSON.stringify({
       header: 'update-child',
-      success: 401,
+      code: 401,
       error: e.message,
     });
     peer.send(message);
     console.error(`[ws] child update failed (${peer.id}):`, e);
   }
+}
+
+export function broadcastUpdateStation(data: string) {
+  const message = JSON.stringify({
+    header: 'update-station',
+    code: 200,
+    station: data,
+  });
+  broadcast(message);
+}
+export function broadcastUpdateChild(stationId: number, data: Child) {
+  const message = JSON.stringify({
+    header: 'update-child',
+    code: 200,
+    stationId: stationId,
+    child: data,
+  });
+  broadcast(message);
 }
 function handlePermission(peer: Peer<any>, data: any) {
   try {
@@ -70,18 +91,19 @@ function handlePermission(peer: Peer<any>, data: any) {
     clients.set(peer.id, { sessionId: data.sessionId, peer: peer });
     const message = JSON.stringify({
       header: 'verification',
-      success: 200,
+      code: 200,
       error: '',
     });
     peer.send(message);
   } catch (e: any) {
     const message = JSON.stringify({
       header: 'verification',
-      success: 401,
+      code: 401,
       error: e.message,
     });
     peer.send(message);
     console.error(`[ws] verification failed (${peer.id}):`, e);
+    console.log(getAllSessions());
     peer.close();
   }
 }
@@ -92,7 +114,7 @@ function handleTimout(peer: Peer<any>) {
       if (!clients.get(peer.id)?.sessionId) {
         const message = JSON.stringify({
           header: 'verification',
-          success: 200,
+          code: 200,
           error: 'verification timed out',
         });
         peer.send(message);
@@ -104,4 +126,10 @@ function handleTimout(peer: Peer<any>) {
       peer.close();
     }
   }, MAX_VERIFICATION_TIME);
+}
+
+function broadcast(message: string) {
+  clients.forEach((client) => {
+    client.peer.send(message);
+  });
 }

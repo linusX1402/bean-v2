@@ -4,7 +4,7 @@ import Child from '~/models/child';
 import type { BeanStation } from '~/models/bean-station';
 import cookieService from '~/composables/cookie-service';
 import StationDetailHeader from '~/components/station/station-detail-header.vue';
-import type { workingState } from '~/constants/constants';
+import type { headerUpdateStates, workingState } from '~/constants/constants';
 
 const props = defineProps<{ station: BeanStation }>();
 const emit = defineEmits<{
@@ -14,8 +14,10 @@ const isEditing = ref<boolean>(false);
 const childInput = ref<string>('');
 const childRef = ref<HTMLInputElement | null>(null);
 const newChildNameError = ref<boolean>(false);
-const tmpChildren = ref<Child[]>([]);
+const tmpChildren = ref<Map<number, Child>>(new Map());
+let runningId = -1;
 const sessionId = ref<string | undefined>(undefined);
+const lastHeaderUpdate = ref<headerUpdateStates>();
 
 onMounted(() => {
   sessionId.value = cookieService().getCurrentSession();
@@ -27,7 +29,7 @@ async function toggleEdit() {
     nextTick(() => childRef.value?.focus());
   } else {
     await submitChildren();
-    tmpChildren.value = [];
+    tmpChildren.value = new Map();
   }
 }
 
@@ -37,16 +39,13 @@ function addChild() {
     return;
   }
   const newChild = new Child(childInput.value.trim());
-  tmpChildren.value.push(newChild);
+  tmpChildren.value.set(newChild.id, newChild);
   childInput.value = '';
 }
 
 async function submitChildren() {
-  while (tmpChildren.value.length > 0) {
-    const child = tmpChildren.value.shift();
-    if (child) {
-      await useSession().addChild(props.station.id, child);
-    }
+  for (const child of tmpChildren.value.values()) {
+    await useSession().addChild(props.station.id, child);
   }
 }
 
@@ -57,12 +56,15 @@ function updateChildWorkState(child: Child, workState: workingState) {
 </script>
 
 <template>
-  <section class="flex h-full w-full flex-col gap-12 bg-bean-white-500 pb-6">
+  <section
+    class="flex h-full w-full flex-col gap-12 overflow-x-hidden bg-bean-white-500 pb-6"
+  >
     <station-detail-header
       :station-name="station.name"
       :is-editing="isEditing"
       @update:close-detail="$emit('update:close-detail')"
       @update:toggle-edit="toggleEdit"
+      @update:set-all-children-work-states="lastHeaderUpdate = $event"
     />
     <main
       class="flex w-full flex-col place-content-start place-items-center gap-8 px-8"
@@ -74,11 +76,15 @@ function updateChildWorkState(child: Child, workState: workingState) {
           <p>Children</p>
         </li>
         <child-row
-          v-for="child in [...station.children, ...tmpChildren]"
+          v-for="child of [
+            ...station.children.values(),
+            ...tmpChildren.values(),
+          ]"
           :station-id="station.id"
           :child="child"
-          :is-unstable="tmpChildren.includes(child)"
+          :is-unstable="tmpChildren.has(child.id)"
           :key="child.id"
+          :last-header-update="lastHeaderUpdate"
           @update:work-state="updateChildWorkState(child, $event)"
         />
         <transition name="edit">

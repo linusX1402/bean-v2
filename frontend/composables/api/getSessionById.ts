@@ -1,16 +1,17 @@
-import type BeanSessionDTO from '~/models/bean-session-dto';
 import { getDynamicBaseURL } from '~/composables/dynamic-base-url';
+import type BeanSession from '~/models/bean-session';
 
 export async function getSessionById(
   sessionId: string,
-): Promise<BeanSessionDTO | undefined> {
+): Promise<BeanSession | undefined> {
   const baseUrl = getDynamicBaseURL();
   try {
-    const session = await $fetch(`${baseUrl}/api/session/get-by-uuid`, {
+    const jsonSession = await $fetch(`${baseUrl}/api/session/get-by-uuid`, {
       method: 'GET',
       headers: { uuid: sessionId },
     });
-    return session as unknown as BeanSessionDTO;
+    const jsonRes = jsonMapService().session.fromJson(jsonSession);
+    return jsonRes;
   } catch (error) {
     console.error('Error fetching session:', error);
   }

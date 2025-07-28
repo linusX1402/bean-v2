@@ -54,7 +54,7 @@ jobs:
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
-        password: ${{ secrets.CTS_GITHUB_TOKEN }}
+        password: ${{ secrets.ACCESS_TOKEN }}
     - name: Tag the Docker image
       run: docker tag bean-v2 ghcr.io/linusx1402/bean-v2:latest
       working-directory: ./frontend

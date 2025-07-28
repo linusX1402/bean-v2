@@ -1,5 +1,6 @@
 export const DEFAULT_ICON = '🫘';
 export const ICON_LIST = ['🫘', '🐋', '🪨', '💸'];
+export const INTERVAL_DURATION = 1000;
 export const PLACEHOLDERS = [
   "Tim's game",
   "July's session",
@@ -29,6 +30,10 @@ export enum dashboardViews {
   settings = 3,
 }
 
+// Interval time
+// export const INTERVAL_TIME_BEAN_CALC = 5;
+export const INTERVAL_TIME_TIMER = 0.5;
+
 // ToDo: adjust values for production
 // Beans per tick
 export const DEFAULT_BEANS_PER_TICK = 1;
@@ -38,7 +43,7 @@ export const BEANS_PER_TICK_STEP_SIZE = 1;
 
 // Seconds per tick
 // TODO: 300
-export const DEFAULT_SECONDS_PER_TICK = 3;
+export const DEFAULT_SECONDS_PER_TICK = 2;
 // TODO: 30
 export const MIN_SECONDS_PER_TICK = 0;
 export const MAX_SECONDS_PER_TICK = 600;
@@ -52,4 +57,11 @@ export const STARTING_FUNDS_STEP_SIZE = 1;
 
 // Child
 export type workingState = 'working' | 'idle' | 'resting';
+export type headerUpdateStates = 'start' | 'stop' | 'reset';
 export type iconList = 'bean:play' | 'bean:stop';
+
+// Server Session Cleanup
+export const SESSION_CLEANUP_INTERVAL = 12 * 60 * 60 * 1000; // 12 hour in milliseconds
+// export const SESSION_CLEANUP_INTERVAL = 10 * 1000; // 10 seconds in milliseconds
+export const SESSION_CLEANUP_AGE = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+// export const SESSION_CLEANUP_AGE = 10 * 1000; // 10 seconds in milliseconds

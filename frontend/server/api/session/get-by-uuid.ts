@@ -1,8 +1,5 @@
-import {
-  getSessionById,
-  getSessionByName,
-} from '../../session-controller-instance';
-import BeanSessionDTO from '~/models/bean-session-dto';
+import BeanSession from '~/models/bean-session';
+import sessionController from '~/server/session-controller-instance';
 
 export default defineEventHandler(async (event) => {
   const method = getMethod(event);
@@ -16,9 +13,9 @@ export default defineEventHandler(async (event) => {
         statusMessage: 'Missing required fields',
       });
     }
-    let session = getSessionById(uuid as string);
+    let session = sessionController.getSessionDtoById(uuid as string);
     if (uuid && !session) {
-      session = getSessionByName(uuid as string);
+      session = sessionController.getSessionByName(uuid as string);
     }
     if (!session) {
       throw createError({
@@ -26,6 +23,6 @@ export default defineEventHandler(async (event) => {
         statusMessage: 'Session not found',
       });
     }
-    return session as BeanSessionDTO;
+    return session;
   }
 });

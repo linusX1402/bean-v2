@@ -12,6 +12,7 @@ export default class Child {
   public lastCheckin: Date | null = null;
   public payoutHistory: Payout[] = [];
   public storedTimeForNextBean: number = 0;
+  public timeResting: string = '00:00';
 
   constructor(
     name: string,
@@ -45,6 +46,18 @@ export default class Child {
     this.payoutHistory.unshift(new Payout(amount));
     this.numberOfBeansEarned += amount;
     this.numberOfBeansToPayout = 0;
+    return this;
+  }
+
+  public resetChild(startingFunds: number): Child {
+    this.numberOfBeansToPayout = 0;
+    this.addBeans(startingFunds);
+    this.workState = 'idle';
+    this.lastCheckout = null;
+    this.lastCheckin = null;
+    this.payoutHistory = [];
+    this.storedTimeForNextBean = 0;
+    this.timeResting = '00:00';
     return this;
   }
 
