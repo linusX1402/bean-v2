@@ -41,7 +41,6 @@ const handleSwipeMove = (event: PointerEvent) => {
 
   // Determine swipe direction
   swipeDirection.value = deltaX > 0 ? 'left' : 'right';
-
   swipePosition.value = Math.max(0, Math.min(deltaX, outerDivWidth.value)); // Clamp within div width
 };
 
@@ -55,19 +54,21 @@ const handleSwipeEnd = () => {
     isMenuOpen.value = true;
   } else if (swipeDirection.value === 'right' && isMenuOpen.value) {
     // Snap closed
-    swipePosition.value = 0;
-    isMenuOpen.value = false;
+    closeMenu();
   }
 };
 
 const handleInteractionOutside = (event: Event) => {
   const outerDivElement = outerDiv.value;
   if (outerDivElement && !outerDivElement.contains(event.target as Node)) {
-    // Close the menu if interaction occurs outside
-    swipePosition.value = 0;
-    isMenuOpen.value = false;
+    closeMenu();
   }
 };
+
+function closeMenu() {
+  swipePosition.value = 0;
+  isMenuOpen.value = false;
+}
 
 const outerDiv = ref<HTMLDivElement | null>(null);
 onMounted(() => {
@@ -87,6 +88,8 @@ onUnmounted(() => {
 
 function handleButtonClick(index: number) {
   emit('option-click', index);
+  console.log(`Option ${index + 1} clicked`);
+  closeMenu();
 }
 </script>
 
@@ -118,7 +121,12 @@ function handleButtonClick(index: number) {
           :class="[option.twColor]"
           class="h-full w-full p-1"
         >
-          <button class="h-full w-full">Option {{ i }}</button>
+          <button
+            class="flex h-full w-full place-content-center place-items-center"
+            @click="handleButtonClick(i)"
+          >
+            <icon :name="option.iconPath" class="size-6" />
+          </button>
         </div>
       </div>
     </div>

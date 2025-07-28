@@ -29,4 +29,8 @@ export class BeanStation {
   get children(): Map<number, Child> {
     return this._children;
   }
+
+  public removeChild(childId: number): boolean {
+    return this._children.delete(childId);
+  }
 }

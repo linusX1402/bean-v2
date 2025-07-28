@@ -37,3 +37,6 @@ p {
 small {
     @apply text-xs md:text-sm font-sans text-inherit lg:text-lg-sm;
 }
+.text-apply-p {
+    @apply text-sm md:text-p font-sans text-inherit
+}

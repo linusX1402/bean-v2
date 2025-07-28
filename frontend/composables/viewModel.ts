@@ -38,14 +38,13 @@ export const useSession = () => {
   }
 
   function updateChild(stationId: number, child: Child) {
-    const station = session.value?.stations.get(stationId);
     session.value?.stations.get(stationId)?.children.set(child.id, child);
   }
 
   async function addChild(stationId: number, child: Child) {
     console.log('trying to add child', child, 'with stationId', stationId);
     try {
-      let res = (await $fetch('/api/session/addChild', {
+      let res = (await $fetch('/api/session/child', {
         method: 'POST',
         body: {
           name: child.name,
@@ -82,6 +81,35 @@ export const useSession = () => {
     }
   }
 
+  async function removeChild(stationId: number, childId: number) {
+    try {
+      const station = session.value?.stations.get(stationId);
+      if (station) {
+        console.log(
+          'childId: ',
+          childId,
+          'stationId:',
+          stationId,
+          'sessionId:',
+          get()?.getHighestPermissionSessionId(),
+        );
+        (await $fetch('/api/session/child', {
+          method: 'DELETE',
+          body: {
+            childId: childId,
+            stationId: stationId,
+            sessionId: get()?.getHighestPermissionSessionId(),
+          },
+        }),
+          station.children.delete(childId));
+      } else {
+        throw new Error(`Station with ID ${stationId} not found.`);
+      }
+    } catch (error) {
+      console.error('Error removing child:', error);
+    }
+  }
+
   return {
     loadSessionBySlug,
     get,
@@ -89,5 +117,6 @@ export const useSession = () => {
     updateChild,
     addChild,
     addBeans: setBeans,
+    removeChild,
   };
 };

@@ -50,6 +50,7 @@ export default class Child {
   }
 
   public resetChild(startingFunds: number): Child {
+    this.numberOfBeansToPayout = 0;
     this.addBeans(startingFunds);
     this.workState = 'idle';
     this.lastCheckout = null;

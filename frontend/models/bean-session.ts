@@ -154,4 +154,8 @@ export default class BeanSession {
       throw new Error(`Session with ID ${uuid} does not exist.`);
     }
   }
+
+  removeChild(childId: any, stationId: any): boolean {
+    return this._stations.get(stationId)?.removeChild(childId) ?? false;
+  }
 }

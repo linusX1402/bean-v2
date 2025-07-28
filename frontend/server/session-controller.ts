@@ -8,6 +8,13 @@ import { type workingState } from '~/constants/constants';
 import jsonMapService from '~/composables/json-map-service';
 
 export default class SessionController {
+  removeChild(childId: any, stationId: any, sessionId: any): boolean {
+    const session = this.getSessionById(sessionId);
+    if (!session) {
+      throw new Error(`Session with ID ${sessionId} does not exist.`);
+    }
+    return session.removeChild(childId, stationId) ?? false;
+  }
   private _openSessions = new Map<string, BeanSession>();
 
   public openNewSession(newSession: NewBeanSessionDTO): BeanSession {

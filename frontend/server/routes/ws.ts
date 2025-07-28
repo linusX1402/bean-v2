@@ -53,7 +53,7 @@ function handleUpdateChild(peer: Peer<any>, data: any) {
       stationId: data.stationId,
       child: child,
     });
-    peer.send(message);
+    broadcast(message);
   } catch (e: any) {
     console.warn(`[ws] update child failed (${peer.id}):`, e);
     const message = JSON.stringify({
@@ -106,4 +106,10 @@ function handleTimout(peer: Peer<any>) {
       peer.close();
     }
   }, MAX_VERIFICATION_TIME);
+}
+
+function broadcast(message: string) {
+  clients.forEach((client) => {
+    client.peer.send(message);
+  });
 }

@@ -25,6 +25,7 @@ const props = withDefaults(
 const emit = defineEmits(['update:work-state']);
 
 let ticksPassed = 0;
+const childEditRef = ref<HTMLInputElement | null>(null);
 const workState = ref<workState>(props.child.workState ?? 'idle');
 const currentIcon = ref<iconList>('bean:play');
 const beansToPayout = computed(
@@ -60,19 +61,29 @@ watch(
     if (newValue === 'start' || newValue === 'stop') {
       ticksPassed = 0;
       tickCounter.value = 0;
-      workState.value = newValue === 'start' ? 'working' : 'resting';
+      props.child.workState = newValue === 'start' ? 'working' : 'resting';
       setIconBasedOnWorkingState();
-      emit('update:work-state', workState.value);
+      emit('update:work-state', props.child.workState);
     } else if (newValue === 'reset') {
       resetChild();
     }
   },
 );
 
+watch(
+  () => props.child,
+  (newChild) => {
+    if (newChild) {
+      setIconBasedOnWorkingState();
+      console.log(newChild);
+    }
+  },
+);
+
 function updateChildProps(child: Child, timeResting: Ref<string>) {
-  if (workState.value === 'resting') {
+  if (props.child.workState === 'resting') {
     calculateRestingTimer(child, timeResting);
-  } else if (workState.value === 'working') {
+  } else if (props.child.workState === 'working') {
     calculateBeans(child);
   }
 }
@@ -128,10 +139,10 @@ function calculateBeans(child: Child) {
 function resetChild() {
   ticksPassed = 0;
   tickCounter.value = 0;
-  workState.value = 'idle';
+  props.child.workState = 'idle';
   currentIcon.value = 'bean:play';
   timeResting.value = '00:00';
-  emit('update:work-state', workState.value);
+  emit('update:work-state', props.child.workState);
 }
 
 function toggleIcon() {
@@ -140,21 +151,37 @@ function toggleIcon() {
     tickCounter.value = 0;
     if (currentIcon.value === 'bean:stop') {
       currentIcon.value = 'bean:play';
-      workState.value = 'resting';
+      props.child.workState = 'resting';
       timeResting.value = '00:00';
     } else {
       currentIcon.value = 'bean:stop';
-      workState.value = 'working';
+      props.child.workState = 'working';
     }
-    emit('update:work-state', workState.value);
+    emit('update:work-state', props.child.workState);
   }
 }
 
 function setIconBasedOnWorkingState() {
-  if (workState.value === 'working') {
+  if (props.child.workState === 'working') {
     currentIcon.value = 'bean:stop';
   } else {
     currentIcon.value = 'bean:play';
+  }
+}
+
+function handleSwipeAction(optionIndex: number) {
+  if (props.isUnstable) return;
+  switch (optionIndex) {
+    case 0:
+      break;
+    case 1:
+      resetChild();
+      break;
+    case 2:
+      useSession().removeChild(props.stationId, props.child.id);
+      break;
+    default:
+      console.warn('Unknown swipe option index:', optionIndex);
   }
 }
 </script>
@@ -166,11 +193,16 @@ function setIconBasedOnWorkingState() {
     <gesture-swipe
       :duration="300"
       :option1="
-        new swipeOption('bean:stop', 'bg-orange-400 text-white', 'Edit')
+        new swipeOption('bean:edit-light', 'bg-blue-500 text-white', 'Edit')
       "
-      :option2="new swipeOption('bean:stop', 'bg-blue-500 text-white', 'Reset')"
-      :option3="new swipeOption('bean:stop', 'bg-red-500 text-white', 'Delete')"
+      :option2="
+        new swipeOption('bean:reset', 'bg-orange-400 text-white', 'Reset')
+      "
+      :option3="
+        new swipeOption('bean:trash-light', 'bg-red-500 text-white', 'Delete')
+      "
       :is-unstable="isUnstable"
+      @option-click="handleSwipeAction"
     >
       <div
         class="grid h-full w-full grid-cols-3 place-content-center place-items-center bg-bean-white-400 px-2"
@@ -178,9 +210,11 @@ function setIconBasedOnWorkingState() {
         <div
           class="flex h-full w-full place-content-start place-items-center pl-1"
         >
-          <p class="w-full truncate text-left">
-            {{ child.name }}
-          </p>
+          <input
+            ref="childEditRef"
+            :value="child.name"
+            class="text-apply-p w-full truncate bg-bean-white-400 text-left"
+          />
         </div>
         <div class="flex w-full place-content-center place-items-center">
           <button
@@ -196,7 +230,7 @@ function setIconBasedOnWorkingState() {
         <div
           class="col-start-3 flex h-full w-full place-content-end place-items-center pr-1"
         >
-          <p v-if="workState !== 'resting'">
+          <p v-if="child.workState !== 'resting'">
             {{ isUnstable ? '-' : beansToPayout }}
             {{ ' ' + sessionIcon }}
           </p>
@@ -207,17 +241,17 @@ function setIconBasedOnWorkingState() {
         @click="toggleIcon"
         id="overlay-unstable"
         :class="{
-          'bg-gray-500/15': currentIcon === 'bean:play' && workState !== 'idle',
+          'bg-gray-500/15':
+            currentIcon === 'bean:play' && child.workState !== 'idle',
         }"
         class="absolute bottom-[3px] left-0 right-0 top-[3px] rounded-lg"
       />
+      <div
+        id="overlay-unstable"
+        v-if="isUnstable"
+        class="absolute bottom-1 left-0 right-0 top-1 rounded-lg bg-gray-500/15"
+      />
     </gesture-swipe>
-
-    <div
-      id="overlay-unstable"
-      v-if="isUnstable"
-      class="absolute bottom-1 left-0 right-0 top-1 rounded-lg bg-gray-500/15"
-    />
   </li>
 </template>
 
