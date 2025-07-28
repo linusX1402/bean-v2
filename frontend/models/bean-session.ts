@@ -52,10 +52,6 @@ export default class BeanSession {
   ): Child {
     const child = this._stations.get(stationId)?.children.get(childId);
     if (workState === 'resting' && child?.workState === 'working') {
-      console.log('------------------------------------------------------');
-      console.log('payout time!');
-      console.log('param: ', workState, 'child: ', child?.workState);
-      console.log(this._stations);
       try {
         child!.lastCheckout = new Date();
         const timeSinceLastCheckout = Math.floor(
@@ -69,7 +65,6 @@ export default class BeanSession {
         );
         const restTime =
           timeSinceLastCheckout - ticksPassed * this.secondsPerTick;
-        console.log('------------------------------------------------------');
         child!.setStoredTimeForNextBean(restTime);
         if (ticksPassed > 0) {
           child!.addPayout(ticksPassed * this.beansPerTick);
@@ -77,6 +72,8 @@ export default class BeanSession {
       } catch (error) {
         console.error('Error calculating payout: (' + child?.id + ')', error);
       }
+    } else if (workState === 'idle') {
+      return child!.resetChild(this.startingFunds);
     }
     child?.updateWorkState(workState);
     return child!;

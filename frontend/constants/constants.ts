@@ -30,8 +30,9 @@ export enum dashboardViews {
   settings = 3,
 }
 
-// Interval time if the value is not availabel
-export const FALLBACK_INTERVAL_TIME = 1;
+// Interval time
+// export const INTERVAL_TIME_BEAN_CALC = 5;
+export const INTERVAL_TIME_TIMER = 0.5;
 
 // ToDo: adjust values for production
 // Beans per tick
@@ -56,4 +57,5 @@ export const STARTING_FUNDS_STEP_SIZE = 1;
 
 // Child
 export type workingState = 'working' | 'idle' | 'resting';
+export type headerUpdateStates = 'start' | 'stop' | 'reset';
 export type iconList = 'bean:play' | 'bean:stop';

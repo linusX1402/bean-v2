@@ -5,15 +5,18 @@ import {
   DEFAULT_BEANS_PER_TICK,
   DEFAULT_ICON,
   DEFAULT_SECONDS_PER_TICK,
-  FALLBACK_INTERVAL_TIME,
+  type headerUpdateStates,
   type iconList,
+  INTERVAL_TIME_TIMER,
   type workingState as workState,
 } from '~/constants/constants';
+import GestureSwipe from '~/components/ui/gesture-swipe.vue';
 
 const props = withDefaults(
   defineProps<{
     child: Child;
     stationId: number;
+    lastHeaderUpdate?: headerUpdateStates;
     isUnstable?: boolean;
   }>(),
   { isUnstable: false },
@@ -43,12 +46,28 @@ onMounted(() => {
 
   const interval = setInterval(() => {
     updateChildProps(props.child, timeResting);
-  }, DEFAULT_SECONDS_PER_TICK * 1000);
+    console.log('interval');
+  }, INTERVAL_TIME_TIMER * 1000);
 
   onUnmounted(() => {
     clearInterval(interval);
   });
 });
+
+watch(
+  () => props.lastHeaderUpdate,
+  (newValue) => {
+    if (newValue === 'start' || newValue === 'stop') {
+      ticksPassed = 0;
+      tickCounter.value = 0;
+      workState.value = newValue === 'start' ? 'working' : 'resting';
+      setIconBasedOnWorkingState();
+      emit('update:work-state', workState.value);
+    } else if (newValue === 'reset') {
+      resetChild();
+    }
+  },
+);
 
 function updateChildProps(child: Child, timeResting: Ref<string>) {
   if (workState.value === 'resting') {
@@ -69,7 +88,6 @@ function calculateRestingTimer(child: Child, timeResting: Ref<string>) {
 }
 
 function calculateBeans(child: Child) {
-  console.log('calculating beans');
   try {
     const lastCheckin = child.lastCheckin
       ? new Date(child.lastCheckin).getTime()
@@ -107,6 +125,15 @@ function calculateBeans(child: Child) {
   return child!;
 }
 
+function resetChild() {
+  ticksPassed = 0;
+  tickCounter.value = 0;
+  workState.value = 'idle';
+  currentIcon.value = 'bean:play';
+  timeResting.value = '00:00';
+  emit('update:work-state', workState.value);
+}
+
 function toggleIcon() {
   if (!props.isUnstable) {
     ticksPassed = 0;
@@ -134,50 +161,62 @@ function setIconBasedOnWorkingState() {
 
 <template>
   <li
-    class="relative flex h-12 w-full place-content-center place-items-center border-t border-t-gray-300 px-2"
+    class="relative flex h-12 w-full place-content-center place-items-center border-t border-t-gray-300"
   >
-    <div
-      class="grid w-full grid-cols-3 place-content-center place-items-center"
+    <gesture-swipe
+      :duration="300"
+      :option1="
+        new swipeOption('bean:stop', 'bg-orange-400 text-white', 'Edit')
+      "
+      :option2="new swipeOption('bean:stop', 'bg-blue-500 text-white', 'Reset')"
+      :option3="new swipeOption('bean:stop', 'bg-red-500 text-white', 'Delete')"
+      :is-unstable="isUnstable"
     >
       <div
-        class="flex h-full w-full place-content-start place-items-center pl-1"
+        class="grid h-full w-full grid-cols-3 place-content-center place-items-center bg-bean-white-400 px-2"
       >
-        <p class="w-full truncate text-left">
-          {{ child.name }}
-        </p>
-      </div>
-      <div class="flex w-full place-content-center place-items-center">
-        <button
-          class="flex h-fit w-fit cursor-pointer place-content-center place-items-center rounded-xl p-1"
-          :class="[currentIcon === 'bean:play' ? 'bg-green-500' : 'bg-red-500']"
-          type="button"
+        <div
+          class="flex h-full w-full place-content-start place-items-center pl-1"
         >
-          <icon :name="currentIcon" class="size-6"></icon>
-        </button>
+          <p class="w-full truncate text-left">
+            {{ child.name }}
+          </p>
+        </div>
+        <div class="flex w-full place-content-center place-items-center">
+          <button
+            class="flex h-fit w-fit cursor-pointer place-content-center place-items-center rounded-xl p-1"
+            :class="[
+              currentIcon === 'bean:play' ? 'bg-green-500' : 'bg-red-500',
+            ]"
+            type="button"
+          >
+            <icon :name="currentIcon" class="size-6"></icon>
+          </button>
+        </div>
+        <div
+          class="col-start-3 flex h-full w-full place-content-end place-items-center pr-1"
+        >
+          <p v-if="workState !== 'resting'">
+            {{ isUnstable ? '-' : beansToPayout }}
+            {{ ' ' + sessionIcon }}
+          </p>
+          <p v-else>{{ timeResting }}</p>
+        </div>
       </div>
       <div
-        class="col-start-3 flex h-full w-full place-content-end place-items-center pr-1"
-      >
-        <p v-if="workState !== 'resting'">
-          {{ isUnstable ? '-' : beansToPayout }}
-          {{ ' ' + sessionIcon }}
-        </p>
-        <p v-else>{{ timeResting }}</p>
-      </div>
-    </div>
+        @click="toggleIcon"
+        id="overlay-unstable"
+        :class="{
+          'bg-gray-500/15': currentIcon === 'bean:play' && workState !== 'idle',
+        }"
+        class="absolute bottom-[3px] left-0 right-0 top-[3px] rounded-lg"
+      />
+    </gesture-swipe>
 
     <div
       id="overlay-unstable"
       v-if="isUnstable"
       class="absolute bottom-1 left-0 right-0 top-1 rounded-lg bg-gray-500/15"
-    />
-    <div
-      @click="toggleIcon"
-      id="overlay-unstable"
-      :class="{
-        'bg-gray-500/15': currentIcon === 'bean:play' && workState !== 'idle',
-      }"
-      class="absolute bottom-[3px] left-0 right-0 top-[3px] rounded-lg"
     />
   </li>
 </template>

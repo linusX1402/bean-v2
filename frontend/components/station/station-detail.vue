@@ -4,7 +4,7 @@ import Child from '~/models/child';
 import type { BeanStation } from '~/models/bean-station';
 import cookieService from '~/composables/cookie-service';
 import StationDetailHeader from '~/components/station/station-detail-header.vue';
-import type { workingState } from '~/constants/constants';
+import type { headerUpdateStates, workingState } from '~/constants/constants';
 
 const props = defineProps<{ station: BeanStation }>();
 const emit = defineEmits<{
@@ -17,6 +17,7 @@ const newChildNameError = ref<boolean>(false);
 const tmpChildren = ref<Map<number, Child>>(new Map());
 let runningId = -1;
 const sessionId = ref<string | undefined>(undefined);
+const lastHeaderUpdate = ref<headerUpdateStates>();
 
 onMounted(() => {
   sessionId.value = cookieService().getCurrentSession();
@@ -55,12 +56,15 @@ function updateChildWorkState(child: Child, workState: workingState) {
 </script>
 
 <template>
-  <section class="flex h-full w-full flex-col gap-12 bg-bean-white-500 pb-6">
+  <section
+    class="flex h-full w-full flex-col gap-12 overflow-x-hidden bg-bean-white-500 pb-6"
+  >
     <station-detail-header
       :station-name="station.name"
       :is-editing="isEditing"
       @update:close-detail="$emit('update:close-detail')"
       @update:toggle-edit="toggleEdit"
+      @update:set-all-children-work-states="lastHeaderUpdate = $event"
     />
     <main
       class="flex w-full flex-col place-content-start place-items-center gap-8 px-8"
@@ -80,6 +84,7 @@ function updateChildWorkState(child: Child, workState: workingState) {
           :child="child"
           :is-unstable="tmpChildren.has(child.id)"
           :key="child.id"
+          :last-header-update="lastHeaderUpdate"
           @update:work-state="updateChildWorkState(child, $event)"
         />
         <transition name="edit">

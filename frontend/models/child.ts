@@ -49,6 +49,17 @@ export default class Child {
     return this;
   }
 
+  public resetChild(startingFunds: number): Child {
+    this.addBeans(startingFunds);
+    this.workState = 'idle';
+    this.lastCheckout = null;
+    this.lastCheckin = null;
+    this.payoutHistory = [];
+    this.storedTimeForNextBean = 0;
+    this.timeResting = '00:00';
+    return this;
+  }
+
   public setStoredTimeForNextBean(seconds: number) {
     this.storedTimeForNextBean = seconds;
   }
