@@ -34,30 +34,31 @@ const handleSwipeStart = (event: PointerEvent) => {
 };
 
 const handleSwipeMove = (event: PointerEvent) => {
-  if (props.isUnstable) return;
-  if (!isSwiping.value) return;
+  if (props.isUnstable || !isSwiping.value) return;
   const currentX = event.clientX || event.pageX;
   const deltaX = startX.value - currentX;
 
+  // Update swipe position dynamically
+  swipePosition.value = Math.max(0, deltaX);
+
   // Determine swipe direction
   swipeDirection.value = deltaX > 0 ? 'left' : 'right';
-  swipePosition.value = Math.max(0, Math.min(deltaX, outerDivWidth.value)); // Clamp within div width
 };
 
 const handleSwipeEnd = () => {
   if (props.isUnstable) return;
   isSwiping.value = false;
 
-  if (swipeDirection.value === 'left' && !isMenuOpen.value) {
-    // Snap open
+  // Always snap open when swiping right to left
+  if (swipeDirection.value === 'left') {
     swipePosition.value = snapThresholds.value;
     isMenuOpen.value = true;
-  } else if (swipeDirection.value === 'right' && isMenuOpen.value) {
-    // Snap closed
+  }
+  // Always snap closed when swiping left to right
+  else if (swipeDirection.value === 'right') {
     closeMenu();
   }
 };
-
 const handleInteractionOutside = (event: Event) => {
   const outerDivElement = outerDiv.value;
   if (outerDivElement && !outerDivElement.contains(event.target as Node)) {
