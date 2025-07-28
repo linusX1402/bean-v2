@@ -59,3 +59,9 @@ export const STARTING_FUNDS_STEP_SIZE = 1;
 export type workingState = 'working' | 'idle' | 'resting';
 export type headerUpdateStates = 'start' | 'stop' | 'reset';
 export type iconList = 'bean:play' | 'bean:stop';
+
+// Server Session Cleanup
+export const SESSION_CLEANUP_INTERVAL = 12 * 60 * 60 * 1000; // 12 hour in milliseconds
+// export const SESSION_CLEANUP_INTERVAL = 10 * 1000; // 10 seconds in milliseconds
+export const SESSION_CLEANUP_AGE = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+// export const SESSION_CLEANUP_AGE = 10 * 1000; // 10 seconds in milliseconds

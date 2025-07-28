@@ -44,6 +44,7 @@ export default class BeanSession {
   public secondsPerTick;
   public beansPerTick;
   public startingFunds;
+  public lastInteractionDate: Date = new Date();
 
   public updateChildWorkingState(
     stationId: number,
