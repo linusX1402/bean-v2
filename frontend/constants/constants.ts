@@ -43,9 +43,9 @@ export const BEANS_PER_TICK_STEP_SIZE = 1;
 
 // Seconds per tick
 // TODO: 300
-export const DEFAULT_SECONDS_PER_TICK = 2;
+export const DEFAULT_SECONDS_PER_TICK = 300;
 // TODO: 30
-export const MIN_SECONDS_PER_TICK = 0;
+export const MIN_SECONDS_PER_TICK = 30;
 export const MAX_SECONDS_PER_TICK = 600;
 export const SECONDS_PER_TICK_STEP_SIZE = 30;
 
