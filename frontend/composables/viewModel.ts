@@ -85,27 +85,33 @@ export const useSession = () => {
     }
   }
 
-  async function removeChild(stationId: number, childId: number) {
+  async function removeChild(
+    stationId: number,
+    childId: number,
+    asResponse: boolean = false,
+  ) {
     try {
       const station = session.value?.stations.get(stationId);
       if (station) {
-        console.log(
-          'childId: ',
-          childId,
-          'stationId:',
-          stationId,
-          'sessionId:',
-          get()?.getHighestPermissionSessionId(),
-        );
-        (await $fetch('/api/session/child', {
-          method: 'DELETE',
-          body: {
-            childId: childId,
-            stationId: stationId,
-            sessionId: get()?.getHighestPermissionSessionId(),
-          },
-        }),
-          station.children.delete(childId));
+        if (!asResponse) {
+          console.log(
+            'childId: ',
+            childId,
+            'stationId:',
+            stationId,
+            'sessionId:',
+            get()?.getHighestPermissionSessionId(),
+          );
+          await $fetch('/api/session/child', {
+            method: 'DELETE',
+            body: {
+              childId: childId,
+              stationId: stationId,
+              sessionId: get()?.getHighestPermissionSessionId(),
+            },
+          });
+        }
+        station.children.delete(childId);
       } else {
         throw new Error(`Station with ID ${stationId} not found.`);
       }

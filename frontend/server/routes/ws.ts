@@ -85,6 +85,20 @@ export function broadcastUpdateChild(stationId: number, data: Child) {
   });
   broadcast(message);
 }
+
+export function broadcastDeleteChild(
+  stationId: number,
+  childId: number,
+  sessionId: string,
+) {
+  const message = JSON.stringify({
+    header: 'delete-child',
+    code: 200,
+    stationId: stationId,
+    childId: childId,
+  });
+  broadcast(message);
+}
 function handlePermission(peer: Peer<any>, data: any) {
   try {
     getPermissionOfId(data.sessionId);

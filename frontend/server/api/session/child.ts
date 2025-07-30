@@ -1,6 +1,5 @@
 import sessionController from '~/server/session-controller-instance';
-import { child } from 'winston';
-import { broadcastUpdateChild } from '~/server/routes/ws';
+import { broadcastDeleteChild, broadcastUpdateChild } from '~/server/routes/ws';
 
 export default defineEventHandler(async (event) => {
   const method = getMethod(event);
@@ -36,6 +35,7 @@ export default defineEventHandler(async (event) => {
         statusMessage: 'Missing required fields',
       });
     }
+    broadcastDeleteChild(stationId, childId, sessionId);
     return sessionController.removeChild(childId, stationId, sessionId);
   }
 });

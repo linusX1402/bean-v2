@@ -49,6 +49,9 @@ export const useWebSocket = () => {
             case 'update-child':
               handleUpdateChild(data);
               break;
+            case 'delete-child':
+              useSession().removeChild(data.stationId, data.childId);
+              break;
             case 'update-station':
               handleUpdateStation(data);
               break;
