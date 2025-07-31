@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { DEFAULT_ICON } from '../../constants/constants';
+import { dashboardViews, DEFAULT_ICON } from '../../constants/constants';
 
-const props = defineProps<{ isEditing: boolean }>();
+const props = defineProps<{ isEditing: boolean; variant: dashboardViews }>();
 
 const emit = defineEmits([
   'update:logout',
@@ -52,7 +52,16 @@ function addStation() {
         <p class="text-p text-blue-500">submit</p>
       </button>
     </div>
-    <h2 class="col-span-3 text-nowrap">Bean-Counter {{ DEFAULT_ICON }}</h2>
+    <h2 v-if="variant === dashboardViews.home" class="col-span-3 text-nowrap">
+      Bean-Counter {{ DEFAULT_ICON }}
+    </h2>
+    <h2
+      v-else-if="variant === dashboardViews.share"
+      class="col-span-3 text-nowrap"
+    >
+      Share
+    </h2>
+    <h2 v-else class="col-span-3 text-nowrap">Settings</h2>
   </header>
 </template>
 

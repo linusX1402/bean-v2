@@ -2,7 +2,13 @@
 import { getDynamicBaseURL } from '~/composables/dynamic-base-url';
 import type BeanSession from '~/models/bean-session';
 
-const props = defineProps<{ currentSession: BeanSession | undefined }>();
+const props = withDefaults(
+  defineProps<{
+    currentSession: BeanSession | undefined;
+    showButtons?: boolean;
+  }>(),
+  { showButtons: true },
+);
 
 let baseUrl = getDynamicBaseURL();
 
@@ -77,6 +83,7 @@ function forwardUser(uuid: string) {
       </button>
     </div>
     <div
+      v-if="showButtons"
       class="grid w-full grid-cols-2 place-content-center place-items-center gap-4"
     >
       <ui-button @click="emitChangeView" :style="'secondary'" :type="'button'"

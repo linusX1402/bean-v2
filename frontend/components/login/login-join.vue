@@ -16,6 +16,7 @@ const emit = defineEmits([
 const sessionNameInput = ref<string>('');
 const sessionNameInputError = ref<boolean>(false);
 const doForwardUserComponent = ref<boolean>(props.doForwardUser);
+const namePlaceholder = ref<string>(getGamePlaceholder());
 
 function getGamePlaceholder() {
   return PLACEHOLDERS[Math.floor(Math.random() * PLACEHOLDERS.length)];
@@ -46,7 +47,7 @@ function submitLogin() {
           v-model="sessionNameInput"
           :is-required="true"
           name="sessionId"
-          :placeholder="getGamePlaceholder()"
+          :placeholder="namePlaceholder"
         />
       </div>
       <div class="flex w-full place-content-start place-items-center gap-2">
