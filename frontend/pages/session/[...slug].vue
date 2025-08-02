@@ -5,6 +5,8 @@ import HomeFooter from '~/components/session/home-footer.vue';
 import HomeHeader from '~/components/session/home-header.vue';
 import { dashboardViews } from '~/constants/constants';
 import { useSession } from '~/composables/viewModel';
+import DashboardSettings from '~/components/dashboard/dashboard-settings.vue';
+import DashboardShare from '~/components/dashboard/dashboard-share.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -196,6 +198,7 @@ function logout() {
       <!-- Header -->
       <home-header
         :is-editing="isEditing"
+        :variant="currentPage"
         @update:logout="logout"
         @update:add-station="addStation"
         @update:toggle-edit="toggleEdit"
@@ -329,6 +332,10 @@ function logout() {
           </div>
         </div>
       </section>
+
+      <dashboard-share v-if="currentPage === dashboardViews.share" />
+
+      <dashboard-settings v-if="currentPage === dashboardViews.settings" />
     </div>
 
     <!-- Footer -->

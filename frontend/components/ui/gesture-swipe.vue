@@ -11,6 +11,7 @@ const props = defineProps<{
 
 const emit = defineEmits(['option-click']);
 
+const rerender = ref(0);
 const swipePosition = ref(0);
 const isSwiping = ref(false);
 const startX = ref(0);
@@ -76,12 +77,14 @@ onMounted(() => {
   if (outerDiv.value) {
     outerDivWidth.value = outerDiv.value.clientWidth;
   }
+  window.addEventListener('resize', handleResize);
   document.addEventListener('click', handleInteractionOutside);
   document.addEventListener('focusout', handleInteractionOutside);
   document.addEventListener('pointermove', handleInteractionOutside);
 });
 
 onUnmounted(() => {
+  window.removeEventListener('resize', handleResize);
   document.removeEventListener('click', handleInteractionOutside);
   document.removeEventListener('focusout', handleInteractionOutside);
   document.removeEventListener('pointermove', handleInteractionOutside);
@@ -92,10 +95,18 @@ function handleButtonClick(index: number) {
   console.log(`Option ${index + 1} clicked`);
   closeMenu();
 }
+
+const handleResize = () => {
+  rerender.value += 1;
+  if (outerDiv.value) {
+    outerDivWidth.value = outerDiv.value.clientWidth;
+  }
+};
 </script>
 
 <template>
   <div
+    :key="rerender"
     ref="outerDiv"
     class="relative flex h-full w-full place-content-center place-items-center"
     @pointerdown="handleSwipeStart"
