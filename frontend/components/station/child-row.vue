@@ -47,7 +47,7 @@ onMounted(() => {
 
   const interval = setInterval(() => {
     updateChildProps(props.child, timeResting);
-    console.log('interval');
+    // console.log('interval');
   }, INTERVAL_TIME_TIMER * 1000);
 
   onUnmounted(() => {
@@ -114,12 +114,13 @@ function calculateBeans(child: Child) {
       useSession().get()?.beansPerTick ?? DEFAULT_BEANS_PER_TICK;
 
     const totalTicksPassed = Math.floor(timeSinceLastCheckin / secondsPerTick);
-    const bonusTimeForNextBean = timeSinceLastCheckin % secondsPerTick;
+    // const bonusTimeForNextBean = timeSinceLastCheckin % secondsPerTick;
 
-    useSession()
-      .get()!
-      .stations.get(props.stationId)!
-      .children.get(child.id)!.storedTimeForNextBean = bonusTimeForNextBean;
+    // console.log(bonusTimeForNextBean);
+    // useSession()
+    //   .get()!
+    //   .stations.get(props.stationId)!
+    //   .children.get(child.id)!.storedTimeForNextBean = bonusTimeForNextBean;
 
     const beansToAdd = totalTicksPassed - ticksPassed;
     if (beansToAdd > 0) {
